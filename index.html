@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Productos — puzle de multiplicaciones</title>
+<meta name="description" content="Puzle numérico: completa la tabla para que cada fila y cada columna den el producto indicado en el margen. Solución única.">
+<meta property="og:title" content="Productos — puzle de multiplicaciones">
+<meta property="og:description" content="Completa la tabla para que cada fila y cada columna den el producto del margen. Tres niveles, cronómetro y clasificación.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --papel:#E7ECF2;
+    --tinta:#16233A;
+    --linea:#B9C5D6;
+    --dato:#8A5A00;
+    --ok:#1C6B4B;
+    --mal:#9E2B2B;
+    --hueco:#FBFCFD;
+    --sel:#2E5C9A;
+    --celda:clamp(44px, 15vw, 64px);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-variant-numeric:tabular-nums lining-nums;
+    line-height:1.5;
+    padding:20px 16px 56px;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  header{max-width:34rem;width:100%;margin-bottom:18px}
+  h1{font-size:1.6rem;font-weight:600;letter-spacing:-0.01em;margin:0 0 6px}
+  header p{margin:0;font-size:0.95rem;color:#42506B;max-width:32rem}
+
+  .niveles{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--tinta);border-radius:3px;overflow:hidden}
+  .niveles button{
+    font:inherit;font-size:0.95rem;padding:8px 16px;
+    background:transparent;color:var(--tinta);border:none;cursor:pointer;
+    border-right:1px solid var(--tinta);
+  }
+  .niveles button:last-child{border-right:none}
+  .niveles button[aria-pressed="true"]{background:var(--tinta);color:#F2F5F9}
+
+  .meta{
+    display:flex;gap:16px;align-items:baseline;justify-content:center;
+    font-size:0.85rem;color:#42506B;margin-bottom:10px;flex-wrap:wrap;
+  }
+  .reloj{font-size:1.5rem;font-weight:600;color:var(--tinta);letter-spacing:0.02em}
+  .semilla{font-size:0.8rem}
+
+  .tablero{display:grid;gap:5px;margin:4px 0 18px}
+  .celda{
+    width:var(--celda);height:var(--celda);
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--celda)*0.42);font-weight:500;
+    background:var(--hueco);border:1px solid var(--linea);border-radius:3px;
+    color:var(--tinta);cursor:pointer;padding:0;
+    font-family:inherit;font-variant-numeric:inherit;
+    transition:background .12s ease, border-color .12s ease;
+  }
+  .celda.factores{font-size:calc(var(--celda)*0.30);letter-spacing:-0.02em}
+  .celda.pista{background:#DFE5EE;color:var(--dato);font-weight:700;cursor:default}
+  .celda.sel{border-color:var(--sel);box-shadow:inset 0 0 0 2px var(--sel)}
+  .celda:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+
+  .margen{
+    width:var(--celda);height:var(--celda);
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--celda)*0.30);font-weight:700;color:var(--dato);
+    border-radius:3px;
+  }
+  .margen.cumple{color:var(--ok);background:rgba(28,107,75,.10)}
+  .margen.falla{color:var(--mal);background:rgba(158,43,43,.10)}
+  .margen.factores{
+    height:auto;min-height:var(--celda);
+    font-size:calc(var(--celda)*0.21);line-height:1.25;
+    padding:4px 3px;text-align:center;white-space:normal;word-break:break-word;
+  }
+  .esquina{width:var(--celda);height:var(--celda)}
+
+  .teclas{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:22rem;margin-bottom:16px}
+  .tecla{
+    min-width:44px;height:44px;padding:0 10px;
+    font-size:1.05rem;font-weight:600;font-family:inherit;font-variant-numeric:inherit;
+    background:var(--tinta);color:#F2F5F9;border:none;border-radius:3px;cursor:pointer;
+  }
+  .tecla.borrar{background:transparent;color:var(--tinta);border:1px solid var(--linea)}
+  .tecla:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+
+  .aviso{min-height:1.6rem;font-size:0.95rem;font-weight:600;margin-bottom:14px;text-align:center;max-width:30rem}
+  .aviso.gano{color:var(--ok)}
+
+  .acciones{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:34rem}
+  .btn{
+    font:inherit;font-size:0.95rem;padding:9px 14px;
+    border:1px solid var(--tinta);border-radius:3px;
+    background:transparent;color:var(--tinta);cursor:pointer;
+  }
+  .btn.principal{background:var(--tinta);color:#F2F5F9}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+
+  details{max-width:34rem;width:100%;margin-top:22px;font-size:0.9rem}
+  summary{cursor:pointer;color:#42506B}
+  .ajustes{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end;margin-top:12px}
+  .campo{display:flex;flex-direction:column;gap:4px;font-size:0.8rem;color:#42506B}
+  .campo input,.campo select{
+    font:inherit;font-size:0.95rem;font-variant-numeric:inherit;
+    width:80px;padding:7px 8px;
+    border:1px solid var(--linea);border-radius:3px;background:var(--hueco);color:var(--tinta);
+  }
+
+  .ranking{max-width:34rem;width:100%;margin-top:28px;border-top:1px solid var(--linea);padding-top:18px}
+  .ranking h2{font-size:1.05rem;font-weight:600;margin:0 0 10px}
+  table{width:100%;border-collapse:collapse;font-size:0.9rem;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--linea)}
+  th{font-weight:600;font-size:0.78rem;color:#42506B;text-transform:uppercase;letter-spacing:0.04em}
+  td.t{font-weight:600}
+  .vacio{color:#42506B;font-size:0.9rem;padding:8px 0}
+  .nota{font-size:0.8rem;color:#42506B;margin-top:10px;max-width:34rem}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Productos</h1>
+  <p>Rellena la tabla. Cada número del margen es el producto de su fila o de su columna. Hay una única solución posible.</p>
+</header>
+
+<div class="niveles" id="niveles">
+  <button data-n="facil" aria-pressed="false">Fácil</button>
+  <button data-n="media" aria-pressed="true">Media</button>
+  <button data-n="dificil" aria-pressed="false">Difícil</button>
+</div>
+
+<div class="meta">
+  <span class="reloj" id="reloj">0:00</span>
+  <span class="semilla" id="semilla"></span>
+</div>
+
+<div class="tablero" id="tablero"></div>
+<div class="teclas" id="teclas"></div>
+<div class="aviso" id="aviso"></div>
+
+<div class="acciones">
+  <button class="btn principal" id="nuevo">Tablero nuevo</button>
+  <button class="btn" id="factores">Factores primos</button>
+  <button class="btn" id="pista">Pista</button>
+  <button class="btn" id="borrar">Reiniciar</button>
+  <button class="btn" id="compartir">Compartir</button>
+</div>
+
+<details>
+  <summary>Ajustes libres (fuera de clasificación)</summary>
+  <div class="ajustes">
+    <label class="campo">Tamaño
+      <select id="n"><option value="3">3 × 3</option><option value="4" selected>4 × 4</option><option value="5">5 × 5</option><option value="6">6 × 6</option></select>
+    </label>
+    <label class="campo">Menor<input id="min" type="number" min="1" max="19" value="1"></label>
+    <label class="campo">Mayor<input id="max" type="number" min="2" max="20" value="9"></label>
+    <label class="campo">Semilla<input id="sem" type="number" min="0" placeholder="al azar"></label>
+    <button class="btn" id="libre">Generar</button>
+  </div>
+</details>
+
+<section class="ranking">
+  <h2>Clasificación</h2>
+  <div class="niveles" id="tabs" style="margin-bottom:12px">
+    <button data-n="facil" aria-pressed="false">Fácil</button>
+    <button data-n="media" aria-pressed="true">Media</button>
+    <button data-n="dificil" aria-pressed="false">Difícil</button>
+  </div>
+  <div id="tabla"></div>
+  <p class="nota" id="nota"></p>
+</section>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // ─────────────────────────────────────────────────────────────
+  // Para una clasificación compartida entre todos los jugadores,
+  // pega aquí la URL de la web app de Apps Script (ver ranking.gs).
+  // Si se deja vacío, la clasificación es local a cada navegador.
+  const RANKING_URL = '';
+  // ─────────────────────────────────────────────────────────────
+
+  const NIVELES = {
+    facil:   {nombre:'Fácil',   n:3, min:1, max:9},
+    media:   {nombre:'Media',   n:4, min:1, max:9},
+    dificil: {nombre:'Difícil', n:5, min:1, max:9}
+  };
+  const PENALIZA = 30000; // 30 s por pista usada
+
+  let N=4, MIN=1, MAX=9, NIVEL='media', SEMILLA=0;
+  let sol=[], filas=[], cols=[], pistas=[], jugada=[], sel=0;
+  let modoFactores=false, pistasUsadas=0, resuelto=false;
+  let t0=null, tFin=null, tick=null;
+  let tabActiva='media';
+
+  // ---- Azar reproducible ----
+  function mulberry32(a){
+    return function(){
+      a|=0; a=a+0x6D2B79F5|0;
+      let t=Math.imul(a^a>>>15,1|a);
+      t=t+Math.imul(t^t>>>7,61|t)^t;
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+
+  // ---- Factores primos ----
+  const SUP=['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+  const exp = k => String(k).split('').map(d=>SUP[+d]).join('');
+  function factorizar(x){
+    if(x===1) return '1';
+    const partes=[]; let n=x;
+    for(let p=2;p*p<=n;p++){
+      let e=0;
+      while(n%p===0){ n/=p; e++; }
+      if(e) partes.push(p+(e>1?exp(e):''));
+    }
+    if(n>1) partes.push(String(n));
+    return partes.join('·');
+  }
+  const etiqueta = x => modoFactores ? factorizar(x) : String(x);
+
+  // ---- Contador de soluciones ----
+  function contar(n,min,max,fi,co,pi,tope,limiteNodos){
+    const rr=fi.slice(), cc=co.slice(), cur=new Array(n*n);
+    const pMax=[], pMin=[];
+    for(let k=0;k<=n;k++){pMax[k]=Math.pow(max,k);pMin[k]=Math.pow(min,k);}
+    let cuenta=0, nodos=0, abortado=false;
+    (function rec(i){
+      if(abortado) return;
+      if(++nodos>limiteNodos){abortado=true;return;}
+      if(i===n*n){cuenta++;return;}
+      const f=(i/n)|0, c=i%n;
+      const lo = pi[i]!=null?pi[i]:min;
+      const hi = pi[i]!=null?pi[i]:max;
+      for(let v=lo;v<=hi;v++){
+        if(rr[f]%v || cc[c]%v) continue;
+        const nf=rr[f]/v, nc=cc[c]/v;
+        const kf=n-1-c, kc=n-1-f;
+        if(nf>pMax[kf]||nf<pMin[kf]) continue;
+        if(nc>pMax[kc]||nc<pMin[kc]) continue;
+        rr[f]=nf; cc[c]=nc; cur[i]=v;
+        rec(i+1);
+        rr[f]=nf*v; cc[c]=nc*v;
+        if(cuenta>=tope||abortado) return;
+      }
+    })(0);
+    return {cuenta,abortado};
+  }
+
+  function minimizar(n,min,max,f,c,p,rnd){
+    const idxs=[];
+    for(let i=0;i<n*n;i++) if(p[i]!=null) idxs.push(i);
+    for(let i=idxs.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [idxs[i],idxs[j]]=[idxs[j],idxs[i]]; }
+    for(const i of idxs){
+      const v=p[i]; p[i]=null;
+      const r=contar(n,min,max,f,c,p,2,600000);
+      if(r.abortado || r.cuenta!==1) p[i]=v;
+    }
+    return p;
+  }
+
+  function generar(n,min,max,semilla){
+    const rnd=mulberry32(semilla);
+    let mejor=null;
+    for(let k=0;k<8;k++){
+      const s=[];
+      for(let i=0;i<n*n;i++) s.push(min+Math.floor(rnd()*(max-min+1)));
+      const f=new Array(n).fill(1), c=new Array(n).fill(1);
+      for(let i=0;i<n*n;i++){ f[(i/n)|0]*=s[i]; c[i%n]*=s[i]; }
+      let p=new Array(n*n).fill(null), listo=false;
+      for(let paso=0;paso<=n*n;paso++){
+        const r=contar(n,min,max,f,c,p,2,400000);
+        if(!r.abortado && r.cuenta===1){ listo=true; break; }
+        const libres=[];
+        for(let i=0;i<n*n;i++) if(p[i]==null) libres.push(i);
+        if(!libres.length) break;
+        const idx=libres[Math.floor(rnd()*libres.length)];
+        p[idx]=s[idx];
+      }
+      if(!listo) continue;
+      p=minimizar(n,min,max,f,c,p,rnd);
+      const np=p.filter(x=>x!=null).length;
+      if(!mejor || np<mejor.np) mejor={sol:s,filas:f,cols:c,pistas:p,np};
+      if(mejor.np===0) break;
+    }
+    return mejor;
+  }
+
+  // ---- Cronómetro ----
+  const fmt = m => { const s=Math.floor(m/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+  function transcurrido(){ return t0===null ? 0 : (tFin||Date.now())-t0; }
+  function arrancarReloj(){ if(t0===null && !resuelto){ t0=Date.now(); tick=setInterval(pintarReloj,250); } }
+  function pararReloj(){ if(tick){clearInterval(tick);tick=null;} tFin=Date.now(); pintarReloj(); }
+  function reiniciarReloj(){ if(tick){clearInterval(tick);tick=null;} t0=null;tFin=null;pintarReloj(); }
+  function pintarReloj(){ $('reloj').textContent=fmt(transcurrido()); }
+
+  // ---- Tablero ----
+  function valor(i){ return pistas[i]!=null?pistas[i]:jugada[i]; }
+
+  function pintar(){
+    const t=$('tablero');
+    t.innerHTML='';
+    t.style.gridTemplateColumns='repeat('+(N+1)+', auto)';
+    for(let f=0;f<N;f++){
+      for(let c=0;c<N;c++){
+        const i=f*N+c;
+        const b=document.createElement('button');
+        b.className='celda'+(pistas[i]!=null?' pista':'')+(i===sel?' sel':'')+(modoFactores?' factores':'');
+        const v=valor(i);
+        b.textContent = v ? etiqueta(v) : '';
+        b.setAttribute('aria-label','Fila '+(f+1)+', columna '+(c+1));
+        if(pistas[i]==null) b.onclick=()=>{sel=i;pintar();};
+        else b.disabled=true;
+        t.appendChild(b);
+      }
+      const m=document.createElement('div');
+      m.className='margen '+estadoFila(f)+(modoFactores?' factores':'');
+      m.textContent=etiqueta(filas[f]);
+      t.appendChild(m);
+    }
+    for(let c=0;c<N;c++){
+      const m=document.createElement('div');
+      m.className='margen '+estadoCol(c)+(modoFactores?' factores':'');
+      m.textContent=etiqueta(cols[c]);
+      t.appendChild(m);
+    }
+    const esq=document.createElement('div'); esq.className='esquina'; t.appendChild(esq);
+    revisarVictoria();
+  }
+
+  function estadoFila(f){
+    let p=1, completa=true;
+    for(let c=0;c<N;c++){const v=valor(f*N+c); if(!v){completa=false;} else p*=v;}
+    if(!completa) return (p>filas[f]||filas[f]%p!==0) ? 'falla' : '';
+    return p===filas[f]?'cumple':'falla';
+  }
+  function estadoCol(c){
+    let p=1, completa=true;
+    for(let f=0;f<N;f++){const v=valor(f*N+c); if(!v){completa=false;} else p*=v;}
+    if(!completa) return (p>cols[c]||cols[c]%p!==0) ? 'falla' : '';
+    return p===cols[c]?'cumple':'falla';
+  }
+
+  function revisarVictoria(){
+    if(resuelto) return;
+    for(let i=0;i<N*N;i++) if(!valor(i)) return;
+    for(let f=0;f<N;f++) if(estadoFila(f)!=='cumple') return;
+    for(let c=0;c<N;c++) if(estadoCol(c)!=='cumple') return;
+    resuelto=true;
+    pararReloj();
+    const aj=transcurrido()+pistasUsadas*PENALIZA;
+    const a=$('aviso'); a.className='aviso gano';
+    a.textContent = 'Resuelto en '+fmt(transcurrido())
+      + (pistasUsadas? ' · '+pistasUsadas+' pista'+(pistasUsadas>1?'s':'')+' (+'+fmt(pistasUsadas*PENALIZA)+') · marca '+fmt(aj) : '');
+    if(NIVEL) registrar(aj);
+  }
+
+  function teclado(){
+    const t=$('teclas'); t.innerHTML='';
+    for(let v=MIN;v<=MAX;v++){
+      const b=document.createElement('button');
+      b.className='tecla'; b.textContent=etiqueta(v);
+      b.setAttribute('aria-label',String(v));
+      b.onclick=()=>{ if(!resuelto && pistas[sel]==null){ arrancarReloj(); jugada[sel]=v; avanzar(); } };
+      t.appendChild(b);
+    }
+    const b=document.createElement('button');
+    b.className='tecla borrar'; b.textContent='Borrar';
+    b.onclick=()=>{ if(!resuelto && pistas[sel]==null){ jugada[sel]=0; pintar(); } };
+    t.appendChild(b);
+  }
+
+  function avanzar(){
+    let i=sel;
+    for(let k=1;k<=N*N;k++){
+      const j=(sel+k)%(N*N);
+      if(pistas[j]==null && !jugada[j]){ i=j; break; }
+    }
+    sel=i; pintar();
+  }
+
+  // ---- Nueva partida ----
+  function nueva(nivel, semilla, libre){
+    const cfg = nivel ? NIVELES[nivel] : libre;
+    const n=cfg.n, min=cfg.min, max=cfg.max;
+    if(!(max>min)){ $('aviso').className='aviso'; $('aviso').textContent='El número mayor tiene que superar al menor.'; return; }
+    const sem = (semilla==null || isNaN(semilla)) ? Math.floor(Math.random()*1000000) : semilla;
+    const a=$('aviso'); a.className='aviso'; a.textContent='Generando tablero…';
+    $('nuevo').disabled=true;
+    setTimeout(()=>{
+      const r=generar(n,min,max,sem);
+      $('nuevo').disabled=false;
+      if(!r){ a.textContent='No he encontrado tablero único con esos ajustes.'; return; }
+      N=n; MIN=min; MAX=max; NIVEL=nivel; SEMILLA=sem;
+      sol=r.sol; filas=r.filas; cols=r.cols; pistas=r.pistas;
+      jugada=new Array(N*N).fill(0);
+      sel=pistas.findIndex(x=>x==null); if(sel<0) sel=0;
+      pistasUsadas=0; resuelto=false;
+      reiniciarReloj();
+      a.textContent='';
+      $('semilla').textContent = 'Tablero n.º '+sem+(nivel?'':' · libre '+n+'×'+n+' ('+min+'–'+max+')');
+      marcarNivel(nivel);
+      teclado(); pintar();
+      const u=new URL(location.href);
+      u.searchParams.set('nivel', nivel||'libre');
+      u.searchParams.set('s', sem);
+      if(!nivel){ u.searchParams.set('n',n); u.searchParams.set('min',min); u.searchParams.set('max',max); }
+      history.replaceState(null,'',u);
+    },30);
+  }
+
+  function marcarNivel(nivel){
+    [...$('niveles').children].forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.n===nivel)));
+  }
+
+  // ---- Almacenamiento del ranking ----
+  const memoria={};
+  const hayStorage = typeof window!=='undefined' && window.storage && typeof window.storage.get==='function';
+  const hayLocal = (()=>{ try{ localStorage.setItem('__p','1'); localStorage.removeItem('__p'); return true; }catch(e){ return false; } })();
+
+  async function leer(clave){
+    const nivel=clave.split(':')[1];
+    if(RANKING_URL){
+      try{
+        const r=await fetch(RANKING_URL+'?nivel='+encodeURIComponent(nivel),{cache:'no-store'});
+        const d=await r.json();
+        if(Array.isArray(d)) return d;
+      }catch(e){}
+    }
+    if(hayStorage){
+      try{ const r=await window.storage.get(clave,true); return r&&r.value?JSON.parse(r.value):[]; }catch(e){ return []; }
+    }
+    if(hayLocal){
+      try{ const v=localStorage.getItem(clave); return v?JSON.parse(v):[]; }catch(e){ return []; }
+    }
+    return memoria[clave]||[];
+  }
+  async function escribir(clave,datos,entrada){
+    if(RANKING_URL && entrada){
+      try{
+        await fetch(RANKING_URL,{
+          method:'POST',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify(Object.assign({nivel:clave.split(':')[1]},entrada))
+        });
+        return;
+      }catch(e){}
+    }
+    if(hayStorage){ try{ await window.storage.set(clave,JSON.stringify(datos),true); return; }catch(e){} }
+    if(hayLocal){ try{ localStorage.setItem(clave,JSON.stringify(datos)); return; }catch(e){} }
+    memoria[clave]=datos;
+  }
+
+  async function registrar(msAjustado){
+    let nombre = (hayLocal && localStorage.getItem('jugador')) || '';
+    if(!nombre){
+      nombre = (prompt('¿Con qué nombre guardo la marca?','') || '').trim().slice(0,20);
+      if(!nombre) return;
+      if(hayLocal) try{ localStorage.setItem('jugador',nombre); }catch(e){}
+    }
+    const clave='ranking:'+NIVEL;
+    const entrada={nombre, ms:msAjustado, bruto:transcurrido(), pistas:pistasUsadas, semilla:SEMILLA, fecha:Date.now()};
+    const lista=await leer(clave);
+    lista.push(entrada);
+    lista.sort((a,b)=>a.ms-b.ms);
+    await escribir(clave, lista.slice(0,25), entrada);
+    tabActiva=NIVEL; marcarTab(); pintarTabla();
+  }
+
+  function marcarTab(){
+    [...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.n===tabActiva)));
+  }
+
+  async function pintarTabla(){
+    const lista=await leer('ranking:'+tabActiva);
+    const cont=$('tabla');
+    if(!lista.length){ cont.innerHTML='<p class="vacio">Todavía no hay marcas en este nivel.</p>'; return; }
+    let h='<table><thead><tr><th>#</th><th>Nombre</th><th>Marca</th><th>Pistas</th><th>Tablero</th></tr></thead><tbody>';
+    lista.slice(0,15).forEach((e,i)=>{
+      h+='<tr><td>'+(i+1)+'</td><td>'+escapar(e.nombre)+'</td><td class="t">'+fmt(e.ms)+'</td><td>'+(e.pistas||0)+'</td><td>'+e.semilla+'</td></tr>';
+    });
+    cont.innerHTML=h+'</tbody></table>';
+  }
+  const escapar = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // ---- Compartir ----
+  async function compartir(){
+    const nivelTxt = NIVEL ? NIVELES[NIVEL].nombre : 'Libre '+N+'×'+N;
+    const marca = resuelto ? fmt(transcurrido()+pistasUsadas*PENALIZA) : 'sin resolver';
+    const u=new URL(location.href);
+    const texto='Productos · '+nivelTxt+' · tablero n.º '+SEMILLA+' · '+marca
+      + (pistasUsadas?' ('+pistasUsadas+' pistas)':'')
+      + '\nJuega el mismo tablero: '+u.toString();
+    if(navigator.share){
+      try{ await navigator.share({text:texto}); return; }catch(e){}
+    }
+    try{
+      await navigator.clipboard.writeText(texto);
+      const a=$('aviso'); const antes=a.textContent, cls=a.className;
+      a.className='aviso'; a.textContent='Resultado copiado al portapapeles.';
+      setTimeout(()=>{a.textContent=antes;a.className=cls;},2200);
+    }catch(e){
+      prompt('Copia este texto:', texto);
+    }
+  }
+
+  // ---- Eventos ----
+  $('niveles').onclick = e => { const b=e.target.closest('button'); if(b) nueva(b.dataset.n,null); };
+  $('tabs').onclick = e => { const b=e.target.closest('button'); if(b){ tabActiva=b.dataset.n; marcarTab(); pintarTabla(); } };
+  $('nuevo').onclick = () => nueva(NIVEL, null, NIVEL?null:{n:N,min:MIN,max:MAX});
+  $('libre').onclick = () => {
+    const s=$('sem').value.trim();
+    nueva(null, s===''?null:parseInt(s,10), {n:+$('n').value, min:+$('min').value, max:+$('max').value});
+  };
+  $('factores').onclick = () => {
+    modoFactores=!modoFactores;
+    $('factores').textContent = modoFactores ? 'Ver productos' : 'Factores primos';
+    teclado(); pintar();
+  };
+  $('borrar').onclick = () => {
+    jugada=new Array(N*N).fill(0);
+    pistasUsadas=0; resuelto=false;
+    $('aviso').textContent=''; $('aviso').className='aviso';
+    reiniciarReloj(); pintar();
+  };
+  $('pista').onclick = () => {
+    if(resuelto) return;
+    const libres=[];
+    for(let i=0;i<N*N;i++) if(pistas[i]==null && jugada[i]!==sol[i]) libres.push(i);
+    if(!libres.length) return;
+    arrancarReloj();
+    const i=libres[Math.floor(Math.random()*libres.length)];
+    jugada[i]=sol[i]; pistasUsadas++;
+    pintar();
+  };
+  $('compartir').onclick = compartir;
+
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return;
+    if(e.key>='1'&&e.key<='9'){
+      const v=+e.key;
+      if(v>=MIN&&v<=MAX&&!resuelto&&pistas[sel]==null){ arrancarReloj(); jugada[sel]=v; avanzar(); }
+    }
+    else if(e.key==='Backspace'||e.key==='Delete'){ if(!resuelto&&pistas[sel]==null){jugada[sel]=0;pintar();} }
+    else if(e.key==='ArrowRight'){sel=(sel+1)%(N*N);pintar();}
+    else if(e.key==='ArrowLeft'){sel=(sel-1+N*N)%(N*N);pintar();}
+    else if(e.key==='ArrowDown'){sel=(sel+N)%(N*N);pintar();}
+    else if(e.key==='ArrowUp'){sel=(sel-N+N*N)%(N*N);pintar();}
+  });
+
+  // ---- Arranque ----
+  $('nota').textContent = RANKING_URL
+    ? 'Clasificación compartida por todos los jugadores. Cada pista suma 30 s a la marca.'
+    : (hayStorage
+      ? 'La clasificación se comparte entre quienes abren este juego aquí. Cada pista suma 30 s a la marca.'
+      : 'La clasificación se guarda en este navegador. Cada pista suma 30 s a la marca. Comparte el enlace para que otra persona juegue exactamente el mismo tablero.');
+
+  const q=new URLSearchParams(location.search);
+  const nv=q.get('nivel'), sq=q.get('s');
+  if(nv && nv!=='libre' && NIVELES[nv]) nueva(nv, sq?parseInt(sq,10):null);
+  else if(nv==='libre') nueva(null, sq?parseInt(sq,10):null, {n:+(q.get('n')||4), min:+(q.get('min')||1), max:+(q.get('max')||9)});
+  else nueva('media', null);
+  marcarTab(); pintarTabla();
+})();
+</script>
+</body>
+</html>
