@@ -1,1 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mondrian — el reto del defecto mínimo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111110;
+  --paper:#F6F5F1;
+  --panel:#FFFFFF;
+  --red:#D2261C;
+  --blue:#1B3A93;
+  --yellow:#F2C500;
+  --dim:#6B6A66;
+  --rule:4px solid var(--ink);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:Archivo,system-ui,sans-serif;
+  background:var(--paper);color:var(--ink);
+  line-height:1.45;padding:0 0 48px;
+}
+.wrap{max-width:420px;margin:0 auto;border-left:var(--rule);border-right:var(--rule);background:var(--paper);min-height:100vh}
+header{padding:20px 18px 16px;border-bottom:var(--rule)}
+h1{font-weight:800;font-size:34px;letter-spacing:-.02em;line-height:1}
+header p{font-size:14px;color:var(--dim);margin-top:8px;max-width:62ch}
+.bar{display:flex;align-items:stretch;border-bottom:var(--rule)}
+.bar>*{border-right:var(--rule)}
+.bar>*:last-child{border-right:none}
+label.size{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:14px;font-weight:600}
+select{font-family:inherit;font-size:16px;font-weight:600;border:2px solid var(--ink);background:var(--panel);padding:4px 6px;color:var(--ink)}
+button{font-family:inherit;font-size:14px;font-weight:600;background:var(--panel);border:none;color:var(--ink);padding:12px 10px;cursor:pointer;flex:1}
+button:hover{background:var(--yellow)}
+button:active{background:var(--ink);color:var(--paper)}
+button:disabled{color:#B4B2AC;background:var(--panel);cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.boardwrap{position:relative;padding:18px;display:flex;justify-content:center;border-bottom:var(--rule);background:var(--panel)}
+#board{position:relative;flex:none;touch-action:none;background:var(--panel);border:2px solid var(--ink)}
+.cg{position:absolute;border-right:1px solid #E2E1DB;border-bottom:1px solid #E2E1DB}
+.pc{position:absolute;background:var(--ink);padding:2px}
+.pcf{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:600;line-height:1}
+.pv{position:absolute;border:3px dashed var(--blue);background:rgba(27,58,147,.14);pointer-events:none}
+#flash{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;display:none;
+  background:var(--panel);color:var(--ink);border:4px solid var(--ink);padding:8px 16px;
+  font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-.02em;white-space:nowrap;
+  box-shadow:6px 6px 0 rgba(17,17,16,.25)}
+#flash.on{display:block;animation:parpadeo .42s steps(1,end) 6}
+#flash.record{background:var(--yellow)}
+@keyframes parpadeo{0%,49%{opacity:1}50%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#flash.on{animation:none}}
+section{padding:16px 18px;border-bottom:var(--rule)}
+h2{font-size:15px;font-weight:800;margin-bottom:10px}
+input[type=text]{font-family:inherit;font-size:16px;border:3px solid var(--ink);background:var(--panel);padding:9px 10px;width:100%;color:var(--ink)}
+.pubrow{display:flex;margin-top:10px}
+.pubrow button{border:3px solid var(--ink);flex:1;padding:10px}
+.note{font-size:12px;color:var(--dim);margin-top:10px;line-height:1.4}
+ol{list-style:none}
+li{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:2px solid var(--ink)}
+li:first-child{border-top:none}
+.rank{font-weight:800;font-size:16px;width:22px;flex:none}
+.who{flex:1;min-width:0}
+.who b{display:block;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who span{font-size:12px;color:var(--dim)}
+.def{font-weight:800;font-size:22px}
+.empty{font-size:14px;color:var(--dim)}
+.mine{background:var(--yellow);margin:0 -6px;padding-left:6px;padding-right:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:var(--rule)}
+.stat{padding:10px 12px;border-right:var(--rule);background:var(--paper)}
+.stat:last-child{border-right:none}
+.stat b{display:block;font-size:12px;font-weight:600;color:var(--dim)}
+.stat span{font-size:26px;font-weight:800;line-height:1.15}
+#msg{padding:12px 18px;font-size:14px;min-height:60px;border-bottom:var(--rule);background:var(--paper)}
+#msg.bad{background:var(--red);color:#fff}
+#msg.win{background:var(--yellow)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Mondrian</h1>
+  <p>Divide el cuadrado en rectángulos, sin repetir ninguno ni siquiera girado. Tu puntuación es el área mayor menos la menor. Cuanto más baja, mejor.</p>
+</header>
 
+<div class="bar">
+  <label class="size" for="nsel">Lado <select id="nsel"></select></label>
+  <button id="undo" type="button">Deshacer</button>
+  <button id="clear" type="button">Vaciar</button>
+</div>
+
+<div class="boardwrap"><div id="board"></div><div id="flash" role="status" aria-live="polite"></div></div>
+
+<div class="stats">
+  <div class="stat"><b>Tu defecto</b><span id="cur">—</span></div>
+  <div class="stat"><b>Tu mejor</b><span id="mine">—</span></div>
+  <div class="stat"><b id="reflab">Óptimo</b><span id="ref">—</span></div>
+</div>
+
+<div id="msg">Arrastra sobre el tablero para colocar un rectángulo. Toca uno colocado para quitarlo.</div>
+
+<section>
+  <h2>Publicar tu marca</h2>
+  <input type="text" id="name" maxlength="20" placeholder="Tu nombre o alias" autocomplete="off">
+  <div class="pubrow"><button id="publish" type="button" disabled>Publicar</button></div>
+  <p class="note">La clasificación es pública: quien abra el juego verá el alias que escribas y el dibujo de tu solución. Mejor un apodo que tu nombre completo.</p>
+</section>
+
+<section>
+  <h2 id="lbtitle">Clasificación</h2>
+  <ol id="lb"><li class="empty">Cargando…</li></ol>
+</section>
+</div>
+
+<script>
+(function(){
+var RANKING_URL='https://script.google.com/macros/s/AKfycbwXTAhDu9V4GJNQOdfcZjoZbgkgTjEzSjKiX9EV5AGh0_aHbN9tIuxWhP4aNmzm48r4/exec';
+var VERIFIED={3:2,4:4,5:4,6:5,7:5,8:6,9:6};
+var FILL=[['#FAF9F4','#111110'],['#D2261C','#FFFFFF'],['#1B3A93','#FFFFFF'],['#F2C500','#111110'],['#C9C7BF','#111110'],['#E7E4D8','#111110'],['#2E2C27','#FAF9F4']];
+function touches(a,b){
+  var colOv=a.c<b.c+b.w&&b.c<a.c+a.w,rowOv=a.r<b.r+b.h&&b.r<a.r+a.h;
+  return (rowOv&&(a.c+a.w===b.c||b.c+b.w===a.c))||(colOv&&(a.r+a.h===b.r||b.r+b.h===a.r));
+}
+function colorize(list){
+  var out=[];
+  for(var i=0;i<list.length;i++){
+    var taken={};
+    for(var j=0;j<i;j++)if(touches(list[i],list[j]))taken[out[j]]=1;
+    var pick=i%FILL.length;
+    for(var k=0;k<FILL.length;k++){var t=(i+k)%FILL.length;if(!taken[t]){pick=t;break;}}
+    out.push(pick);
+  }
+  return out;
+}
+var n=5,cell=64,rects=[],drag=null,delIdx=-1,start=null,bests={},player='',lb=[],busy=false;
+var board=document.getElementById('board'),sel=document.getElementById('nsel'),msg=document.getElementById('msg'),nameIn=document.getElementById('name'),pubBtn=document.getElementById('publish');
+
+for(var i=3;i<=16;i++){var o=document.createElement('option');o.value=i;o.textContent=i;sel.appendChild(o);}
+sel.value=5;
+
+function key(w,h){return Math.min(w,h)+'×'+Math.max(w,h);}
+function areas(list){return list.map(function(p){return p.w*p.h;});}
+function defectOf(list){var a=areas(list);return Math.max.apply(null,a)-Math.min.apply(null,a);}
+function valid(list,size){
+  if(!Array.isArray(list)||list.length<2||list.length>size*size)return false;
+  var grid=new Array(size*size),seen={},i,r,c;
+  for(i=0;i<list.length;i++){
+    var p=list[i];
+    if(!p||![p.r,p.c,p.w,p.h].every(function(v){return typeof v==='number'&&v===Math.floor(v);}))return false;
+    if(p.w<1||p.h<1||p.r<0||p.c<0||p.r+p.h>size||p.c+p.w>size)return false;
+    var k=key(p.w,p.h);
+    if(seen[k])return false;
+    seen[k]=1;
+    for(r=p.r;r<p.r+p.h;r++)for(c=p.c;c<p.c+p.w;c++){
+      if(grid[r*size+c])return false;
+      grid[r*size+c]=1;
+    }
+  }
+  for(i=0;i<size*size;i++)if(!grid[i])return false;
+  return true;
+}
+
+function fitCell(){
+  var wrap=document.querySelector('.boardwrap');
+  var avail=(wrap.clientWidth||340)-36-4;
+  return Math.max(14,Math.min(70,Math.floor(avail/n)));
+}
+function setup(){
+  n=+sel.value;
+  cell=fitCell();
+  rects=[];drag=null;delIdx=-1;
+  board.style.width=(cell*n+4)+'px';board.style.height=(cell*n+4)+'px';
+  document.getElementById('reflab').textContent=VERIFIED[n]!==undefined?'Óptimo':'Sin resolver';
+  document.getElementById('ref').textContent=VERIFIED[n]!==undefined?VERIFIED[n]:'?';
+  document.getElementById('lbtitle').textContent='Clasificación · tableros de '+n+'×'+n;
+  say('Arrastra para colocar un rectángulo. Toca uno colocado para quitarlo.');
+  render();loadBoard();
+}
+
+function render(){
+  var h='',i;
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++)h+='<div class="cg" style="left:'+c*cell+'px;top:'+r*cell+'px;width:'+cell+'px;height:'+cell+'px"></div>';
+  var cols=colorize(rects);
+  for(i=0;i<rects.length;i++){
+    var p=rects[i],f=FILL[cols[i]],lab=String(p.w*p.h);
+    var fs=Math.floor(Math.min((p.h*cell-6)*0.62,(p.w*cell-6)/(lab.length*0.62),30));
+    h+='<div class="pc" style="left:'+p.c*cell+'px;top:'+p.r*cell+'px;width:'+p.w*cell+'px;height:'+p.h*cell+'px">'+
+       '<div class="pcf" style="background:'+f[0]+';color:'+f[1]+';font-size:'+Math.max(fs,1)+'px">'+(fs>=8?lab:'')+'</div></div>';
+  }
+  if(drag){var b=box(drag);h+='<div class="pv" style="left:'+b.c*cell+'px;top:'+b.r*cell+'px;width:'+b.w*cell+'px;height:'+b.h*cell+'px"></div>';}
+  board.innerHTML=h;
+  score();
+}
+
+function box(d){return{r:Math.min(d.r0,d.r1),c:Math.min(d.c0,d.c1),w:Math.abs(d.c1-d.c0)+1,h:Math.abs(d.r1-d.r0)+1};}
+function occupied(r,c){for(var i=0;i<rects.length;i++){var p=rects[i];if(r>=p.r&&r<p.r+p.h&&c>=p.c&&c<p.c+p.w)return i;}return -1;}
+var flashed=false;
+function flash(d){
+  var el=document.getElementById('flash');
+  if(d===null){el.className='';flashed=false;return;}
+  if(flashed)return;
+  flashed=true;
+  el.textContent='Defecto '+d;
+  var record=VERIFIED[n]===undefined||d===VERIFIED[n];
+  el.className='';
+  void el.offsetWidth;              // reinicia la animación
+  el.className='on'+(record?' record':'');
+}
+function say(t,cls){msg.textContent=t;msg.className=cls||'';}
+
+function score(){
+  var cov=0;rects.forEach(function(p){cov+=p.w*p.h;});
+  var el=document.getElementById('cur');
+  document.getElementById('mine').textContent=bests[n]!==undefined?bests[n]:'—';
+  if(!valid(rects,n)){el.textContent='—';flash(null);pubBtn.disabled=true;return;}
+  var d=defectOf(rects);
+  el.textContent=d;
+  flash(d);
+  pubBtn.disabled=false;
+  if(bests[n]===undefined||d<bests[n]){bests[n]=d;document.getElementById('mine').textContent=d;saveMe();}
+  if(VERIFIED[n]!==undefined&&d===VERIFIED[n])say('Tablero completo con defecto '+d+'. Es el mínimo demostrado: imposible bajar de ahí.','win');
+  else if(VERIFIED[n]!==undefined)say('Tablero completo con defecto '+d+'. El mínimo demostrado es '+VERIFIED[n]+'.');
+  else say('Tablero completo con defecto '+d+'. Nadie ha demostrado cuál es el mínimo para este tamaño.','win');
+}
+
+function pos(e){
+  var b=board.getBoundingClientRect();
+  var c=Math.floor((e.clientX-b.left-2)/cell),r=Math.floor((e.clientY-b.top-2)/cell);
+  return{r:Math.max(0,Math.min(n-1,r)),c:Math.max(0,Math.min(n-1,c))};
+}
+board.addEventListener('pointerdown',function(e){
+  e.preventDefault();board.setPointerCapture(e.pointerId);
+  var p=pos(e);start=p;var o=occupied(p.r,p.c);
+  if(o>=0){delIdx=o;drag=null;}else{delIdx=-1;drag={r0:p.r,c0:p.c,r1:p.r,c1:p.c};render();}
+});
+board.addEventListener('pointermove',function(e){
+  if(!drag)return;var p=pos(e);
+  if(p.r===drag.r1&&p.c===drag.c1)return;
+  drag.r1=p.r;drag.c1=p.c;render();
+});
+board.addEventListener('pointerup',function(e){
+  var p=pos(e);
+  if(delIdx>=0){if(p.r===start.r&&p.c===start.c){rects.splice(delIdx,1);say('Rectángulo retirado.');}delIdx=-1;render();return;}
+  if(!drag)return;
+  var b=box(drag);drag=null;
+  for(var r=b.r;r<b.r+b.h;r++)for(var c=b.c;c<b.c+b.w;c++){
+    if(occupied(r,c)>=0){say('Ese rectángulo pisa a otro. Colócalo en hueco libre.','bad');render();return;}
+  }
+  var k=key(b.w,b.h);
+  for(var i=0;i<rects.length;i++){
+    if(key(rects[i].w,rects[i].h)===k){say('El '+k+' ya está en el tablero. No vale repetirlo, ni girado.','bad');render();return;}
+  }
+  rects.push(b);say('Colocado un '+k+'.');render();
+});
+
+sel.addEventListener('change',setup);
+window.addEventListener('resize',function(){
+  var c=fitCell();
+  if(c===cell)return;
+  cell=c;
+  board.style.width=(cell*n+4)+'px';board.style.height=(cell*n+4)+'px';
+  render();
+});
+document.getElementById('undo').addEventListener('click',function(){if(rects.length){rects.pop();say('Última pieza retirada.');render();}});
+document.getElementById('clear').addEventListener('click',function(){rects=[];say('Tablero vacío. Empieza de nuevo.');render();});
+function nivel(){return 'mondrian-'+(n<10?'0':'')+n;}
+function esc(s){return String(s).replace(/[<>&"]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function thumb(list,size){
+  var s=52,u=s/size,g=Math.min(1,u*0.16),cols=colorize(list);
+  var h='<svg width="'+s+'" height="'+s+'" viewBox="0 0 '+s+' '+s+'" aria-hidden="true" style="flex:none;border:1.5px solid #111110;display:block">';
+  h+='<rect x="0" y="0" width="'+s+'" height="'+s+'" fill="#111110"/>';
+  for(var i=0;i<list.length;i++){
+    var p=list[i],f=FILL[cols[i]];
+    h+='<rect x="'+(p.c*u+g)+'" y="'+(p.r*u+g)+'" width="'+(p.w*u-2*g)+'" height="'+(p.h*u-2*g)+'" fill="'+f[0]+'"/>';
+  }
+  return h+'</svg>';
+}
+
+function drawLb(){
+  var el=document.getElementById('lb');
+  if(!lb.length){el.innerHTML='<li class="empty">Todavía no hay marcas en este tamaño. Puedes ser el primero.</li>';return;}
+  var h='';
+  for(var i=0;i<lb.length;i++){
+    var e=lb[i];
+    h+='<li'+(e.nombre===player?' class="mine"':'')+'><span class="rank">'+(i+1)+'</span>'+thumb(e.piezas,n)+
+       '<span class="who"><b>'+esc(e.nombre)+'</b><span>'+e.piezas.length+' piezas</span></span>'+
+       '<span class="def">'+defectOf(e.piezas)+'</span></li>';
+  }
+  el.innerHTML=h;
+}
+
+// Solo se muestran las soluciones que se comprueban aquí también.
+function limpia(datos,size){
+  var out=[];
+  for(var i=0;i<datos.length;i++){
+    var piezas;
+    try{piezas=JSON.parse(datos[i].tablero);}catch(err){continue;}
+    if(!valid(piezas,size))continue;
+    out.push({nombre:String(datos[i].nombre||''),piezas:piezas});
+  }
+  return out;
+}
+
+async function loadBoard(){
+  var el=document.getElementById('lb'),want=n;
+  el.innerHTML='<li class="empty">Cargando…</li>';
+  try{
+    var res=await fetch(RANKING_URL+'?nivel='+nivel()+'&ambito=mundo');
+    var datos=await res.json();
+    if(want!==n)return;
+    lb=limpia(Array.isArray(datos)?datos:[],want);
+  }catch(err){
+    if(want!==n)return;
+    lb=[];
+    el.innerHTML='<li class="empty">No se ha podido cargar la clasificación. Comprueba la conexión y recarga la página.</li>';
+    return;
+  }
+  drawLb();
+}
+
+function loadMe(){
+  try{
+    var v=JSON.parse(localStorage.getItem('mondrian:yo')||'{}');
+    bests=v.bests||{};player=v.nombre||'';nameIn.value=player;
+  }catch(err){bests={};player='';}
+}
+function saveMe(){
+  try{localStorage.setItem('mondrian:yo',JSON.stringify({nombre:player,bests:bests}));}catch(err){}
+}
+
+nameIn.addEventListener('input',function(){player=nameIn.value.trim();saveMe();});
+
+pubBtn.addEventListener('click',async function(){
+  if(busy)return;
+  player=nameIn.value.trim();
+  if(!player){say('Escribe un alias antes de publicar.','bad');nameIn.focus();return;}
+  if(!valid(rects,n)){say('Solo se publican tableros completos, sin huecos y sin repetir rectángulos.','bad');return;}
+  busy=true;pubBtn.disabled=true;pubBtn.textContent='Publicando…';
+  var size=n,d=defectOf(rects);
+  saveMe();
+  try{
+    // text/plain a propósito: con application/json el navegador manda una
+    // petición previa que Apps Script no sabe responder.
+    var res=await fetch(RANKING_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({nivel:'mondrian-'+(size<10?'0':'')+size,nombre:player,
+        piezas:rects.map(function(p){return{r:p.r,c:p.c,w:p.w,h:p.h};})})
+    });
+    var out=await res.json();
+    if(out.error)throw new Error(out.error);
+    say('Publicado: defecto '+d+' en '+size+'×'+size+'.','win');
+    if(size===n)loadBoard();
+  }catch(err){
+    say('No se ha podido publicar. Vuelve a intentarlo en un momento.','bad');
+  }
+  busy=false;pubBtn.textContent='Publicar';pubBtn.disabled=false;
+});
+
+loadMe();setup();
+})();
+</script>
+</body>
+  </html>
