@@ -1,1 +1,8 @@
-
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "es.matematicasjosepfont.mondrian",
+    "sha256_cert_fingerprints": ["63:1F:EC:D1:A8:98:21:D9:2B:6F:8E:4F:8C:CF:34:53:4C:42:49:91:F0:41:B9:F9:03:F5:94:3A:F4:A9:8D:70"]
+  }
+}]
