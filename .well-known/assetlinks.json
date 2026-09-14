@@ -1,11 +1,23 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "es.matematicasjosepfont.mondrian",
-    "sha256_cert_fingerprints": [
-      "63:1F:EC:D1:A8:98:21:D9:2B:6F:8E:4F:8C:CF:34:53:4C:42:49:91:F0:41:B9:F9:03:F5:94:3A:F4:A9:8D:70",
-      "71:F0:D6:1C:A2:7C:EE:C0:F4:35:61:B1:EF:55:C9:EA:01:FE:75:24:CA:84:88:11:B8:17:42:B9:0D:7D:49:F3"
-    ]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "es.matematicasjosepfont.mondrian",
+      "sha256_cert_fingerprints": [
+        "63:1F:EC:D1:A8:98:21:D9:2B:6F:8E:4F:8C:CF:34:53:4C:42:49:91:F0:41:B9:F9:03:F5:94:3A:F4:A9:8D:70",
+        "71:F0:D6:1C:A2:7C:EE:C0:F4:35:61:B1:EF:55:C9:EA:01:FE:75:24:CA:84:88:11:B8:17:42:B9:0D:7D:49:F3"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "es.matematicasjosepfont.rutaminima",
+      "sha256_cert_fingerprints": [
+        "HUELLA_SHA256_DE_RUTA_MINIMA"
+      ]
+    }
   }
-}]
+]
