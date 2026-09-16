@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>minimal route</title>
+<meta name="description" content="Juego de matemáticas: recorre el grafo de α a Ω y busca el producto más pequeño. Dos modalidades, decimales o fracciones, y pantallas infinitas.">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#4B3F8C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ruta mínima">
+<link rel="icon" href="./icons/favicon-64.png" sizes="64x64">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Juegos de Josep Font">
+<meta property="og:title" content="minimal route">
+<meta property="og:description" content="Ve de α a Ω multiplicando por el camino. ¿Encuentras el producto más pequeño? Reto diario, decimales o fracciones.">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/ruta-minima/">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/ruta-minima/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --paper:#F6F5FB; --grid:#E4E1F3; --ink:#2A2440; --soft:#6C6390; --rule:#CFC9E6;
+    --node:#C5BEF2; --deep:#4B3F8C; --edge:#9A93B4; --min:#A81F63; --ok:#1C6E52;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/22px 22px,
+      var(--paper);
+    color:var(--ink);
+    font:400 17px/1.5 Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    padding:14px 14px 44px;
+  }
+  main{max-width:560px;margin:0 auto}
+  /* ---------- barra superior ---------- */
+  body{padding-top:0}
+  .topbar{position:sticky;top:0;z-index:8;display:flex;align-items:center;gap:.5rem;
+    background:#221C3A;color:#fff;margin:-14px -14px 0;padding:.55rem .8rem;
+    padding-top:calc(.55rem + env(safe-area-inset-top))}
+  .brand{display:flex;align-items:center;gap:.45rem;background:none;border:0;padding:.1rem;
+    color:#fff;font-size:1.05rem;cursor:pointer}
+  .brand-mark{width:34px;height:24px}
+  .brand-mark{width:38px;height:25px;overflow:visible}
+  .bm-bg line{stroke:#5B4F92;stroke-width:1.4}
+  .bm-bg circle{fill:#5B4F92}
+  .bm-r{fill:none;stroke:#E4538F;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .bm-n{fill:#E4538F}
+  .b1{color:#fff}.b2{color:#E48BB6;margin-left:.28em}
+  .tb-btn{margin-left:auto;background:none;border:0;color:#C9C2EE;font-size:.86rem;padding:.3rem .4rem}
+  .panel{margin:0 -14px;padding:.8rem .9rem .9rem;background:#2E2750;color:#fff;
+    display:flex;flex-direction:column;gap:.55rem}
+  .p-fila{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+  .p-nota{margin:.1rem 0 0;font-size:.76rem;color:#B7AEE0;line-height:1.35}
+  .p-estado{margin:.2rem 0 0;font-size:.82rem;color:#fff;background:#1E1838;
+    border-radius:6px;padding:.4rem .6rem}
+  .panel .seg{border-color:#6B5FAE}
+  .panel .seg button{background:#fff;color:#2A2440;font-size:.82rem;padding:.42rem .6rem;
+    border-right-color:#6B5FAE}
+  .panel .seg button[aria-pressed="true"]{background:var(--min);color:#fff}
+  .p-tit{font-size:.85rem;color:#C9C2EE}
+  .p-ver{margin-left:auto;font-size:.72rem;color:#8A80BE;letter-spacing:.04em}
+  .p-tit{min-width:5.2rem}
+  .panel .seg{border-color:#4B3F8C}
+  .panel .seg button{background:#fff;font-size:.82rem}
+
+  /* ---------- portada ---------- */
+  #inicio{padding:.4rem 0 1rem}
+  .hero{position:relative;padding:1.5rem 0 1.1rem;text-align:center}
+  .fondo{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.5}
+  .f-e line{stroke:#B9B2DC;stroke-width:2.4}
+  .f-n circle{fill:#D7D1F5;stroke:#B0A7E4;stroke-width:2}
+  .f-cap{fill:var(--deep);opacity:.3}
+  .f-ruta{fill:none;stroke:var(--min);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;
+    opacity:.45;stroke-dasharray:14 10;animation:fluir 4.5s linear infinite}
+  @keyframes fluir{to{stroke-dashoffset:-48}}
+  .titulo{position:relative;z-index:1;margin:0;font-weight:400;line-height:1;
+    display:flex;flex-direction:column;align-items:center;font-size:clamp(2.1rem,13vw,3rem)}
+  .titulo .t1{color:var(--deep)}
+  .titulo .t2{color:var(--min)}
+  .claim{position:relative;z-index:1;color:var(--soft);font-size:.9rem;margin:.7rem auto 0;max-width:24rem}
+
+  .tarjeta{position:relative;overflow:hidden;background:#fff;border:1px solid var(--rule);
+    border-radius:10px;padding:.95rem 1rem;margin-top:.7rem;display:block;width:100%;text-align:left}
+  .tarjeta.hoy{background:linear-gradient(145deg,#4B3F8C 0%,#382E6E 100%);border:0;color:#fff;
+    padding:1.05rem 1rem 1.1rem;cursor:pointer}
+  .t-cab{display:block;font-size:1.02rem;color:#D7D1F5}
+  .t-cab.oscuro{color:var(--ink)}
+  .t-cab em{font-style:normal;color:var(--ink);font-size:.82rem}
+  .t-fecha{display:block;font-size:3rem;font-weight:700;line-height:1.05;margin:.2rem 0 .1rem}
+  .t-estado{display:block;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:#C0B7EC}
+  .t-cta{display:inline-block;margin-top:.9rem;background:#8B7FD4;color:#fff;
+    padding:.5rem 1.3rem;border-radius:24px;font-size:.95rem}
+  .t-deco{position:absolute;right:-6px;bottom:4px;width:56%;max-width:210px;opacity:.55;pointer-events:none}
+  .t-deco polyline{fill:none;stroke:#D9A8C6;stroke-width:3;stroke-linecap:round}
+  .t-deco circle{fill:#F0D9E6}
+  .n-top{display:flex;align-items:baseline;gap:.6rem}
+  .enlace{margin-left:auto;border:1px solid var(--deep);background:var(--deep);color:#fff;
+    font-size:.88rem;padding:.4rem 1rem;border-radius:20px}
+  .enlace:active{background:#3A2F74}
+  .n-mid{display:flex;align-items:center;gap:.8rem;margin:.7rem 0 .8rem}
+  .n-num{width:62px;height:62px;flex:0 0 62px;border:3px solid var(--node);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:1.55rem;font-weight:700;color:var(--deep)}
+  .n-txt{font-size:.9rem;color:var(--soft)}
+  .n-txt b{color:var(--ink);font-weight:400}
+  .n-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .st{background:#F3F1FA;border-radius:7px;padding:.55rem .3rem;text-align:center;
+    font-size:.72rem;color:var(--soft);display:flex;flex-direction:column;gap:.15rem}
+  .st b{font-size:1.25rem;color:var(--deep);font-weight:700}
+  .tira{display:flex;gap:.5rem;margin-top:.7rem;overflow-x:auto;scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;padding-bottom:.2rem}
+  .chip{flex:0 0 auto;scroll-snap-align:start;border:1.5px solid #B5ADD8;border-radius:8px;
+    background:#EFEDF9;padding:.5rem .75rem;text-align:left;font-size:.82rem;color:var(--ink);cursor:pointer}
+  .chip b{display:block;font-weight:700;font-size:.98rem;color:var(--deep)}
+  .chip span{font-size:.74rem;color:#5B5480}
+  .chip.ok{background:#D8F0E4;border-color:var(--ok)}
+  .chip.ok b,.chip.ok span{color:#11543D}
+  .chip.rend{background:#F7DCE8;border-color:var(--min)}
+  .chip.rend b,.chip.rend span{color:#7E1449}
+  .pie-inicio{color:var(--soft);font-size:.8rem;margin:1.1rem 0 0;text-align:center}
+  .legal{color:var(--soft);font-size:.78rem}
+  @media (min-width:620px){
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:stretch}
+    .cols .tarjeta{margin-top:0}
+    .tarjeta.hoy .t-fecha{font-size:3.4rem}
+  }
+  @media (max-width:360px){
+    .t-fecha{font-size:2.6rem}
+    .st b{font-size:1.1rem}
+    .t-deco{width:48%}
+  }
+  #volver,#cal-volver{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+    padding:.4rem 1.1rem .4rem .9rem;border:1px solid var(--ok);background:var(--ok);
+    border-radius:24px;color:#fff;font-size:.95rem;line-height:1}
+  #volver:active,#cal-volver:active{background:#155A42}
+  .fl{font-size:1.3rem;line-height:.8;position:relative;top:-.05em}
+  body.diario .solo-niveles{display:none}
+  .cal-top{display:flex;align-items:center;gap:.5rem;padding:.4rem 0 .8rem}
+  .cal-top h2{flex:1;text-align:center;margin:0;border:0;padding:0;font-size:1.05rem;
+    color:var(--ink);text-transform:capitalize}
+
+  .cal-nav button{padding:.25rem .5rem}
+  .cal-dow,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}
+  .cal-dow span{text-align:center;color:var(--soft);font-size:.78rem;padding-bottom:.2rem}
+  .cal-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.9rem;
+    border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);cursor:pointer;padding:0}
+  .cal-d.off{border-style:dashed;color:#C3BFD2;background:transparent;cursor:default}
+  .cal-d.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+  .cal-d.rend{background:#F6DDE9;border-color:var(--min);color:var(--min)}
+  .cal-d.hoy{box-shadow:0 0 0 2px var(--deep)}
+  .cal-hueco{aspect-ratio:1}
+  .cal-ley{color:var(--soft);font-size:.8rem;margin:.9rem 0 0;text-align:center}
+  .cal-ley b{font-weight:400}.cal-ley .ok{color:var(--ok)}.cal-ley .rend{color:var(--min)}.cal-ley .pend{color:var(--rule)}
+  @media (prefers-reduced-motion:reduce){.f-ruta{animation:none}}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+  .card{aspect-ratio:1;display:flex;flex-direction:column;justify-content:space-between;
+    align-items:flex-start;text-align:left;padding:.95rem;border:1px solid var(--rule);
+    background:#fff;border-radius:5px;font:inherit;cursor:pointer}
+  .card:active{transform:scale(.985)}
+  .card-dia{background:var(--deep);border-color:var(--deep);color:#fff}
+  .c-tag{font-size:1.02rem}
+  .c-mid{font-size:1.75rem;font-weight:700;line-height:1.05}
+  .c-pie{font-size:.78rem;color:var(--soft)}
+  .card-dia .c-pie{color:#C9C2EE}
+  .pie-inicio{color:var(--soft);font-size:.82rem;margin:1.1rem 0 0}
+  body.diario .solo-niveles{display:none}
+  header{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.5rem 0 .1rem}
+  h1{font-size:1.25rem;font-weight:400;margin:0}
+  .sub{color:var(--soft);font-size:.85rem;width:100%;margin:.15rem 0 0}
+  .bar{display:flex;gap:.35rem;align-items:center;margin:.5rem 0 0}
+  .seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:#fff}
+  .seg button{border:0;border-right:1px solid var(--rule);border-radius:0;padding:.34rem .6rem;font-size:.84rem}
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:var(--deep);color:#fff}
+  #modo button{font-size:.9rem;min-width:3.1rem}
+  #ajustes button{font-size:.82rem;padding:.34rem .5rem}
+  #lvl{width:4rem;font:inherit;font-size:.86rem;padding:.32rem .2rem;border:1px solid var(--rule);
+    border-radius:2px;background:#fff;color:var(--ink);text-align:center}
+  .bar button{padding:.34rem .6rem}
+  .grow{margin-left:auto}
+  svg{width:100%;height:auto;display:block;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .edge{stroke:var(--edge);stroke-width:1.6;stroke-linecap:round}
+  .edge.walked{stroke:var(--min);stroke-width:5}
+  .edge.open{stroke:var(--deep);stroke-width:2.6;stroke-dasharray:5 4}
+  .wbg{fill:#FFFFFF;stroke:var(--rule);stroke-width:1;cursor:pointer}
+  .wt{cursor:pointer;font-size:15px;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .wt.on{fill:var(--min)}
+  .wt.won{fill:var(--ok)}
+  g.n circle{fill:var(--node);stroke:#8B82D6;stroke-width:1.2;transition:fill .12s,stroke .12s}
+  g.n text{font-style:italic;font-size:16px;fill:#241F3D;text-anchor:middle;dominant-baseline:central}
+  g.n.open{cursor:pointer}
+  g.n.open circle{stroke:var(--deep);stroke-width:3}
+  g.n.visited circle{fill:#EBE8FA;stroke:var(--min)}
+  g.n.cur circle{fill:var(--deep);stroke:var(--deep)}
+  g.n.cur text{fill:#fff}
+  g.n.off circle{fill:#EDECF2;stroke:#D5D2E2}
+  g.n.off text{fill:#A9A5B8}
+  g.n.omega circle{fill:var(--min);stroke:#8E1A54;stroke-width:2}
+  g.n.omega text{fill:#fff}
+  g.n.omega.open circle{stroke:var(--deep);stroke-width:3.5}
+  @keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+  g.n.omega.esperando{animation:latido 1.7s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  @media (prefers-reduced-motion:reduce){g.n.omega.esperando{animation:none}}
+  .edge.win{stroke:var(--ok);stroke-width:6}
+  .edge.sol{stroke:var(--deep);stroke-width:6}
+  .wt.sol{fill:var(--deep)}
+  .lead{stroke:var(--rule);stroke-width:1.3;pointer-events:none}
+  .lead.on{stroke:var(--min);stroke-width:1.8}
+  .lead.live{stroke:var(--deep);stroke-width:1.8}
+  .lead.sol{stroke:var(--deep);stroke-width:1.8}
+  .wt.dim{fill:#8A85A0;font-weight:400}
+  .wbg.dim{opacity:.72}
+  .wt.live{fill:var(--deep)}
+  .edge.sel{stroke:var(--deep);stroke-width:7}
+  .wt.sel{fill:#fff}
+  .wbg.sel{fill:var(--deep);stroke:var(--deep);stroke-width:2}
+  .lead.sel{stroke:var(--deep);stroke-width:2.2}
+  .hit{stroke:transparent;stroke-width:22;fill:none;cursor:pointer}
+  .insp{font-size:.92rem;margin-top:.2rem;color:var(--deep)}
+  .wbg.live{stroke:var(--deep);stroke-width:1.8}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+  g.n.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1);transform-box:fill-box;transform-origin:center}
+  @keyframes halo{from{transform:scale(1);opacity:.85}to{transform:scale(3.2);opacity:0}}
+  .halo{fill:none;stroke:var(--ok);stroke-width:3;transform-box:fill-box;transform-origin:center;
+    animation:halo .9s ease-out forwards;pointer-events:none}
+  @keyframes bigwin{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
+  .big.won{color:var(--ok);animation:bigwin .7s ease-out}
+  @media (prefers-reduced-motion:reduce){g.n.pop,.big.won,.halo{animation:none}.halo{display:none}}
+  .lienzo{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:.3rem;margin-top:.45rem}
+  .nivel-ok{margin-top:.6rem;background:var(--ok);color:#fff;border-radius:12px;
+    padding:1rem;text-align:center;display:flex;flex-direction:column;gap:.3rem;align-items:center}
+  .no-tit{font-size:1.35rem}
+  .no-sub{font-size:.88rem;color:#CFEADE}
+  .no-btn{margin-top:.5rem;background:#fff;color:var(--ok);border:0;border-radius:24px;
+    padding:.55rem 1.5rem;font-size:1rem}
+  .board{position:relative;background:#fff;border:1px solid var(--rule);border-radius:12px;
+    margin-top:.6rem;padding:.85rem .9rem .9rem;min-height:5.2rem;overflow:hidden}
+  .avance{position:absolute;left:0;top:0;height:4px;width:100%;background:#EEEBF7}
+  .avance i{display:block;height:100%;width:0;background:var(--deep);transition:width .25s ease}
+  .controls{display:flex;gap:.45rem;margin-top:.65rem;align-items:stretch}
+  .controls button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:.25rem;padding:.55rem .14rem;border-radius:8px;
+    font-size:clamp(.52rem,2.5vw,.68rem);line-height:1.18;text-align:center;white-space:normal}
+  .controls .ic{display:flex;align-items:center;justify-content:center;height:24px}
+  .controls .ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round}
+  #give .ic svg{color:#2A2440}
+  #give .ic .hueco{stroke:#fff;fill:#fff;stroke-width:1.9}
+  #give:disabled .ic svg{color:#BCB8C9}
+  #give:disabled .ic .hueco{stroke:#F6F5F9;fill:#F6F5F9}
+  #again{flex:1.6 1 0;background:var(--deep);border-color:var(--deep);color:#fff;
+    font-size:clamp(.78rem,3.8vw,1rem)}
+  #give{background:#F0A03C;border-color:#DE8F28;color:#fff}
+  #give .ic{color:#fff}
+  #give:disabled{background:#F6F5F9;border-color:var(--rule);color:#BCB8C9}
+  #give:disabled .ic{color:#BCB8C9}
+  .controls:has(> #share[hidden]){display:none}
+  .ancho-verde{flex:1;background:var(--ok);color:#fff;border-color:var(--ok);
+    padding:.6rem;border-radius:9px;font-size:.92rem}
+  .glow{fill:var(--deep)}
+  .expr{font-size:.98rem;word-break:break-word}
+  .expr .num{color:var(--soft)}
+  .big{font-size:1.95rem;font-weight:700;line-height:1.15;margin-top:.12rem}
+  .big .dec{font-size:.82rem;font-weight:400;color:var(--soft);margin-left:.55rem}
+  .verdict{font-size:.92rem;margin-top:.35rem}
+  .verdict.win{color:var(--ok);font-weight:700}
+  .verdict.stuck{color:var(--min)}
+  .controls{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+  button{font:inherit;font-size:.88rem;padding:.4rem .8rem;border:1px solid var(--rule);
+    background:#fff;color:var(--ink);border-radius:2px;cursor:pointer}
+  button:disabled{color:#B5B1C4;cursor:default}
+  button.go{background:var(--deep);color:#fff;border-color:var(--deep)}
+  h2{font-size:.9rem;font-weight:400;color:var(--soft);margin:1.3rem 0 .25rem;
+    border-bottom:1px solid var(--rule);padding-bottom:.22rem}
+  ol{list-style:none;margin:0;padding:0}
+  li{display:flex;gap:.6rem;align-items:baseline;padding:.28rem 0;border-bottom:1px dotted var(--rule);font-size:.92rem}
+  li:last-child{border-bottom:0}
+  li .p{letter-spacing:.04em;word-break:break-word}
+  li .v{margin-left:auto;font-weight:700}
+  li.best .v,li.best .p{color:var(--min)}
+  .empty{color:var(--soft);font-size:.88rem;padding:.28rem 0}
+  .score{color:var(--soft);font-size:.85rem;margin:.25rem 0 0}
+
+  #hoy[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);
+    color:#fff;padding:.5rem .9rem;border-radius:4px;font-size:.88rem;z-index:9}
+  :focus-visible{outline:2px solid var(--deep);outline-offset:3px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="brand" id="marca" aria-label="Inicio">
+    <svg viewBox="0 0 46 30" class="brand-mark" aria-hidden="true">
+      <g class="bm-bg">
+        <line x1="5" y1="16"  x2="11" y2="23"/><line x1="5" y1="16"  x2="12" y2="9"/>
+        <line x1="12" y1="9"  x2="20" y2="6"/><line x1="12" y1="9"  x2="19" y2="16"/>
+        <line x1="11" y1="23" x2="19" y2="16"/><line x1="11" y1="23" x2="24" y2="25"/>
+        <line x1="19" y1="16" x2="28" y2="10"/><line x1="19" y1="16" x2="24" y2="25"/>
+        <line x1="20" y1="6"  x2="28" y2="10"/><line x1="28" y1="10" x2="34" y2="18"/>
+        <line x1="24" y1="25" x2="34" y2="18"/><line x1="34" y1="18" x2="41" y2="9"/>
+        <line x1="28" y1="10" x2="41" y2="9"/>
+        <circle cx="12" cy="9" r="1.9"/><circle cx="20" cy="6" r="1.9"/><circle cx="24" cy="25" r="1.9"/>
+        <circle cx="34" cy="18" r="1.9"/>
+      </g>
+      <polyline class="bm-r" points="5,16 11,23 19,16 28,10 41,9"/>
+      <g class="bm-n"><circle cx="11" cy="23" r="2.3"/><circle cx="19" cy="16" r="2.3"/><circle cx="28" cy="10" r="2.3"/></g>
+      <circle class="bm-n" cx="5" cy="16" r="3.1"/><circle class="bm-n" cx="41" cy="9" r="3.1"/>
+    </svg>
+    <span class="b1">minimal</span><span class="b2">route</span>
+  </button>
+  <button class="tb-btn" id="btn-ajustes" aria-expanded="false" data-i18n="ajustes">Ajustes</button>
+</div>
+<div class="panel" id="panel-ajustes" hidden>
+  <div class="p-fila">
+    <span class="p-tit" data-i18n="idioma">Idioma</span>
+    <div class="seg" id="lang-p">
+      <button data-l="es">ES</button><button data-l="va">VA</button><button data-l="en">EN</button>
+      <button data-l="fr">FR</button><button data-l="ru">RU</button><button data-l="zh">中文</button>
+    </div>
+  </div>
+  <div class="p-fila">
+    <span class="p-tit" data-i18n="modalidad">Modalidad</span>
+    <div class="seg" id="modo-p">
+      <button data-m="0" aria-pressed="false">3/4 <span data-i18n="fracciones">Fracciones</span></button>
+      <button data-m="1" aria-pressed="true"><span class="ej-dec">0,75</span> <span data-i18n="decimales">Decimales</span></button>
+    </div>
+  </div>
+  <div class="p-fila">
+    <span class="p-tit" data-i18n="sonido">Sonido</span>
+    <div class="seg" id="ajustes">
+      <button data-s="son" aria-pressed="true">♪ <span data-i18n="sonido">Sonido</span></button>
+      <button data-s="vib" aria-pressed="true" data-i18n="vibracion">Vibración</button>
+    </div>
+    <button id="install" hidden data-i18n="instalar">Instalar</button>
+    <span class="p-ver">compilación 33</span>
+  </div>
+  <p class="p-estado" id="p-estado"></p>
+  <p class="p-nota" data-i18n="nota_panel"></p>
+</div>
+<main>
+  <section id="inicio">
+    <div class="hero">
+      <svg class="fondo" viewBox="0 0 360 200" aria-hidden="true">
+        <g class="f-e">
+          <line x1="30" y1="160" x2="95" y2="55"/><line x1="30" y1="160" x2="120" y2="160"/>
+          <line x1="95" y1="55" x2="185" y2="30"/><line x1="95" y1="55" x2="175" y2="105"/>
+          <line x1="120" y1="160" x2="175" y2="105"/><line x1="120" y1="160" x2="215" y2="175"/>
+          <line x1="175" y1="105" x2="185" y2="30"/><line x1="175" y1="105" x2="265" y2="85"/>
+          <line x1="185" y1="30" x2="285" y2="35"/><line x1="215" y1="175" x2="265" y2="85"/>
+          <line x1="215" y1="175" x2="320" y2="140"/><line x1="265" y1="85" x2="320" y2="140"/>
+          <line x1="265" y1="85" x2="285" y2="35"/><line x1="285" y1="35" x2="330" y2="85"/>
+        </g>
+        <polyline class="f-ruta" points="30,160 120,160 175,105 265,85 330,85"/>
+        <g class="f-n">
+          <circle cx="95" cy="55" r="9"/><circle cx="120" cy="160" r="9"/><circle cx="175" cy="105" r="9"/>
+          <circle cx="185" cy="30" r="9"/><circle cx="215" cy="175" r="9"/><circle cx="265" cy="85" r="9"/>
+          <circle cx="285" cy="35" r="9"/><circle cx="320" cy="140" r="9"/>
+        </g>
+        <circle class="f-cap" cx="30" cy="160" r="13"/><circle class="f-cap" cx="330" cy="85" r="13"/>
+      </svg>
+      <h1 class="titulo"><span class="t1">minimal</span><span class="t2">route</span></h1>
+      <p class="claim"><span data-i18n="claim1"></span><br><span data-i18n="claim2"></span></p>
+    </div>
+
+    <div class="cols">
+    <button class="tarjeta hoy" id="card-dia">
+      <span class="t-cab" data-i18n="reto_hoy">Reto de hoy</span>
+      <span class="t-fecha" id="c-dia-fecha"></span>
+      <span class="t-estado" id="c-dia-estado"></span>
+      <span class="t-cta">▶ <span data-i18n="jugar">Jugar</span></span>
+      <svg class="t-deco" viewBox="0 0 200 90" aria-hidden="true">
+        <polyline points="12,78 52,60 92,44 132,30 176,12"/>
+        <circle cx="12" cy="78" r="6"/><circle cx="52" cy="60" r="6"/><circle cx="92" cy="44" r="6"/>
+        <circle cx="132" cy="30" r="6"/><circle cx="176" cy="12" r="8"/>
+      </svg>
+    </button>
+
+    <div class="tarjeta niveles">
+      <div class="n-top">
+        <span class="t-cab oscuro" data-i18n="campana">Campaña</span>
+        <button class="enlace" id="card-niveles" data-i18n="jugar">Jugar →</button>
+      </div>
+      <div class="n-mid">
+        <span class="n-num" id="c-niv-num">1</span>
+        <span class="n-txt"><b data-i18n="nivel_actual">Nivel actual</b><br><span id="c-niv-estado"></span></span>
+      </div>
+      <div class="n-stats">
+        <span class="st"><b id="st-comp">0</b><span data-i18n="completados">Completados</span></span>
+        <span class="st"><b id="st-max">1</b><span data-i18n="nivel_max">Nivel máximo</span></span>
+        <span class="st"><b id="st-retos">0</b><span data-i18n="retos">Retos</span></span>
+      </div>
+    </div>
+    </div>
+
+    <div class="tarjeta">
+      <div class="n-top">
+        <span class="t-cab oscuro"><span data-i18n="retos_ant">Retos anteriores</span> <em id="cal-resumen"></em></span>
+        <button class="enlace" id="card-cal" data-i18n="ver_todos">Ver todos →</button>
+      </div>
+      <div class="tira" id="tira-retos"></div>
+    </div>
+
+    <p class="pie-inicio"><span data-i18n="pie"></span><br><a class="legal" href="./privacidad.html" data-i18n="privacidad">Privacidad</a></p>
+  </section>
+
+  <section id="calendario" hidden>
+    <div class="cal-top">
+      <button id="cal-volver"><span class="fl">‹</span> <span data-i18n="inicio">Inicio</span></button>
+      <h2 id="cal-mes"></h2>
+      <span class="cal-nav">
+        <button id="mes-prev" aria-label="Mes anterior">‹</button>
+        <button id="mes-next" aria-label="Mes siguiente">›</button>
+      </span>
+    </div>
+    <div class="cal-dow" id="cal-dow"></div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <p class="cal-ley" id="cal-ley"></p>
+  </section>
+
+  <section id="juego" hidden>
+  <header>
+    <button id="volver"><span class="fl">‹</span> <span data-i18n="volver">Volver</span></button>
+    <span class="sub" id="sub"></span>
+  </header>
+
+  <div class="lienzo"><svg id="g" viewBox="0 0 400 400" role="application" aria-label="Diagrama de rutas"></svg></div>
+
+  <div class="nivel-ok" id="nivel-ok" hidden>
+    <span class="no-tit" data-i18n="nivel_ok">¡Nivel completado!</span>
+    <span class="no-sub" id="no-sub"></span>
+    <button class="no-btn" id="no-btn" data-i18n="sig_nivel">Siguiente nivel ›</button>
+  </div>
+  <div class="board">
+    <div class="avance"><i id="avance-barra"></i></div>
+    <div class="expr" id="expr">α</div>
+    <div class="big" id="big"></div>
+    <div class="verdict" id="verdict">Elige tu primer paso.</div>
+    <div class="insp" id="insp"></div>
+  </div>
+
+  <div class="controls">
+    <button id="equiv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.6" cy="7.6" r="2.9"/><circle cx="16.4" cy="16.4" r="2.9"/><line x1="17.8" y1="6.2" x2="6.2" y2="17.8"/></svg></span><span class="lbl">Ver decimales</span></button>
+    <button id="undo"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 12.4a7.4 7.4 0 1 1 2.4 5.5"/><polyline points="1.4,9.2 4.7,12.8 8.3,9.6"/></svg></span><span class="lbl">Deshacer</span></button>
+    <button id="again" class="go"><span class="lbl">Nueva ruta</span></button>
+    <button id="zoom"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.4"/><line x1="15.3" y1="15.3" x2="20.6" y2="20.6"/><line x1="7.9" y1="10.6" x2="13.3" y2="10.6"/><line x1="10.6" y1="7.9" x2="10.6" y2="13.3"/></svg></span><span class="lbl">Zoom 1x</span></button>
+    <button id="give"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 21.6 20.4H2.4Z" fill="currentColor" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="10.2" x2="12" y2="14.6" class="hueco"/><circle cx="12" cy="17.2" r="1.15" class="hueco"/></svg></span><span class="lbl">Rendirse</span></button>
+  </div>
+  <div class="controls">
+    <button id="share" class="ancho-verde" hidden data-i18n="compartir">Compartir resultado</button>
+  </div>
+  <p class="score" id="score"></p>
+  <div class="toast" id="toast" hidden></div>
+
+  <h2 data-i18n="tus_rutas">Tus rutas en esta pantalla</h2>
+  <ol id="found"><li class="empty" data-i18n="no_omega">Todavía no has llegado a Ω.</li></ol>
+  </section>
+</main>
+
+<script>
+/* ===== idiomas ===== */
+const T={
+  ajustes:{es:"Ajustes",en:"Settings",ru:"Настройки",zh:"设置",va:"Ajustes",fr:"Réglages"},
+  idioma:{es:"Idioma",en:"Language",ru:"Язык",zh:"语言",va:"Idioma",fr:"Langue"},
+  modalidad:{es:"Modalidad",en:"Numbers",ru:"Числа",zh:"数字形式",va:"Modalitat",fr:"Nombres"},
+  fracciones:{es:"Fracciones",en:"Fractions",ru:"Дроби",zh:"分数",va:"Fraccions",fr:"Fractions"},
+  decimales:{es:"Decimales",en:"Decimals",ru:"Десятичные",zh:"小数",va:"Decimals",fr:"Décimaux"},
+  sonido:{es:"Sonido",en:"Sound",ru:"Звук",zh:"声音",va:"So",fr:"Son"},
+  vibracion:{es:"Vibración",en:"Vibration",ru:"Вибрация",zh:"振动",va:"Vibració",fr:"Vibration"},
+  instalar:{es:"Instalar",en:"Install",ru:"Установить",zh:"安装",va:"Instal·lar",fr:"Installer"},
+  nota_panel:{es:"La modalidad vale para la campaña. La dificultad sube sola con el nivel. El reto diario es el mismo para todos, con su propia modalidad cada día.",en:"Your choice applies to the campaign. Difficulty rises with the level. The daily challenge is the same for everyone, with its own format each day.",ru:"Выбор действует в кампании. Сложность растёт вместе с уровнем. Ежедневное задание одинаково для всех и каждый день в своём формате.",zh:"此设置适用于闯关模式。难度随关卡自动提高。每日挑战对所有人相同，每天使用固定的数字形式。",va:"La modalitat val per a la campanya. La dificultat puja sola amb el nivell. El repte diari és el mateix per a tots, amb la seua pròpia modalitat cada dia.",fr:"Ce choix s'applique à la campagne. La difficulté augmente avec le niveau. Le défi du jour est le même pour tous, avec son propre format chaque jour."},
+  claim1:{es:"De α a Ω multiplicando por el camino.",en:"From α to Ω, multiplying along the way.",ru:"От α до Ω, умножая по пути.",zh:"从 α 到 Ω，沿途相乘。",va:"De α a Ω multiplicant pel camí.",fr:"De α à Ω en multipliant en chemin."},
+  claim2:{es:"Encuentra el producto más pequeño.",en:"Find the smallest product.",ru:"Найдите наименьшее произведение.",zh:"找出最小的乘积。",va:"Troba el producte més menut.",fr:"Trouve le plus petit produit."},
+  reto_hoy:{es:"Reto de hoy",en:"Today's challenge",ru:"Задание дня",zh:"今日挑战",va:"Repte de hui",fr:"Défi du jour"},
+  resuelto:{es:"Resuelto",en:"Solved",ru:"Решено",zh:"已完成",va:"Resolt",fr:"Résolu"},
+  rendido:{es:"Te rendiste",en:"You gave up",ru:"Вы сдались",zh:"已放弃",va:"Et vas rendir",fr:"Abandonné"},
+  sin_resolver:{es:"Sin resolver",en:"Not solved",ru:"Не решено",zh:"未完成",va:"Sense resoldre",fr:"Non résolu"},
+  campana:{es:"Campaña",en:"Campaign",ru:"Кампания",zh:"闯关",va:"Campanya",fr:"Campagne"},
+  jugar:{es:"Jugar →",en:"Play →",ru:"Играть →",zh:"开始 →",va:"Jugar →",fr:"Jouer →"},
+  nivel_actual:{es:"Nivel actual",en:"Current level",ru:"Текущий уровень",zh:"当前关卡",va:"Nivell actual",fr:"Niveau actuel"},
+  completados:{es:"Completados",en:"Completed",ru:"Пройдено",zh:"已通关",va:"Completats",fr:"Terminés"},
+  racha:{es:"Racha",en:"Streak",ru:"Серия",zh:"连续天数",va:"Ratxa",fr:"Série"},
+  retos:{es:"Retos",en:"Challenges",ru:"Задания",zh:"挑战",va:"Reptes",fr:"Défis"},
+  retos_ant:{es:"Retos anteriores",en:"Past challenges",ru:"Прошлые задания",zh:"往期挑战",va:"Reptes anteriors",fr:"Défis passés"},
+  de_n:{es:"de {0}",en:"of {0}",ru:"из {0}",zh:"共 {0}",va:"de {0}",fr:"sur {0}"},
+  ver_todos:{es:"Ver todos →",en:"See all →",ru:"Смотреть все →",zh:"查看全部 →",va:"Veure tots →",fr:"Voir tout →"},
+  pie:{es:"Un tablero nuevo cada vez. Decimales o fracciones.",en:"A new board every time. Decimals or fractions.",ru:"Каждый раз новое поле. Десятичные дроби или обычные.",zh:"每次都是新棋盘。小数或分数。",va:"Un tauler nou cada volta. Decimals o fraccions.",fr:"Un plateau nouveau à chaque fois. Décimaux ou fractions."},
+  privacidad:{es:"Privacidad",en:"Privacy",ru:"Конфиденциальность",zh:"隐私",va:"Privacitat",fr:"Confidentialité"},
+  sin_ant:{es:"Aún no hay retos anteriores",en:"No past challenges yet",ru:"Прошлых заданий пока нет",zh:"暂无往期挑战",va:"Encara no hi ha reptes anteriors",fr:"Pas encore de défis passés"},
+  volver:{es:"Volver",en:"Back",ru:"Назад",zh:"返回",va:"Tornar",fr:"Retour"},
+  inicio:{es:"Inicio",en:"Home",ru:"Главная",zh:"首页",va:"Inici",fr:"Accueil"},
+  elige_1:{es:"Elige tu primer paso.",en:"Choose your first step.",ru:"Выберите первый шаг.",zh:"选择第一步。",va:"Tria el teu primer pas.",fr:"Choisis ton premier pas."},
+  desde:{es:"Desde {0} puedes ir a {1}.",en:"From {0} you can go to {1}.",ru:"Из {0} можно перейти к {1}.",zh:"从 {0} 可以走到 {1}。",va:"Des de {0} pots anar a {1}.",fr:"Depuis {0} tu peux aller vers {1}."},
+  sin_salida:{es:"Sin salida en {0}. Deshaz un paso.",en:"Dead end at {0}. Undo a step.",ru:"Тупик в {0}. Отмените шаг.",zh:"{0} 无路可走。请撤销一步。",va:"Sense eixida en {0}. Desfés un pas.",fr:"Impasse en {0}. Annule un pas."},
+  minimo_ok:{es:"Mínimo alcanzado. Ninguna de las {0} rutas baja de {1}.",en:"Minimum reached. None of the {0} routes goes below {1}.",ru:"Минимум достигнут. Ни один из {0} маршрутов не даёт меньше {1}.",zh:"已达最小值。{0} 条路径中没有低于 {1} 的。",va:"Mínim assolit. Cap de les {0} rutes baixa de {1}.",fr:"Minimum atteint. Aucune des {0} routes ne descend sous {1}."},
+  puesto:{es:"Puesto {0} de {1} · rutas mejores: {2}",en:"Rank {0} of {1} · better routes: {2}",ru:"Место {0} из {1} · лучших маршрутов: {2}",zh:"第 {0} 名，共 {1} 名 · 更优路径：{2}",va:"Lloc {0} de {1} · rutes millors: {2}",fr:"Rang {0} sur {1} · routes meilleures : {2}"},
+  fin_pantalla:{es:"Se acabó esta pantalla. El mínimo es {0}, por {1}.",en:"This board is over. The minimum is {0}, via {1}.",ru:"Поле завершено. Минимум {0}, через {1}.",zh:"本局结束。最小值为 {0}，路径 {1}。",va:"S'ha acabat esta pantalla. El mínim és {0}, per {1}.",fr:"Ce plateau est terminé. Le minimum est {0}, par {1}."},
+  la_optima:{es:"La ruta óptima es {0}, por {1}.",en:"The optimal route is {0}, via {1}.",ru:"Оптимальный маршрут: {0}, через {1}.",zh:"最优路径为 {0}，经过 {1}。",va:"La ruta òptima és {0}, per {1}.",fr:"La route optimale est {0}, par {1}."},
+  vale:{es:"{0}–{1} vale {2}",en:"{0}–{1} is {2}",ru:"{0}–{1} равно {2}",zh:"{0}–{1} 为 {2}",va:"{0}–{1} val {2}",fr:"{0}–{1} vaut {2}"},
+  disponible:{es:"salida disponible",en:"available move",ru:"доступный ход",zh:"可走",va:"eixida disponible",fr:"coup possible"},
+  recorrida:{es:"ya recorrida",en:"already used",ru:"уже пройдено",zh:"已走过",va:"ja recorreguda",fr:"déjà empruntée"},
+  intentos:{es:"{0} intentos · {1} rutas distintas",en:"{0} attempts · {1} different routes",ru:"{0} попыток · {1} разных маршрутов",zh:"{0} 次尝试 · {1} 条不同路径",va:"{0} intents · {1} rutes distintes",fr:"{0} essais · {1} routes différentes"},
+  tus_rutas:{es:"Tus rutas en esta pantalla",en:"Your routes on this board",ru:"Ваши маршруты на этом поле",zh:"本局你的路径",va:"Les teues rutes en esta pantalla",fr:"Tes routes sur ce plateau"},
+  no_omega:{es:"Todavía no has llegado a Ω.",en:"You have not reached Ω yet.",ru:"Вы ещё не дошли до Ω.",zh:"你还没有到达 Ω。",va:"Encara no has arribat a Ω.",fr:"Tu n'as pas encore atteint Ω."},
+  compartir:{es:"Compartir resultado",en:"Share result",ru:"Поделиться результатом",zh:"分享结果",va:"Compartir resultat",fr:"Partager le résultat"},
+  copiado:{es:"Resultado copiado",en:"Result copied",ru:"Результат скопирован",zh:"结果已复制",va:"Resultat copiat",fr:"Résultat copié"},
+  no_copiado:{es:"No se pudo copiar",en:"Could not copy",ru:"Не удалось скопировать",zh:"复制失败",va:"No s'ha pogut copiar",fr:"Copie impossible"},
+  nivel_ok:{es:"¡Nivel completado!",en:"Level complete!",ru:"Уровень пройден!",zh:"关卡完成！",va:"Nivell completat!",fr:"Niveau terminé !"},
+  nivel_res:{es:"Nivel {0} · mínimo {1} · {2} intentos",en:"Level {0} · minimum {1} · {2} attempts",ru:"Уровень {0} · минимум {1} · попыток: {2}",zh:"第 {0} 关 · 最小值 {1} · {2} 次尝试",va:"Nivell {0} · mínim {1} · {2} intents",fr:"Niveau {0} · minimum {1} · {2} essais"},
+  sig_nivel:{es:"Siguiente nivel ›",en:"Next level ›",ru:"Следующий уровень ›",zh:"下一关 ›",va:"Nivell següent ›",fr:"Niveau suivant ›"},
+  ver_dec:{es:"Ver decimales",en:"Show decimals",ru:"Показать десятичные",zh:"显示小数",va:"Veure decimals",fr:"Voir décimaux"},
+  ver_frac:{es:"Ver fracciones",en:"Show fractions",ru:"Показать дроби",zh:"显示分数",va:"Veure fraccions",fr:"Voir fractions"},
+  ocultar:{es:"Ocultar",en:"Hide",ru:"Скрыть",zh:"隐藏",va:"Amagar",fr:"Masquer"},
+  deshacer:{es:"Deshacer",en:"Undo",ru:"Отменить",zh:"撤销",va:"Desfer",fr:"Annuler"},
+  nueva_ruta:{es:"Nueva ruta",en:"New route",ru:"Новый маршрут",zh:"重新开始",va:"Nova ruta",fr:"Nouvelle route"},
+  siguiente:{es:"Siguiente",en:"Next",ru:"Далее",zh:"下一关",va:"Següent",fr:"Suivant"},
+  zoom:{es:"Zoom {0}",en:"Zoom {0}",ru:"Масштаб {0}",zh:"缩放 {0}",va:"Zoom {0}",fr:"Zoom {0}"},
+  rendirse:{es:"Rendirse",en:"Give up",ru:"Сдаться",zh:"放弃",va:"Rendir-se",fr:"Abandonner"},
+  optimo:{es:"Ver el óptimo",en:"Show best",ru:"Показать лучший",zh:"查看最优",va:"Veure l'òptim",fr:"Voir la meilleure"},
+  puntos:{es:"puntos",en:"points",ru:"точек",zh:"个点",va:"punts",fr:"points"},
+  rutas:{es:"rutas",en:"routes",ru:"маршрутов",zh:"条路径",va:"rutes",fr:"routes"},
+  denoms:{es:"denominadores {0}",en:"denominators {0}",ru:"знаменатели {0}",zh:"分母 {0}",va:"denominadors {0}",fr:"dénominateurs {0}"},
+  dec_lbl:{es:"decimales",en:"decimals",ru:"десятичные",zh:"小数",va:"decimals",fr:"décimaux"},
+  resuelta:{es:"resuelta ✓",en:"solved ✓",ru:"решено ✓",zh:"已完成 ✓",va:"resolta ✓",fr:"résolu ✓"},
+  nivel_n:{es:"Nivel {0}",en:"Level {0}",ru:"Уровень {0}",zh:"第 {0} 关",va:"Nivell {0}",fr:"Niveau {0}"},
+  reto_del:{es:"Reto del {0}",en:"Challenge of {0}",ru:"Задание за {0}",zh:"{0} 的挑战",va:"Repte del {0}",fr:"Défi du {0}"},
+  ley_ok:{es:"resuelto",en:"solved",ru:"решено",zh:"已完成",va:"resolt",fr:"résolu"},
+  ley_rend:{es:"te rendiste",en:"gave up",ru:"сдались",zh:"已放弃",va:"et vas rendir",fr:"abandonné"},
+  ley_pend:{es:"pendiente",en:"pending",ru:"не начато",zh:"未完成",va:"pendent",fr:"à faire"},
+  comp_reto:{es:"minimal route · reto del {0}",en:"minimal route · challenge of {0}",ru:"minimal route · задание за {0}",zh:"minimal route · {0} 的挑战",va:"minimal route · repte del {0}",fr:"minimal route · défi du {0}"},
+  comp_nivel:{es:"minimal route · nivel {0} ({1})",en:"minimal route · level {0} ({1})",ru:"minimal route · уровень {0} ({1})",zh:"minimal route · 第 {0} 关（{1}）",va:"minimal route · nivell {0} ({1})",fr:"minimal route · niveau {0} ({1})"},
+  comp_int:{es:"{0} intentos",en:"{0} attempts",ru:"попыток: {0}",zh:"{0} 次尝试",va:"{0} intents",fr:"{0} essais"},
+  comp_rend:{es:"{0} intentos · me rendí",en:"{0} attempts · gave up",ru:"попыток: {0} · сдался",zh:"{0} 次尝试 · 已放弃",va:"{0} intents · em vaig rendir",fr:"{0} essais · abandon"},
+  comp_racha:{es:"racha {0}",en:"streak {0}",ru:"серия {0}",zh:"连续 {0} 天",va:"ratxa {0}",fr:"série {0}"},
+  nivel_max:{es:"Nivel máximo",en:"Best level",ru:"Макс. уровень",zh:"最高关卡",va:"Nivell màxim",fr:"Niveau max"},
+  dif0:{es:"Fácil",en:"Easy",ru:"Лёгкий",zh:"简单",va:"Fàcil",fr:"Facile"},
+  dif1:{es:"Normal",en:"Normal",ru:"Средний",zh:"普通",va:"Normal",fr:"Normal"},
+  dif2:{es:"Difícil",en:"Hard",ru:"Сложный",zh:"困难",va:"Difícil",fr:"Difficile"}
+};
+const LOC={"es": "es-ES", "en": "en-US", "ru": "ru-RU", "zh": "zh-CN", "va": "ca-ES", "fr": "fr-FR"};
+const DOW={"es": ["L", "M", "X", "J", "V", "S", "D"], "en": ["M", "T", "W", "T", "F", "S", "S"], "ru": ["П", "В", "С", "Ч", "П", "С", "В"], "zh": ["一", "二", "三", "四", "五", "六", "日"], "va": ["L", "M", "C", "J", "V", "S", "G"], "fr": ["L", "M", "M", "J", "V", "S", "D"]};
+
+const IDIOMAS=['es','en','ru','zh','va','fr'];
+const NOMBRE={es:'Español',en:'English',ru:'Русский',zh:'中文',va:'Valencià',fr:'Français'};
+let lang='es';
+function detectaIdioma(){
+  try{
+    const n=(navigator.languages&&navigator.languages[0]||navigator.language||'es').toLowerCase();
+    if(n.startsWith('ca')||n.startsWith('va')) return 'va';
+    for(const c of IDIOMAS) if(n.startsWith(c)) return c;
+    if(n.startsWith('zh')) return 'zh';
+  }catch(e){}
+  return 'es';
+}
+function t(k,...a){
+  const fila=T[k]; let x=fila?(fila[lang]||fila.es):k;
+  a.forEach((v,i)=>{x=x.split('{'+i+'}').join(v);});
+  return x;
+}
+const sepDecimal=()=>(1.1).toLocaleString(LOC[lang]).charAt(1);
+
+/* ===== aritmética exacta: todo son enteros, en las dos modalidades ===== */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t;}return a||1;};
+const fr=(n,d)=>{const g=gcd(n,d);return{n:n/g,d:d/g};};
+const mul=(x,y)=>fr(x.n*y.n,x.d*y.d);
+const cmp=(x,y)=>x.n*y.d-y.n*x.d;
+const val=x=>x.n/x.d;
+const kf=x=>x.n+'/'+x.d;
+const UNO={n:1,d:1};
+
+const fracStr=f=>f.d===1?String(f.n):f.n+'/'+f.d;
+const num=n=>n.toLocaleString(LOC[lang]);
+function decStr(f){
+  let d=f.d,k2=0,k5=0;
+  while(d%2===0){d/=2;k2++;}
+  while(d%5===0){d/=5;k5++;}
+  if(d!==1) return (f.n/f.d).toFixed(6).replace('.',sepDecimal());
+  const k=Math.max(k2,k5);
+  if(k===0) return String(f.n);
+  const s=String(f.n*(Math.pow(10,k)/f.d)).padStart(k+1,'0');
+  return s.slice(0,s.length-k)+sepDecimal()+s.slice(s.length-k);
+}
+const decimales=f=>{let d=f.d,k2=0,k5=0;while(d%2===0){d/=2;k2++;}while(d%5===0){d/=5;k5++;}
+  return d===1?Math.max(k2,k5):99;};
+let modo=1;                                  /* 0 = fracciones, 1 = decimales */
+const show=f=>modo?decStr(f):fracStr(f);
+
+/* ===== azar reproducible ===== */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const pick=(r,a)=>a[Math.floor(r()*a.length)];
+const shuffle=(r,a)=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const dist=(p,q)=>Math.hypot(p[0]-q[0],p[1]-q[1]);
+const pairs=E=>[...E].map(s=>s.split('|'));
+const key=(a,b)=>[a,b].sort().join('|');
+const LET=['B','C','D','E','F','G','H','J','K','L','M','N'];
+
+/* ===== dificultades: cada una con su repertorio en cada modalidad ===== */
+const DIFF=[
+  {name:'Fácil', size:[5,6], paths:[6,30], trap:false, minEdges:3,
+   frac:{dens:[2,3,4,5],      nd:1, ints:[2,3,4,5], impropias:false, maxDen:100},
+   dec :{dens:[2,5,10],       nd:1, ints:[2,3,4,5], impropias:false, maxDen:10000}},
+  {name:'Normal', size:[6,8], paths:[12,90], trap:true, minEdges:3,
+   frac:{dens:[2,3,4,5],      nd:2, ints:[2,3,4,5], impropias:false, maxDen:240},
+   dec :{dens:[2,4,5,10],     nd:2, ints:[2,3,4,5], impropias:false, maxDen:100000}},
+  {name:'Difícil', size:[8,10], paths:[24,400], trap:true, minEdges:4,
+   frac:{dens:[2,3,4,5,6,8,9],nd:2, ints:[2,3,4,5,6], impropias:true, maxDen:600},
+   dec :{dens:[2,4,5,10,20],  nd:2, ints:[2,3,4,5,6], impropias:true, maxDen:100000}}
+];
+const cfgDe=(d,m)=>m?d.dec:d.frac;
+/* campaña: la dificultad sube sola con el número de nivel */
+const difDeNivel=n=>n<=20?0:(n<=60?1:2);
+
+function pools(r,c){
+  const ds=shuffle(r,c.dens).slice(0,c.nd);
+  const small=[], large=[];
+  ds.forEach(x=>{
+    for(let k=1;k<x;k++) if(gcd(k,x)===1) small.push(fr(k,x));
+    if(c.impropias) for(let k=x+1;k<2*x;k++) if(gcd(k,x)===1) large.push(fr(k,x));
+  });
+  c.ints.forEach(i=>large.push(fr(i,1)));
+  return {small,large,ds};
+}
+
+/* ===== familias de tablero ===== */
+function famRing(r,n){
+  let inner = n>=8 ? (r()<0.7?2:1) : n>=6 ? (r()<0.5?1:(r()<0.5?2:0)) : (r()<0.55?1:0);
+  let k=n-inner; if(k<4){inner=0;k=n;}
+  const rot=r()*Math.PI*2, RA=128+r()*22;
+  const ai=2+Math.floor(r()*Math.max(1,k-3));
+  const ring=[],pos={},nodes=[]; let li=0;
+  for(let i=0;i<k;i++){
+    const nm = i===0?'Ω' : i===ai?'α' : LET[li++];
+    ring.push(nm); nodes.push(nm);
+    const ang=rot+i*2*Math.PI/k;
+    pos[nm]=[200+RA*Math.cos(ang),200+RA*Math.sin(ang)];
+  }
+  const E=new Set(), add=(a,b)=>{if(a&&b&&a!==b)E.add(key(a,b));};
+  for(let i=0;i<k;i++) add(ring[i],ring[(i+1)%k]);
+  const drops = k>=6?Math.floor(r()*3) : k>=5?Math.floor(r()*2) : 0;
+  for(let t=0;t<drops;t++){const j=Math.floor(r()*k);E.delete(key(ring[j],ring[(j+1)%k]));}
+  const chords=(inner?0:1)+Math.floor(r()*3);
+  for(let c=0;c<chords;c++){
+    const i=Math.floor(r()*k), j=Math.floor(r()*k), dd=Math.abs(i-j);
+    if(dd<2||dd>k-2) continue;
+    add(ring[i],ring[j]);
+  }
+  const inn=[];
+  for(let t=0;t<inner;t++){
+    const nm=LET[li++]; inn.push(nm); nodes.push(nm);
+    const ang=r()*Math.PI*2+t*Math.PI, rad = inner===1 ? r()*30 : 40+r()*20;
+    pos[nm]=[200+rad*Math.cos(ang),200+rad*Math.sin(ang)];
+    const cerca=[...ring].sort((x,y)=>dist(pos[nm],pos[x])-dist(pos[nm],pos[y]));
+    const want=2+Math.floor(r()*3);
+    shuffle(r,cerca.slice(0,Math.min(cerca.length,want+2))).slice(0,want).forEach(x=>add(nm,x));
+  }
+  if(inner===2) add(inn[0],inn[1]);
+  return {pos,nodes,edges:pairs(E),fam:'anillo'};
+}
+
+function famLayer(r,n){
+  const resto=n-2;
+  let mid=2+Math.floor(r()*2);
+  mid=Math.max(mid,Math.ceil(resto/3)); mid=Math.min(mid,resto);
+  const tam=[]; let libre=resto;
+  for(let i=0;i<mid;i++){
+    const quedan=mid-i-1, max=Math.min(3,libre-quedan), min=Math.max(1,libre-3*quedan);
+    tam.push(min+Math.floor(r()*(max-min+1))); libre-=tam[i];
+  }
+  const cols=[['α'],...tam.map(()=>[]),['Ω']]; let li=0;
+  tam.forEach((t,ci)=>{for(let j=0;j<t;j++) cols[ci+1].push(LET[li++]);});
+  const C=cols.length, pos={}, nodes=[];
+  cols.forEach((col,ci)=>{
+    const x=54+ci*(292/(C-1)), m=col.length;
+    col.forEach((nm,j)=>{pos[nm]=[x,200+(j-(m-1)/2)*(m>2?118:132)];nodes.push(nm);});
+  });
+  const E=new Set(), add=(a,b)=>{if(a&&b&&a!==b)E.add(key(a,b));};
+  for(let ci=0;ci<C-1;ci++){
+    const A=cols[ci], Bc=cols[ci+1];
+    A.forEach(a=>add(a,pick(r,Bc)));
+    Bc.forEach(b=>add(pick(r,A),b));
+    A.forEach(a=>Bc.forEach(b=>{if(r()<0.35) add(a,b);}));
+  }
+  if(cols[1].length>1)   add('α',pick(r,cols[1]));
+  if(cols[C-2].length>1) add('Ω',pick(r,cols[C-2]));
+  for(let ci=0;ci<C-2;ci++) if(r()<0.45) add(pick(r,cols[ci]),pick(r,cols[ci+2]));
+  cols.forEach(col=>{if(col.length>1&&r()<0.4){const s=shuffle(r,col);add(s[0],s[1]);}});
+  return {pos,nodes,edges:pairs(E),fam:'capas'};
+}
+
+function famGrid(r,n){
+  const op=[[2,3],[2,4],[2,5],[3,3],[3,4]].filter(([R,C])=>R*C>=n&&R*C-n<=2);
+  const [R,C]= op.length? op[Math.floor(r()*op.length)] : [3,4];
+  const cells=[]; for(let y=0;y<R;y++) for(let x=0;x<C;x++) cells.push([x,y]);
+  const esq=[[0,R-1],[C-1,0]];
+  const quit=shuffle(r,cells.filter(c=>!esq.some(k=>k[0]===c[0]&&k[1]===c[1])));
+  const fuera=new Set(quit.slice(0,R*C-n).map(c=>c.join(',')));
+  const name={}, pos={}, nodes=[]; let li=0;
+  cells.forEach(([x,y])=>{
+    if(fuera.has(x+','+y)) return;
+    const nm = (x===0&&y===R-1)?'α' : (x===C-1&&y===0)?'Ω' : LET[li++];
+    name[x+','+y]=nm; nodes.push(nm);
+    pos[nm]=[C>1?64+x*(272/(C-1)):200, R>1?72+y*(256/(R-1)):200];
+  });
+  const E=new Set(), add=(a,b)=>{if(a&&b&&a!==b)E.add(key(a,b));};
+  cells.forEach(([x,y])=>{
+    const a=name[x+','+y]; if(!a) return;
+    add(a,name[(x+1)+','+y]); add(a,name[x+','+(y+1)]);
+  });
+  if(r()<0.55){const [x,y]=shuffle(r,cells)[0];add(name[x+','+y],name[(x+1)+','+(y+1)]);}
+  const arr=[...E], q=Math.floor(r()*3);
+  for(let i=0;i<q;i++) E.delete(arr[Math.floor(r()*arr.length)]);
+  return {pos,nodes,edges:pairs(E),fam:'rejilla'};
+}
+const FAMS=[famRing,famLayer,famGrid];
+
+function candidate(r,d,fi,m){
+  const [lo,hi]=d.size, n=lo+Math.floor(r()*(hi-lo+1));
+  const b=FAMS[fi](r,n);
+  const P=pools(r,cfgDe(d,m));
+  b.repertorio=P.ds;
+  b.edges=b.edges.map(([a,c])=>[a,c, r()<0.42?pick(r,P.small):pick(r,P.large)]);
+  return b;
+}
+
+/* ===== resolver y validar ===== */
+function analyse(b){
+  const adj={}, w={};
+  b.nodes.forEach(n=>adj[n]=[]);
+  for(const [a,c,x] of b.edges){adj[a].push(c);adj[c].push(a);w[key(a,c)]=x;}
+  const all=[]; let over=false;
+  (function walk(cur,seen,prod,path){
+    if(over) return;
+    if(all.length>1200){over=true;return;}
+    if(cur==='Ω'){all.push({path:[...path],prod});return;}
+    for(const nb of adj[cur]){ if(seen.has(nb)) continue;
+      seen.add(nb); walk(nb,seen,mul(prod,w[key(cur,nb)]),[...path,nb]); seen.delete(nb);}
+  })('α',new Set(['α']),UNO,['α']);
+  if(over||!all.length) return null;
+
+  const sorted=[...all].sort((x,y)=>cmp(x.prod,y.prod));
+  const min=sorted[0].prod, ties=all.filter(p=>kf(p.prod)===kf(min));
+  const hops=Math.min(...all.map(p=>p.path.length));
+  const cortas=all.filter(p=>p.path.length===hops);
+  let cur='α', seen=new Set(['α']), greedy=['α'];
+  while(cur!=='Ω'){
+    const opts=adj[cur].filter(x=>!seen.has(x));
+    if(!opts.length) break;
+    let best=opts[0];
+    for(const o of opts) if(cmp(w[key(cur,o)],w[key(cur,best)])<0) best=o;
+    cur=best; seen.add(cur); greedy.push(cur);
+  }
+  return {adj,w,all,min,ties,cortas,greedy:greedy.join('–'),minPath:sorted[0].path};
+}
+
+function valid(b,a,d,relax,m){
+  if(!a) return false;
+  if(b.nodes.some(n=>a.adj[n].length<2)) return false;
+  const [plo,phi]=d.paths;
+  if(a.all.length<(relax?4:plo) || a.all.length>phi) return false;
+  if(a.ties.length>1) return false;
+  if(a.minPath.length<(relax?3:d.minEdges+1)) return false;
+  if(!relax && a.cortas.length===1 && a.cortas[0].path.join()===a.minPath.join()) return false;
+  if(d.trap && !relax && a.minPath.join('–')===a.greedy) return false;
+  if(a.min.d>cfgDe(d,m).maxDen) return false;
+  if(val(a.min)<0.0008 || val(a.min)>=1) return false;      /* el mínimo siempre por debajo de 1 */
+  if(Math.max(...a.all.map(p=>val(p.prod)))>20000) return false;
+  if(m && a.all.some(p=>decimales(p.prod)>4)) return false;   /* decimales cortos, comprobables a mano */
+  return true;
+}
+
+/* distancia de un punto a un segmento: sirve para detectar nodos pegados a una arista ajena */
+function distSeg(p,a,b){
+  const vx=b[0]-a[0], vy=b[1]-a[1], wx=p[0]-a[0], wy=p[1]-a[1];
+  const L2=vx*vx+vy*vy || 1;
+  let s=(wx*vx+wy*vy)/L2; s=Math.max(0,Math.min(1,s));
+  return Math.hypot(p[0]-(a[0]+s*vx), p[1]-(a[1]+s*vy));
+}
+/* un nodo que cae sobre una arista a la que no pertenece parece conectado y engaña */
+function despejado(t){
+  for(const n of t.nodes){
+    for(const [a,b] of t.edges){
+      if(n===a||n===b) continue;
+      if(distSeg(t.pos[n],t.pos[a],t.pos[b]) < 30) return false;
+    }
+  }
+  return true;
+}
+
+/* un tablero válido que no se pueda rotular con claridad se descarta */
+function rotulable(t,tope){
+  const L=placeLabels(t);
+  return L.every(l=>l&&l.choque<=(tope||2));
+}
+
+function makeBoard(level,di,m){
+  const d=DIFF[di];
+  const fi=Math.floor(mulberry32((level*2654435761+di*40503+m*7717)>>>0)()*3);
+  for(let round=0;round<3;round++){
+    const relax=round>0;
+    const orden = round<2 ? [fi] : [fi,(fi+1)%3,(fi+2)%3];
+    for(const f of orden){
+      const r=mulberry32((level*7919+di*104729+m*31337+round*13+f*31)>>>0);
+      for(let t=0;t<250;t++){
+        const b=candidate(r,d,f,m), a=analyse(b);
+        if(!valid(b,a,d,relax,m)) continue;
+        const t={...b,...a};
+        if(!despejado(t)) continue;
+        if(rotulable(t,relax?6:2)) return t;
+      }
+    }
+  }
+  return makeBoard(level+1,di,m);
+}
+
+/* ===== sonido y vibración =====
+   Todo se sintetiza al vuelo: ni un archivo de audio. El tono de cada paso sale del
+   producto acumulado, comprimido logarítmicamente, así que cuanto más pequeño es el
+   producto más grave suena. La ruta mínima es la más grave de todas. */
+let sonido=true, vibra=true, AC=null;
+function audio(){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+  }catch(e){AC=null;}
+  return AC;
+}
+function tono(f,dur,tipo,vol,retardo){
+  if(!sonido) return;
+  const ac=audio(); if(!ac) return;
+  const t0=ac.currentTime+(retardo||0);
+  const o=ac.createOscillator(), g=ac.createGain();
+  o.type=tipo||'triangle';
+  o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.linearRampToValueAtTime(vol||0.16,t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+(dur||0.13));
+  o.connect(g); g.connect(ac.destination);
+  o.start(t0); o.stop(t0+(dur||0.13)+0.03);
+}
+const hz=f=>Math.max(90,Math.min(2000,660*Math.pow(Math.max(val(f),1e-6),0.35)));
+function vibrar(p){ if(vibra&&navigator.vibrate){ try{navigator.vibrate(p);}catch(e){} } }
+
+const sonPaso   =prod=>{tono(hz(prod),0.13,'triangle',0.15); vibrar(12);};
+const sonMeta   =prod=>{const f=hz(prod);tono(f,0.12,'triangle',0.15);tono(f*0.75,0.2,'triangle',0.13,0.12);vibrar(28);};
+const sonVictoria=prod=>{const f=hz(prod);
+  [1,1.25,1.5,2].forEach((k,i)=>tono(f*k,0.22,'sine',0.15,i*0.11));
+  vibrar([0,30,60,30,60,150]);};
+const sonBloqueo=()=>{tono(150,0.1,'sawtooth',0.1);tono(110,0.22,'sawtooth',0.1,0.09);vibrar([20,60,20]);};
+const sonAtras  =()=>{tono(320,0.08,'sine',0.1);vibrar(8);};
+const sonPantalla=()=>{tono(520,0.07,'sine',0.09);};
+const sonRendir =prod=>{const f=hz(prod);
+  [1.6,1.2,1].forEach((k,i)=>tono(f*k,0.26,'sine',0.12,i*0.13));
+  vibrar([0,20,50,20]);};
+
+/* ===== reto diario y difusión ===== */
+const ORIGEN=new Date(2026,0,1);
+const hoyFecha=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const diaNum=f=>Math.round((f-ORIGEN)/86400000);
+const fechaDeN=n=>{const d=new Date(ORIGEN);d.setDate(d.getDate()+n);return d;};
+const retoDe=n=>({level:10000+n, di:1, modo:((n%2)+2)%2, n});
+const retoDeHoy=()=>retoDe(diaNum(hoyFecha()));
+const nDeNivel=()=>level-10000;
+/* ¿esta pantalla es el reto de algún día? */
+const esReto=()=>{const n=nDeNivel(); if(n<0) return false; const r=retoDe(n); return r.di===di&&r.modo===modo;};
+const esDiario=()=>esReto()&&nDeNivel()===diaNum(hoyFecha());
+const claveReto=n=>{const r=retoDe(n);return r.modo+':'+r.di+':'+r.level;};
+const fechaCorta=n=>fechaDeN(n===undefined?diaNum(hoyFecha()):n)
+  .toLocaleDateString(LOC[lang],{day:'2-digit',month:'2-digit',year:'numeric'});
+
+/* un cuadro por intento: verde el óptimo, y más frío cuanto peor fue */
+function cuadro(puesto,total){
+  if(puesto===1) return '🟩';
+  if(puesto<=3) return '🟨';
+  if(puesto<=Math.ceil(total/3)) return '🟧';
+  return '🟥';
+}
+function textoResultado(){
+  const diario=esDiario();
+  const cabecera = esReto() ? t('comp_reto',fechaCorta(nDeNivel()))
+                            : t('comp_nivel',level,t('dif'+di));
+  const rejilla = intentos.map(p=>cuadro(p,B.all.length)).join('') + (revealed?'🏳️':'');
+  const linea = revealed ? t('comp_rend',intentos.length)
+    : t('comp_int',intentos.length)+(diario&&racha>1?' · '+t('comp_racha',racha):'');
+  return `${cabecera}\n${rejilla}\n${linea}\n${enlace()}`;
+}
+function enlace(){
+  const base=location.origin+location.pathname.replace(/index\.html$/,'');
+  if(esDiario()) return base+'?dia';
+  if(esReto())   return `${base}?reto=${nDeNivel()}`;
+  return `${base}?n=${level}&d=${di}&m=${modo}`;
+}
+function avisar(t){
+  const el=document.getElementById('toast');
+  el.textContent=t; el.hidden=false;
+  clearTimeout(avisar._t); avisar._t=setTimeout(()=>{el.hidden=true;},2200);
+}
+async function compartir(){
+  const txt=textoResultado();
+  try{ if(navigator.share){ await navigator.share({text:txt}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(txt); avisar(t('copiado')); return; }catch(e){}
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); avisar(t('copiado'));
+  }catch(e){ avisar(t('no_copiado')); }
+}
+function guardarURL(){
+  try{ history.replaceState(null,'',enlace()); }catch(e){}
+}
+function leerURL(){
+  try{
+    const q=new URLSearchParams(location.search);
+    if(q.has('dia')){ const r=retoDeHoy(); level=r.level; di=r.di; modo=r.modo; return true; }
+    const t=parseInt(q.get('reto'),10);
+    if(!isNaN(t)&&t>=0&&t<=diaNum(hoyFecha())){ const r=retoDe(t); level=r.level; di=r.di; modo=r.modo; return true; }
+    const n=parseInt(q.get('n'),10), d=parseInt(q.get('d'),10), m=parseInt(q.get('m'),10);
+    if(!isNaN(n)&&n>0){ level=Math.min(n,99999); if([0,1,2].includes(d)) di=d; if([0,1].includes(m)) modo=m; return true; }
+  }catch(e){}
+  return false;
+}
+
+/* ===== estado ===== */
+let zi=0, inspect=null; const ZOOMS=[1,1.7,2.4];
+let vistaPrevia='inicio', mejorRacha=0, diLibre=1, modoLibre=1;
+let level=1, di=1, B=null, path=['α'], ws=[], tries=0, found=new Map(), intentos=[], racha=0, ultimoDia=null, nivelLibre=1, vista='inicio', rendidas=new Set(),
+    solved=false, revealed=false, wins=0, hechas=new Set(), verEquiv=false;
+
+function st(){
+  const cur=path[path.length-1], fin=cur==='Ω';
+  const open=fin?[]:B.adj[cur].filter(n=>!path.includes(n));
+  return {cur,fin,open,prod:ws.reduce((a,b)=>mul(a,b),UNO)};
+}
+
+/* ===== dibujo ===== */
+/* Los rótulos se colocan buscando un hueco: se prueban varios puntos a lo largo de la
+   arista y desplazamientos perpendiculares, y se elige el que menos se solape con los
+   nodos y con los rótulos ya colocados. */
+const overCircle=(cx,cy,w,h,c)=>{
+  const px=Math.max(cx-w/2,Math.min(c.x,cx+w/2)), py=Math.max(cy-h/2,Math.min(c.y,cy+h/2));
+  const d=Math.hypot(c.x-px,c.y-py);
+  return d<c.r ? c.r-d : 0;
+};
+const overRect=(cx,cy,w,h,p)=>{
+  const ox=Math.min(cx+w/2,p.cx+p.w/2)-Math.max(cx-w/2,p.cx-p.w/2);
+  const oy=Math.min(cy+h/2,p.cy+p.h/2)-Math.max(cy-h/2,p.cy-p.h/2);
+  return ox>0&&oy>0 ? Math.min(ox,oy) : 0;
+};
+const TS=[0.5,0.46,0.54,0.42,0.58,0.38,0.62,0.34,0.66,0.3,0.7,0.25,0.75,0.2,0.8];
+const OFF=[0,10,-10,18,-18,26,-26,34,-34];
+const TAM=[{f:15,kw:9,kh:26},{f:12.5,kw:7.5,kh:21}];   /* segundo tamaño para huecos difíciles */
+
+function mejorHueco(T0,i,circles,placed){
+  const [a,b,f]=T0.edges[i];
+  const [x1,y1]=T0.pos[a],[x2,y2]=T0.pos[b];
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, nx=-dy/L, ny=dx/L;
+  const tx=show(f);
+  let best=null;
+  for(const T of TAM){
+    const w=tx.length*T.kw+14, h=T.kh;
+    for(const t of TS) for(const off of OFF){
+      const ax=x1+dx*t, ay=y1+dy*t, cx=ax+nx*off, cy=ay+ny*off;
+      if(cx-w/2<3||cx+w/2>397||cy-h/2<3||cy+h/2>397) continue;
+      let choque=0;
+      for(const c of circles) choque+=3*overCircle(cx,cy,w,h,c);
+      for(const p of placed) if(p) choque+=overRect(cx,cy,w,h,p);
+      const pen=choque+Math.abs(off)*0.03+Math.abs(t-0.5)*0.8+(T.f<15?1.2:0);
+      if(!best||pen<best.pen) best={cx,cy,ax,ay,w,h,pen,choque,fs:T.f,tx,k:key(a,b)};
+      if(choque===0) return best;
+    }
+    if(best&&best.choque<=1) break;   /* el tamaño grande ya sirve: no lo encogemos */
+  }
+  return best;
+}
+
+function placeLabels(T0){
+  T0=T0||B;
+  const circles=T0.nodes.map(n=>({x:T0.pos[n][0],y:T0.pos[n][1],r:24}));
+  const largo=e=>dist(T0.pos[e[0]],T0.pos[e[1]]);
+  const orden=T0.edges.map((e,i)=>i).sort((a,b)=>largo(T0.edges[a])-largo(T0.edges[b]));
+  const out=[];
+  for(const i of orden) out[i]=mejorHueco(T0,i,circles,out);
+  /* segunda pasada: cada rótulo se recoloca viendo ya dónde están todos los demás */
+  for(let v=0;v<2;v++) for(const i of orden){
+    const resto=out.map((p,j)=>j===i?null:p);
+    const mejor=mejorHueco(T0,i,circles,resto);
+    if(mejor&&mejor.pen<out[i].pen) out[i]=mejor;
+  }
+  return out;
+}
+
+function draw(){
+  const {cur,open}=st();
+  const walked=new Set(); for(let i=0;i<path.length-1;i++) walked.add(key(path[i],path[i+1]));
+  let s='';
+  for(const [a,b] of B.edges){
+    const k=key(a,b),[x1,y1]=B.pos[a],[x2,y2]=B.pos[b];
+    const cls=walked.has(k)?'walked':((a===cur&&open.includes(b))||(b===cur&&open.includes(a))?'open':'');
+    s+=`<line class="edge ${k===inspect?'sel':cls}" data-k="${k}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+  }
+  /* zonas de toque anchas e invisibles: una línea de 1,6 px no se acierta con el dedo */
+  for(const [a,b] of B.edges){
+    const [x1,y1]=B.pos[a],[x2,y2]=B.pos[b];
+    s+=`<line class="hit" data-e="${key(a,b)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+  }
+  const [gx,gy]=B.pos[cur];
+  s+=`<circle class="glow" cx="${gx}" cy="${gy}" r="34" opacity=".10"/>`
+   + `<circle class="glow" cx="${gx}" cy="${gy}" r="27" opacity=".16"/>`;
+  for(const n of B.nodes){
+    const [x,y]=B.pos[n];
+    let cls = n===cur?'cur' : path.includes(n)?'visited' : open.includes(n)?'open':'off';
+    if(n==='Ω'){ cls+=' omega'+(path.includes('Ω')?'':' esperando'); }
+    const tap = cls.startsWith('open')||cls.includes(' open')?` tabindex="0" role="button" aria-label="Ir a ${n}"`:'';
+    s+=`<g class="n ${cls}" data-n="${n}"${tap}><circle cx="${x}" cy="${y}" r="20"/><text x="${x}" y="${y+1}">${n}</text></g>`;
+  }
+  /* Los rótulos van los últimos y se clasifican por relevancia: en violeta los de las
+     salidas disponibles desde donde estás, en magenta los ya recorridos y apagados los
+     demás. Si el rótulo tuvo que apartarse de su arista, una línea guía lo ata a ella. */
+  const vivas=new Set(open.map(n=>key(cur,n)));
+  for(const L of placeLabels()){
+    const cls = L.k===inspect ? 'sel' : walked.has(L.k) ? 'on' : vivas.has(L.k) ? 'live' : 'dim';
+    const dx=L.ax-L.cx, dy=L.ay-L.cy;
+    const kx=dx?(L.w/2)/Math.abs(dx):1e9, ky=dy?(L.h/2)/Math.abs(dy):1e9;
+    const kk=Math.min(kx,ky,1), bx=L.cx+dx*kk, by=L.cy+dy*kk;
+    if(Math.hypot(L.ax-bx,L.ay-by)>3||cls==='sel')
+      s+=`<line class="lead ${cls}" data-k="${L.k}" x1="${bx}" y1="${by}" x2="${L.ax}" y2="${L.ay}"/>`;
+    s+=`<rect class="wbg ${cls}" data-e="${L.k}" x="${L.cx-L.w/2}" y="${L.cy-L.h/2}" width="${L.w}" height="${L.h}" rx="5"/>`
+     + `<text class="wt ${cls}" data-k="${L.k}" data-e="${L.k}" x="${L.cx}" y="${L.cy+1}" style="font-size:${L.fs}px">${L.tx}</text>`;
+  }
+  const g=document.getElementById('g');
+  const z=ZOOMS[zi], vw=400/z, vh=400/z;
+  const [fx,fy] = z===1 ? [200,200] : B.pos[cur];
+  const vx=Math.max(0,Math.min(400-vw,fx-vw/2)), vy=Math.max(0,Math.min(400-vh,fy-vh/2));
+  g.setAttribute('viewBox',`${vx} ${vy} ${vw} ${vh}`);
+  g.innerHTML=s;
+}
+
+function walkedAhora(){
+  const w=new Set(); for(let i=0;i<path.length-1;i++) w.add(key(path[i],path[i+1])); return w;
+}
+
+const setLbl=(id,t)=>{const e=document.getElementById(id).querySelector('.lbl'); if(e) e.textContent=t;};
+
+function board(){
+  const {cur,fin,open,prod}=st();
+  document.getElementById('expr').innerHTML=
+    path.map((n,i)=>i?`<span class="num"> ×${show(ws[i-1])}× </span>${n}`:n).join('');
+  const big=document.getElementById('big');
+  const otro = modo? fracStr(prod) : decStr(prod);
+  big.innerHTML = show(prod) + (verEquiv&&prod.d!==1?`<span class="dec">= ${otro}</span>`:'');
+  if(!fin||cmp(prod,B.min)!==0) big.classList.remove('won');
+
+  const v=document.getElementById('verdict'); v.className='verdict';
+  if(revealed){
+    v.classList.add('stuck');
+    v.textContent=solved?t('la_optima',show(B.min),B.minPath.join('–'))
+                        :t('fin_pantalla',show(B.min),B.minPath.join('–'));
+  } else if(fin){
+    const menores=B.all.filter(p=>cmp(p.prod,prod)<0).length;
+    if(cmp(prod,B.min)===0){v.classList.add('win');
+      v.textContent=t('minimo_ok',B.all.length,show(B.min));}
+    else v.textContent=t('puesto',menores+1,B.all.length,menores);
+  } else if(!open.length){
+    v.classList.add('stuck'); v.textContent=t('sin_salida',cur);
+  } else {
+    v.textContent = path.length===1?t('elige_1'):t('desde',cur,open.join(', '));
+  }
+  document.getElementById('undo').disabled=revealed||path.length===1;
+  const give=document.getElementById('give');
+  give.disabled=revealed;
+  setLbl('give', solved?t('optimo'):t('rendirse'));
+  setLbl('again', revealed?t('siguiente'):t('nueva_ruta'));
+  setLbl('equiv', verEquiv ? t('ocultar') : (modo?t('ver_frac'):t('ver_dec')));
+  document.getElementById('sub').textContent=
+    `${esReto()?(esDiario()?t('reto_hoy'):t('reto_del',fechaCorta(nDeNivel()).slice(0,5)))
+       :t('nivel_n',level)+' · '+t('dif'+di)} · ${B.nodes.length} ${t('puntos')} · ${B.all.length} ${t('rutas')} · ${modo?t('dec_lbl'):t('denoms',B.repertorio.join(' · '))}${solved?' · '+t('resuelta'):''}${esDiario()&&racha>1?' · '+t('comp_racha',racha):''}`;
+  const sh=document.getElementById('share');
+  sh.hidden=!(solved||revealed);
+  const insp=document.getElementById('insp');
+  if(inspect){
+    let [a,b]=inspect.split('|');
+    if(b===cur||a==='Ω'||(b==='α'&&a!==cur)) [a,b]=[b,a];
+    const disponible = (a===cur&&open.includes(b))||(b===cur&&open.includes(a));
+    const recorrida = walkedAhora().has(inspect);
+    insp.textContent=t('vale',a,b,show(B.w[inspect]))
+      + (recorrida?' · '+t('recorrida'):disponible?' · '+t('disponible'):'');
+  } else insp.textContent='';
+  document.getElementById('avance-barra').style.width=
+    Math.round(100*(path.length-1)/Math.max(1,B.nodes.length-1))+'%';
+  document.getElementById('score').textContent=
+    tries?t('intentos',tries,found.size):'';
+}
+
+function list(){
+  const el=document.getElementById('found');
+  if(!found.size){el.innerHTML=`<li class="empty">${t('no_omega')}</li>`;return;}
+  el.innerHTML=[...found.entries()].sort((a,b)=>cmp(a[1],b[1]))
+    .map(([p,f],i)=>`<li class="${i===0?'best':''}"><span class="p">${p}</span><span class="v">${show(f)}</span></li>`).join('');
+}
+
+function celebrate(){
+  const svg=document.getElementById('g');
+  const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  document.getElementById('big').classList.add('won');
+  const segs=[];
+  for(let i=0;i<path.length-1;i++) segs.push([key(path[i],path[i+1]),path[i+1]]);
+  segs.forEach(([k,node],i)=>{
+    const go=()=>{
+      const ln=svg.querySelector(`.edge[data-k="${k}"]`);
+      if(ln){ln.classList.remove('walked');ln.classList.add('win');}
+      const tx=svg.querySelector(`.wt[data-k="${k}"]`);
+      if(tx){tx.classList.remove('on','dim','live');tx.classList.add('won');}
+      const ld=svg.querySelector(`.lead[data-k="${k}"]`);
+      if(ld){ld.classList.remove('on','dim','live');ld.classList.add('sol');}
+      const gn=svg.querySelector(`g.n[data-n="${node}"]`); if(gn) gn.classList.add('pop');
+      if(i===segs.length-1){
+        const [x,y]=B.pos['Ω'];
+        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('class','halo');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',20);
+        svg.appendChild(c);
+      }
+    };
+    calm?go():setTimeout(go,i*150);
+  });
+}
+
+function revelar(){
+  revealed=true;
+  if(esReto()){rendidas.add(claveReto(nDeNivel()));save();}
+  path=[...B.minPath];
+  ws=path.slice(1).map((n,i)=>B.w[key(path[i],n)]);
+  draw(); board();
+  const svg=document.getElementById('g');
+  const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  for(let i=0;i<path.length-1;i++){
+    const k=key(path[i],path[i+1]);
+    const go=()=>{
+      const ln=svg.querySelector(`.edge[data-k="${k}"]`);
+      if(ln){ln.classList.remove('walked');ln.classList.add('sol');}
+      const tx=svg.querySelector(`.wt[data-k="${k}"]`);
+      if(tx){tx.classList.remove('on','dim','live');tx.classList.add('sol');}
+      const ld=svg.querySelector(`.lead[data-k="${k}"]`);
+      if(ld){ld.classList.remove('on','dim','live');ld.classList.add('sol');}
+    };
+    calm?go():setTimeout(go,i*130);
+  }
+  sonRendir(B.min);
+}
+
+function celebrarNivel(){
+  const caja=document.getElementById('nivel-ok');
+  document.getElementById('no-sub').textContent=
+    t('nivel_res',level,show(B.min),intentos.length);
+  caja.hidden=false;
+}
+function siguienteNivel(){
+  level++; nivelLibre=level; sonPantalla(); save(); load();
+}
+
+function step(n){
+  if(revealed) return;
+  inspect=null;
+  const {cur,fin,open}=st();
+  if(fin||!open.includes(n)) return;
+  ws.push(B.w[key(cur,n)]); path.push(n);
+  let fiesta=false;
+  if(n==='Ω'){
+    tries++;
+    const prod=ws.reduce((a,b)=>mul(a,b),UNO);
+    found.set(path.join('–'),prod);
+    intentos.push(B.all.filter(p=>cmp(p.prod,prod)<0).length+1);
+    if(cmp(prod,B.min)===0){fiesta=true;
+      if(!solved){
+        solved=true; hechas.add(modo+':'+di+':'+level); wins=hechas.size;
+        if(esDiario()){
+          const hoy=diaNum(hoyFecha());
+          racha = (ultimoDia===hoy) ? racha : (ultimoDia===hoy-1 ? racha+1 : 1);
+          ultimoDia=hoy; if(racha>mejorRacha) mejorRacha=racha;
+        }
+        save();
+      }}
+    list();
+  }
+  draw();board();
+  if(fiesta&&!esReto()) celebrarNivel();
+  const tras=st();
+  if(n==='Ω'){ const prod=ws.reduce((a,b)=>mul(a,b),UNO);
+    if(fiesta) sonVictoria(prod); else sonMeta(prod); }
+  else if(!tras.open.length) sonBloqueo();
+  else sonPaso(tras.prod);
+  if(fiesta) celebrate();
+}
+
+/* ===== progreso ===== */
+const KEY='ruta-minima-v3';
+function save(){try{localStorage.setItem(KEY,JSON.stringify({level,di,modo,sonido,vibra,lang,racha,mejorRacha,ultimoDia,nivelLibre,diLibre,modoLibre,done:[...hechas].slice(-800),rend:[...rendidas].slice(-800)}));}catch(e){}}
+function restore(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY)||'{}');
+    if(Number.isInteger(s.level)&&s.level>0) level=s.level;
+    if([0,1,2].includes(s.di)) di=s.di;
+    if([0,1].includes(s.modo)) modo=s.modo;
+    if(IDIOMAS.includes(s.lang)) lang=s.lang;
+    if(typeof s.sonido==='boolean') sonido=s.sonido;
+    if(typeof s.vibra==='boolean') vibra=s.vibra;
+    if(Number.isInteger(s.nivelLibre)&&s.nivelLibre>0) nivelLibre=s.nivelLibre;
+    if([0,1,2].includes(s.diLibre)) diLibre=s.diLibre;
+    if([0,1].includes(s.modoLibre)) modoLibre=s.modoLibre;
+    if(Number.isInteger(s.racha)) racha=s.racha;
+    if(Number.isInteger(s.mejorRacha)) mejorRacha=s.mejorRacha;
+    if(Number.isInteger(s.ultimoDia)) ultimoDia=s.ultimoDia;
+    if(Array.isArray(s.done)) hechas=new Set(s.done);
+    if(Array.isArray(s.rend)) rendidas=new Set(s.rend);
+    wins=hechas.size;
+  }catch(e){}
+}
+
+function load(){
+  document.getElementById('nivel-ok').hidden=true;
+  if(!esReto()) di=difDeNivel(level);
+  B=makeBoard(level,di,modo);
+  path=['α'];ws=[];tries=0;found=new Map();intentos=[];revealed=false;verEquiv=false;inspect=null;
+  solved=hechas.has(modo+':'+di+':'+level);
+  pintarAjustes();
+  if(!esReto()){ nivelLibre=level; diLibre=di; modoLibre=modo; }
+  document.body.classList.toggle('diario',esReto());
+  guardarURL(); save(); draw(); board(); list();
+}
+
+/* ===== inicio y navegación ===== */
+function aplicarIdioma(){
+  document.documentElement.lang = lang==='va'?'ca':lang;
+  document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=t(e.dataset.i18n); });
+  document.querySelectorAll('#lang-p button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.l===lang));
+  const ej=document.querySelector('.ej-dec'); if(ej) ej.textContent='0'+sepDecimal()+'75';
+  const dow=document.getElementById('cal-dow');
+  if(dow) dow.innerHTML=DOW[lang].map(d=>`<span>${d}</span>`).join('');
+  const ley=document.getElementById('cal-ley');
+  if(ley) ley.innerHTML=`<b class="ok">■</b> ${t('ley_ok')} · <b class="rend">■</b> ${t('ley_rend')} · <b class="pend">■</b> ${t('ley_pend')}`;
+}
+
+function pintarAjustes(){
+  document.querySelectorAll('#modo-p button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.m===modoLibre));
+  document.querySelectorAll('#dif-p button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.d===diLibre));
+  document.querySelectorAll('#ajustes button').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.s==='son'?sonido:vibra));
+  const e=document.getElementById('p-estado');
+  if(e) e.textContent=`${t('idioma')}: ${NOMBRE[lang]} · ${t('modalidad')}: `
+    + (modoLibre?t('decimales'):t('fracciones'))
+    + ` · ${t('sonido')}: ${sonido?'✓':'✗'} · ${t('vibracion')}: ${vibra?'✓':'✗'}`;
+}
+
+function pintarInicio(){
+  const hoyN=diaNum(hoyFecha());
+  const hecho=hechas.has(claveReto(hoyN)), rend=rendidas.has(claveReto(hoyN));
+  document.getElementById('c-dia-fecha').textContent=fechaCorta(hoyN).slice(0,5);
+  document.getElementById('c-dia-estado').textContent=
+    (hecho?t('resuelto'):(rend?t('rendido'):t('sin_resolver')))
+    + (racha>1?' · '+t('comp_racha',racha):'');
+  document.getElementById('c-niv-num').textContent=nivelLibre;
+  document.getElementById('c-niv-estado').textContent=
+    `${t('dif'+difDeNivel(nivelLibre))} · ${modoLibre?t('decimales'):t('fracciones')}`;
+
+  let niveles=0; hechas.forEach(k=>{ if(+k.split(':')[2]<10000) niveles++; });
+  const q=resumenRetos();
+  document.getElementById('st-comp').textContent=niveles;
+  document.getElementById('st-max').textContent=nivelLibre;
+  document.getElementById('st-retos').textContent=q.hechos;
+  document.getElementById('cal-resumen').textContent=t('de_n',q.total);
+
+  /* tira con los seis días anteriores */
+  let h='';
+  for(let i=1;i<=6;i++){
+    const n=hoyN-i; if(n<0) break;
+    const ok=hechas.has(claveReto(n)), re=rendidas.has(claveReto(n));
+    h+=`<button class="chip ${ok?'ok':(re?'rend':'')}" data-n="${n}">`
+     + `<b>${fechaCorta(n).slice(0,5)}</b><span>${ok?'✓ '+t('resuelto'):(re?t('rendido'):t('sin_resolver'))}</span></button>`;
+  }
+  document.getElementById('tira-retos').innerHTML=h||`<span class="chip">${t('sin_ant')}</span>`;
+}
+
+function irA(v){
+  vista=v;
+  document.getElementById('inicio').hidden     = v!=='inicio';
+  document.getElementById('juego').hidden      = v!=='juego';
+  document.getElementById('calendario').hidden = v!=='calendario';
+  if(v==='inicio') pintarInicio();
+  pintarAjustes();
+  if(v==='calendario'){ if(!calMes) calMes=new Date(hoyFecha().getFullYear(),hoyFecha().getMonth(),1); pintarCalendario(); }
+  if(v!=='juego'){ try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+}
+
+/* ===== calendario de retos ===== */
+let calMes=null;
+const colLunes=(f)=>(f.getDay()+6)%7;       /* lunes = 0 */
+function resumenRetos(){
+  const hoyN=diaNum(hoyFecha());
+  let hechos=0, total=hoyN+1;
+  for(let n=0;n<=hoyN;n++) if(hechas.has(claveReto(n))) hechos++;
+  return {hechos,total};
+}
+function pintarCalendario(){
+  const y=calMes.getFullYear(), m=calMes.getMonth();
+  document.getElementById('cal-mes').textContent=
+    calMes.toLocaleDateString(LOC[lang],{month:'long',year:'numeric'});
+  const dias=new Date(y,m+1,0).getDate(), hoyN=diaNum(hoyFecha());
+  let h='';
+  for(let i=0;i<colLunes(new Date(y,m,1));i++) h+='<span class="cal-hueco"></span>';
+  for(let d=1;d<=dias;d++){
+    const n=diaNum(new Date(y,m,d));
+    const fuera = n<0 || n>hoyN;
+    const ok=hechas.has(claveReto(n)), rend=rendidas.has(claveReto(n));
+    const cls=['cal-d', fuera?'off':'', ok?'ok':(rend?'rend':''), n===hoyN?'hoy':''].filter(Boolean).join(' ');
+    h += fuera ? `<span class="${cls}">${d}</span>`
+               : `<button class="${cls}" data-n="${n}" aria-label="${t('reto_del',d)}">${d}</button>`;
+  }
+  document.getElementById('cal-grid').innerHTML=h;
+  const prim=diaNum(new Date(y,m,1)), ult=diaNum(new Date(y,m,dias));
+  document.getElementById('mes-prev').disabled = prim<=0;
+  document.getElementById('mes-next').disabled = ult>=hoyN;
+}
+function jugarReto(n){
+  const r=retoDe(n); level=r.level; di=r.di; modo=r.modo;
+  sonPantalla(); irA('juego'); load();
+}
+
+/* ===== eventos ===== */
+document.getElementById('card-dia').onclick=()=>{
+  vistaPrevia='inicio'; jugarReto(diaNum(hoyFecha()));
+};
+document.getElementById('card-niveles').onclick=()=>{
+  vistaPrevia='inicio'; level=nivelLibre||1; di=diLibre; modo=modoLibre;
+  sonPantalla(); irA('juego'); load();
+};
+document.getElementById('volver').onclick=()=>{ inspect=null; irA(vistaPrevia); };
+document.getElementById('tira-retos').onclick=e=>{
+  const b=e.target.closest('button[data-n]'); if(!b)return;
+  vistaPrevia='inicio'; jugarReto(+b.dataset.n);
+};
+document.getElementById('marca').onclick=()=>{ inspect=null; irA('inicio'); };
+/* Un único manejador delegado en el panel: funciona aunque el toque caiga en el
+   texto, en el icono o en el hueco entre ellos. */
+document.getElementById('panel-ajustes').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.l){
+    lang=b.dataset.l; save(); aplicarIdioma();
+    if(vista==='juego'){ draw(); board(); list(); }
+    if(vista==='inicio') pintarInicio();
+    if(vista==='calendario') pintarCalendario();
+  } else if(b.dataset.m!==undefined){
+    modoLibre=+b.dataset.m;
+    if(vista==='juego'&&!esReto()){ modo=modoLibre; di=diLibre; load(); }
+    else if(vista==='inicio') pintarInicio();
+    save();
+  } else if(b.dataset.s){
+    if(b.dataset.s==='son'){ sonido=!sonido; if(sonido) tono(660,0.14,'sine',0.16); }
+    else { vibra=!vibra; if(vibra) vibrar(30); }
+    save();
+  }
+  pintarAjustes();
+});
+
+document.getElementById('btn-ajustes').onclick=()=>{
+  const p=document.getElementById('panel-ajustes');
+  p.hidden=!p.hidden;
+  document.getElementById('btn-ajustes').setAttribute('aria-expanded',!p.hidden);
+};
+document.getElementById('card-cal').onclick=()=>{ sonPantalla(); irA('calendario'); };
+document.getElementById('cal-volver').onclick=()=>irA('inicio');
+document.getElementById('mes-prev').onclick=()=>{calMes=new Date(calMes.getFullYear(),calMes.getMonth()-1,1);pintarCalendario();};
+document.getElementById('mes-next').onclick=()=>{calMes=new Date(calMes.getFullYear(),calMes.getMonth()+1,1);pintarCalendario();};
+document.getElementById('cal-grid').onclick=e=>{
+  const b=e.target.closest('button[data-n]'); if(!b)return;
+  vistaPrevia='calendario'; jugarReto(+b.dataset.n);
+};
+const G=document.getElementById('g');
+G.addEventListener('click',e=>{
+  const g=e.target.closest('g.n.open');
+  if(g){step(g.dataset.n); return;}
+  const el=e.target.closest('[data-e]');
+  if(el){
+    inspect = inspect===el.dataset.e ? null : el.dataset.e;
+    if(inspect) tono(hz(B.w[inspect]),0.12,'sine',0.13);
+    draw(); board();
+  }
+});
+G.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;
+  const g=e.target.closest('g.n.open');if(g){e.preventDefault();step(g.dataset.n);}});
+document.getElementById('undo').onclick=()=>{if(path.length>1){path.pop();ws.pop();sonAtras();draw();board();}};
+document.getElementById('again').onclick=()=>{
+  if(revealed){level++;sonPantalla();load();return;}
+  path=['α'];ws=[];inspect=null;sonAtras();draw();board();
+};
+document.getElementById('zoom').onclick=()=>{
+  zi=(zi+1)%ZOOMS.length;
+  setLbl('zoom', t('zoom', String(ZOOMS[zi]).replace('.',sepDecimal())+'x'));
+  draw();
+};
+document.getElementById('equiv').onclick=()=>{verEquiv=!verEquiv;board();};
+document.getElementById('give').onclick=()=>{ if(!revealed) revelar(); };
+document.getElementById('no-btn').onclick=siguienteNivel;
+document.getElementById('share').onclick=compartir;
+document.getElementById('hoy').onclick=()=>{
+  const r=retoDeHoy(); level=r.level; di=r.di; modo=r.modo; sonPantalla(); load();
+};
+function cambiaNiveles(){
+  pintarAjustes();
+  if(vista==='juego'&&!esReto()){ di=diLibre; modo=modoLibre; load(); }
+  else if(vista==='inicio') pintarInicio();
+  save();
+}
+
+lang=detectaIdioma();
+restore();
+aplicarIdioma();
+if(leerURL()){ irA('juego'); load(); }
+else { irA('inicio'); }
+
+/* ===== instalación y offline ===== */
+addEventListener('pointerdown',()=>{audio();},{once:true});
+
+let deferred=null;
+const btnInstall=document.getElementById('install');
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;btnInstall.hidden=false;});
+btnInstall.onclick=async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice;deferred=null;btnInstall.hidden=true;};
+addEventListener('appinstalled',()=>{btnInstall.hidden=true;});
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
