@@ -20,12 +20,14 @@
       ]
     }
   },
-{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "es.matematicasjosepfont.mimizu",
-        "sha256_cert_fingerprints": ["7C:76:09:93:49:F6:09:1A:13:18:5F:FF:C7:CF:C1:EE:84:AF:48:8A:27:09:EB:B0:80:F4:B9:B3:EA:3F:71:E9"]
-      }
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "es.matematicasjosepfont.mimizu",
+      "sha256_cert_fingerprints": [
+        "7C:76:09:93:49:F6:09:1A:13:18:5F:FF:C7:CF:C1:EE:84:AF:48:8A:27:09:EB:B0:80:F4:B9:B3:EA:3F:71:E9"
+      ]
     }
+  }
 ]
