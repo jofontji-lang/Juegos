@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#E9B949">
+<title>Mimizu — la lombriz de los factores</title>
+<meta name="description" content="Juego de matemáticas: guía a la lombriz desde el 2 por todo el panal. Las paredes dicen qué números comparten factores primos. Puzzles infinitos con solución única.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mimizu">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Juegos de Josep Font">
+<meta property="og:title" content="Mimizu — la lombriz de los factores">
+<meta property="og:description" content="Recorre el panal desde el 2 sin contradecir ninguna pared: consecutivos o con factor común, paso abierto; coprimos, pared.">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/mimizu/">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/mimizu/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/bricolage-grotesque-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/bricolage-grotesque-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/bricolage-grotesque-latin-800-normal.woff2) format('woff2')}
+:root{
+  --bg:#E9B949; --panel:#F4D27E; --cell:#FBEBC0; --cell-dug:#DDAA52; --ink:#2B1D0E; --muted:#5E451C;
+  --wall:#2F5D7C; --outline:#2B1D0E; --grid:rgba(43,29,14,.18); --worm:#7BB13C; --worm-dark:#3F6E1C; --worm-light:#C2E08A; --saddle:#E08E3C; --crumb:#8A5A1C; --moss:#2F5A12; --bad:#C62D22; --reach:#8A5A12;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2B2210; --panel:#3A2D14; --cell:#4D3D1C; --cell-dug:#6B5222; --ink:#F6E7C1; --muted:#CDB88A;
+    --wall:#86BCE0; --outline:#F6E7C1; --grid:rgba(246,231,193,.14); --worm:#8CC553; --worm-dark:#4E8424; --worm-light:#C4E68F; --saddle:#E89A4C; --crumb:#E0B868; --moss:#9ED36A; --bad:#FF6B5E; --reach:#D9A54A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2B2210; --panel:#3A2D14; --cell:#4D3D1C; --cell-dug:#6B5222; --ink:#F6E7C1; --muted:#CDB88A;
+    --wall:#86BCE0; --outline:#F6E7C1; --grid:rgba(246,231,193,.14); --worm:#8CC553; --worm-dark:#4E8424; --worm-light:#C4E68F; --saddle:#E89A4C; --crumb:#E0B868; --moss:#9ED36A; --bad:#FF6B5E; --reach:#D9A54A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;overflow-x:hidden}
+main{max-width:760px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
+html{-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.sub{-webkit-user-select:none;user-select:none}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:clamp(2.2rem,8vw,3.4rem);font-weight:800;letter-spacing:-.03em;margin:0;line-height:1}
+h1 span{display:inline-block;transform:translateY(-.08em)}
+.sub{color:var(--muted);margin:.35rem 0 0;max-width:60ch}
+.levels{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 10px}
+.levels button,.actions button{font:inherit;font-weight:600;border:2px solid var(--ink);background:transparent;color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.levels button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--worm);outline-offset:2px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:.95rem;color:var(--muted);min-height:1.6em}
+.status b{color:var(--ink);font-weight:600}
+.boardwrap{background:var(--panel);border-radius:22px;padding:10px;margin:8px 0 12px;position:relative}
+svg#board{display:block;width:100%;height:auto;max-height:68vh;touch-action:none;user-select:none;-webkit-user-select:none}
+.msg{min-height:1.6em;font-weight:600;text-align:center;margin:4px 0 10px}
+.msg.bad{color:var(--bad)} .msg.good{color:var(--moss)}
+.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.actions button.primary{background:var(--worm);border-color:var(--worm-dark);color:#1E2A0E}
+.soundbtn{font:inherit;border:0;background:transparent;color:var(--muted);cursor:pointer;padding:6px 10px;border-radius:999px}
+.toggle{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 0;color:var(--muted);font-size:.95rem}
+details{margin-top:22px;background:var(--panel);border-radius:16px;padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details p,details li{max-width:66ch}
+details ul{padding-left:1.2em}
+.gen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-weight:600;color:var(--muted);background:color-mix(in srgb,var(--panel) 80%,transparent);border-radius:22px}
+.gen.on{display:flex}
+.win{animation:pop .5s ease}
+.bite{transform-box:fill-box;transform-origin:center;animation:bite .42s ease-out}
+@keyframes bite{0%{fill:var(--cell);transform:scale(1)}45%{transform:scale(.86)}100%{fill:var(--cell-dug);transform:scale(1)}}
+.chomp{transform-box:fill-box;transform-origin:center;animation:chomp .38s ease-out}
+@keyframes chomp{0%{transform:scale(1)}30%{transform:scale(1.28,.82)}60%{transform:scale(.9,1.12)}100%{transform:scale(1)}}
+.crumb{animation:crumb .55s ease-out forwards}
+@keyframes crumb{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.02)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.win,.bite,.chomp,.crumb{animation:none}.crumb{display:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <h1><span>🪱</span> Mimizu</h1>
+    <p class="sub">Recorre todas las casillas desde el 2. Paso abierto: consecutivos o con un factor primo común. Pared: coprimos.</p>
+  </div>
+</header>
+
+<div class="levels" role="group" aria-label="Dificultad">
+  <button data-level="0">Fácil</button>
+  <button data-level="1">Medio</button>
+  <button data-level="2">Difícil</button>
+  <button data-level="3">Experto</button>
+</div>
+
+<div class="status" id="status"></div>
+<div class="boardwrap">
+  <svg id="board" aria-label="Tablero de Mimizu"></svg>
+  <div class="gen" id="gen">Cavando un tablero nuevo…</div>
+</div>
+<div class="msg" id="msg" aria-live="polite"></div>
+<div class="actions">
+  <button id="undo">Deshacer</button>
+  <button id="reset">Reiniciar</button>
+  <button id="hint">Pista</button>
+  <button id="show">Ver solución</button>
+  <button id="new" class="primary">Nuevo puzzle</button>
+</div>
+<div class="toggle"><button id="sound" class="soundbtn" aria-pressed="true">🔊 Sonido activado</button><button id="vibe" class="soundbtn" aria-pressed="true">📳 Vibración activada</button></div>
+
+<details>
+  <summary>Reglas y cómo se generan los puzzles</summary>
+  <ul>
+    <li>La lombriz empieza en la casilla del 2 y visita todas las casillas una sola vez. Al entrar en cada una le escribe el número siguiente.</li>
+    <li>No puede atravesar paredes (en azul). El borde exterior del tablero es la tapia.</li>
+    <li>Dos casillas vecinas con números consecutivos siempre tienen el paso abierto.</li>
+    <li>Dos vecinas no consecutivas tienen el paso abierto si y solo si comparten un factor primo (mcd &gt; 1). Si son coprimas, hay pared.</li>
+    <li>Si un número contradice alguna pared ya visitada, la casilla lo rechaza. Los números fijos en negrita son pistas: la lombriz debe llegar a esa casilla justo con ese número.</li>
+  </ul>
+  <p>Cada puzzle sale de un camino hamiltoniano aleatorio. Las paredes se calculan con la regla del mcd y un solver comprueba que la solución es única, añadiendo pistas solo si hace falta. La dificultad mide cuántas veces, siguiendo la solución, hay más de una casilla siguiente que no contradice ninguna pared: cuantas más bifurcaciones, más hay que pensar.</p>
+  <p>Basado en el puzzle Mimizu de Gordon Hamilton, publicado en MathPickle. El juego no recoge ningún dato: todo se guarda solo en tu dispositivo.</p>
+</details>
+<p style="text-align:center;margin-top:18px;font-size:.9rem"><a href="privacidad.html" style="color:var(--muted)">Privacidad</a></p>
+</main>
+
+<script>
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gcd(a,b){while(b){[a,b]=[b,a%b]}return a}
+const DIRS=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+function makeBoard(shape){
+  const cells=[];
+  if(shape.type==='hex'){const R=shape.r;for(let r=-R;r<=R;r++)for(let q=-R;q<=R;q++){if(Math.abs(q+r)<=R)cells.push({q,r})}}
+  else{for(let row=0;row<shape.rows;row++)for(let col=0;col<shape.cols;col++){cells.push({q:col-(row-(row&1))/2,r:row})}}
+  const idx=new Map();cells.forEach((c,i)=>idx.set(c.q+','+c.r,i));
+  const nb=cells.map(c=>{const o=[];DIRS.forEach(([dq,dr],d)=>{const j=idx.get((c.q+dq)+','+(c.r+dr));if(j!==undefined)o.push(j)});return o});
+  return {cells,nb,n:cells.length};
+}
+function randomPath(board,rng){
+  const n=board.n,nb=board.nb;
+  for(let attempt=0;attempt<500;attempt++){
+    const start=Math.floor(rng()*n);const vis=new Uint8Array(n);const path=[start];vis[start]=1;let steps=0;
+    const ok=(function dfs(c){
+      if(path.length===n)return true;if(++steps>20000)return false;
+      const cand=nb[c].filter(j=>!vis[j]).map(j=>({j,deg:nb[j].filter(k=>!vis[k]).length,r:rng()}));
+      cand.sort((a,b)=>a.deg-b.deg||a.r-b.r);
+      for(const {j} of cand){vis[j]=1;path.push(j);if(dfs(j))return true;path.pop();vis[j]=0}
+      return false})(start);
+    if(ok)return path;
+  }
+  return null;
+}
+// open[i][k] for neighbor index k
+function buildPuzzle(board,path){
+  const num=new Array(board.n);path.forEach((c,i)=>num[c]=i+2);
+  const open=board.nb.map((ns,i)=>ns.map(j=>{const a=num[i],b=num[j];return Math.abs(a-b)===1||gcd(a,b)>1}));
+  return {num,open,start:path[0]};
+}
+// solver: counts solutions up to limit. clues: array cell->value or 0
+function solve(board,open,start,clues,limit,nodeLimit){
+  const n=board.n,nb=board.nb;
+  const openAdj=nb.map((ns,i)=>ns.filter((j,k)=>open[i][k]));
+  const openSet=nb.map((ns,i)=>{const s=new Map();ns.forEach((j,k)=>s.set(j,open[i][k]));return s});
+  const clueAt=new Int16Array(n+2).fill(-1);// value -> cell
+  for(let c=0;c<n;c++)if(clues[c])clueAt[clues[c]]=c;
+  const num=new Int16Array(n);const path=[];const sols=[];let nodes=0;let aborted=false;
+  function consistent(c,k){
+    if(clues[c]&&clues[c]!==k)return false;
+    if(clueAt[k]>=0&&clueAt[k]!==c)return false;
+    const ns=nb[c];
+    for(let t=0;t<ns.length;t++){const d=ns[t];const m=num[d];if(!m)continue;
+      if(m===k-1)continue;const g=gcd(k,m)>1;if(openSet[c].get(d)!==g)return false}
+    return true;
+  }
+  const stack=new Int32Array(n);
+  function prune(tail){
+    // degree check + connectivity of unvisited cells
+    let ends=0;let first=-1,cnt=0;
+    for(let c=0;c<n;c++){if(num[c])continue;cnt++;if(first<0)first=c;
+      let deg=0;for(const d of openAdj[c]){if(!num[d]||d===tail)deg++}
+      if(deg===0)return false;
+      if(deg===1){ends++;if(ends>1)return false}
+    }
+    if(cnt===0)return true;
+    // BFS from tail through unvisited
+    const seen=new Uint8Array(n);let sp=0,got=0;
+    for(const d of openAdj[tail])if(!num[d]&&!seen[d]){seen[d]=1;stack[sp++]=d}
+    while(sp){const c=stack[--sp];got++;for(const d of openAdj[c])if(!num[d]&&!seen[d]){seen[d]=1;stack[sp++]=d}}
+    return got===cnt;
+  }
+  function dfs(c,k){
+    nodes++;if(nodes>nodeLimit){aborted=true;return}
+    if(k===n+1){sols.push(Array.from(num));return}
+    if(!prune(c))return;
+    for(const d of openAdj[c]){if(num[d])continue;if(!consistent(d,k+1))continue;
+      num[d]=k+1;dfs(d,k+1);num[d]=0;if(sols.length>=limit||aborted)return}
+  }
+  if(consistent(start,2)){num[start]=2;dfs(start,2)}
+  return {sols,nodes,aborted};
+}
+function generate(shape,opts,seed){
+  const rng=mulberry32(seed);const board=makeBoard(shape);
+  for(let tries=0;tries<50;tries++){
+    const path=randomPath(board,rng);if(!path)continue;
+    const P=buildPuzzle(board,path);
+    const clues=new Array(board.n).fill(0);
+    let ok=false;
+    for(let it=0;it<board.n;it++){
+      const r=solve(board,P.open,P.start,clues,2,opts.nodeLimit);
+      if(r.aborted)break;
+      if(r.sols.length===1){ok=true;break}
+      // find differing cell (choose random among differing)
+      const other=r.sols.find(s=>s.some((v,i)=>v!==P.num[i]))||r.sols[1];
+      const diff=[];for(let i=0;i<board.n;i++)if(other[i]!==P.num[i]&&!clues[i])diff.push(i);
+      const pick=diff[Math.floor(rng()*diff.length)];clues[pick]=P.num[pick];
+    }
+    if(!ok)continue;
+    // minimize
+    const order=[];clues.forEach((v,i)=>{if(v)order.push(i)});
+    for(const i of order.sort(()=>rng()-.5)){const v=clues[i];clues[i]=0;const r=solve(board,P.open,P.start,clues,2,opts.nodeLimit);if(r.aborted||r.sols.length!==1)clues[i]=v}
+    const fin=solve(board,P.open,P.start,clues,2,opts.nodeLimit);
+    return {board,shape,...P,clues,nodes:fin.nodes,seed};
+  }
+  return null;
+}
+
+
+</script>
+<script>
+(function(){
+const LEVELS=[
+  {name:'Fácil', shape:{type:'rect',rows:3,cols:4}, maxForks:1, pick:1},
+  {name:'Medio', shape:{type:'hex',r:2}, maxForks:3, pick:3},
+  {name:'Difícil', shape:{type:'rect',rows:5,cols:5}, maxForks:99, pick:8},
+  {name:'Experto', shape:{type:'hex',r:3}, maxForks:99, pick:8},
+];
+const svg=document.getElementById('board'),msgEl=document.getElementById('msg'),statusEl=document.getElementById('status'),genEl=document.getElementById('gen');
+const NS='http://www.w3.org/2000/svg';
+const S=40, SQ3=Math.sqrt(3);
+let histArmed=false,eatPending=false,flash=null,flashTimer=0,soundOn=true,actx=null;
+try{soundOn=localStorage.getItem('mimizu-sound')!=='0'}catch(e){}
+const SCALE=[0,2,4,7,9];
+function audio(){if(!soundOn)return null;if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(actx.state==='suspended')actx.resume();return actx}
+function tone(freq,dur,type,vol,when=0,slide=0){const a=audio();if(!a)return;const t=a.currentTime+when;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(freq*slide,t+dur);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+0.05)}
+function noteFor(k){const i=k-2;const st=SCALE[i%5]+12*Math.floor(i/5);return 261.63*Math.pow(2,st/12)}
+const sfx={step:k=>{tone(noteFor(k),0.18,'triangle',0.22);tone(noteFor(k)*2,0.08,'sine',0.05)},back:()=>tone(330,0.1,'sine',0.12,0,0.7),
+ crunch:()=>{const a=audio();if(!a)return;const len=Math.floor(a.sampleRate*0.09);const buf=a.createBuffer(1,len,a.sampleRate);const dd=buf.getChannelData(0);for(let i=0;i<len;i++){dd[i]=(Math.random()*2-1)*Math.pow(1-i/len,2)*(i%900<450?1:.35)}const s=a.createBufferSource();s.buffer=buf;const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.8;const g=a.createGain();g.gain.value=.35;s.connect(f).connect(g).connect(a.destination);s.start()},
+ block:()=>{tone(140,0.16,'square',0.07,0,0.6);tone(90,0.2,'sine',0.18,0.02,0.8)},
+ hint:()=>{tone(784,0.12,'sine',0.12);tone(1046,0.18,'sine',0.1,0.08)},
+ win:()=>{[0,4,7,12,16].forEach((s,i)=>tone(392*Math.pow(2,s/12),0.35,'triangle',0.18,i*0.09))}};
+const Cap=window.Capacitor,Plug=Cap&&Cap.Plugins?Cap.Plugins:{};
+let vibeOn=true;try{vibeOn=localStorage.getItem('mimizu-vibe')!=='0'}catch(e){}
+const canVibe=!!Plug.Haptics||('vibrate' in navigator);
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+const hap={eat:()=>{if(!vibeOn)return;if(Plug.Haptics)Plug.Haptics.impact({style:'LIGHT'}).catch(()=>{});else buzz(12)},
+  bad:()=>{if(!vibeOn)return;if(Plug.Haptics)Plug.Haptics.notification({type:'ERROR'}).catch(()=>{});else buzz([30,40,30])},
+  win:()=>{if(!vibeOn)return;if(Plug.Haptics)Plug.Haptics.notification({type:'SUCCESS'}).catch(()=>{});else buzz([20,60,20,60,60])}};
+function armHistory(){if(!histArmed){try{history.pushState({mimizu:1},'')}catch(e){return}histArmed=true}}
+window.addEventListener('popstate',()=>{histArmed=false;
+  const det=document.querySelector('details');
+  if(det&&det.open){det.open=false;armHistory();return}
+  if(!won&&!revealed&&path.length>1){path.pop();sfx.back();setMsg('');render();armHistory()}
+});
+function spf(n){for(let p=2;p*p<=n;p++)if(n%p===0)return p;return n}
+let level=1,P=null,path=[],hints=0,revealed=false,won=false,t0=0,centers=[];
+try{const l=parseInt(localStorage.getItem('mimizu-level'));if(l>=0&&l<4)level=l}catch(e){}
+
+function forks(p,clues){
+  const b=p.board,inv=[];p.num.forEach((v,c)=>inv[v]=c);const num=new Array(b.n).fill(0);let f=0;
+  const clueCell={};clues.forEach((v,c)=>{if(v)clueCell[v]=c});
+  for(let k=2;k<=b.n;k++){const c=inv[k];num[c]=k;let opts=0;
+    b.nb[c].forEach((d,ki)=>{if(!p.open[c][ki]||num[d])return;
+      if(clues[d]&&clues[d]!==k+1)return; if(clueCell[k+1]!==undefined&&clueCell[k+1]!==d)return;
+      let ok=true;b.nb[d].forEach((e,ke)=>{const m=num[e];if(!m||m===k)return;if(p.open[d][ke]!==(gcd(k+1,m)>1))ok=false});
+      if(ok)opts++});
+    if(opts>1)f++}
+  return f;
+}
+function makePuzzle(L,seed){
+  let best=null;
+  for(let i=0;i<L.pick;i++){
+    const p=generate(L.shape,{nodeLimit:4e5},(seed+i*7919)>>>0);if(!p)continue;
+    p.forks=forks(p,p.clues);
+    // easier levels: add clues on fork-resolving cells until target
+    let guard=0;
+    while(p.forks>L.maxForks&&guard++<40){
+      const inv=[];p.num.forEach((v,c)=>inv[v]=c);let bestC=-1,bestF=p.forks;
+      for(let c=0;c<p.board.n;c++){if(p.clues[c]||c===p.start)continue;p.clues[c]=p.num[c];const f=forks(p,p.clues);p.clues[c]=0;if(f<bestF){bestF=f;bestC=c}}
+      if(bestC<0)break;p.clues[bestC]=p.num[bestC];p.forks=bestF;
+    }
+    if(!best||p.forks>best.forks)best=p;
+  }
+  best.seed=seed;return best;
+}
+
+function solvedCount(l){try{return parseInt(localStorage.getItem('mimizu-solved-'+l))||0}catch(e){return 0}}
+function bumpSolved(){try{localStorage.setItem('mimizu-solved-'+level,solvedCount(level)+1)}catch(e){}}
+function newGame(seed){
+  genEl.classList.add('on');msgEl.textContent='';msgEl.className='msg';
+  setTimeout(()=>{
+    const sd=seed??Math.floor(Math.random()*1e6);
+    P=makePuzzle(LEVELS[level],sd);
+    path=[P.start];hints=0;revealed=false;won=false;t0=Date.now();
+    layout();render();genEl.classList.remove('on');
+  },30);
+}
+function layout(){
+  const b=P.board;centers=b.cells.map(c=>({x:S*SQ3*(c.q+c.r/2),y:S*1.5*c.r}));
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  centers.forEach(p=>{minx=Math.min(minx,p.x);maxx=Math.max(maxx,p.x);miny=Math.min(miny,p.y);maxy=Math.max(maxy,p.y)});
+  const pad=S*1.05;svg.setAttribute('viewBox',`${minx-pad} ${miny-pad} ${maxx-minx+2*pad} ${maxy-miny+2*pad}`);
+}
+function corner(c,deg,r=S){const a=deg*Math.PI/180;return {x:centers[c].x+r*Math.cos(a),y:centers[c].y+r*Math.sin(a)}}
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e}
+function numbers(){const num=new Array(P.board.n).fill(0);path.forEach((c,i)=>num[c]=i+2);return num}
+function conflicts(num){
+  const bad=new Set();const b=P.board;
+  for(let i=0;i<b.n;i++)b.nb[i].forEach((j,k)=>{if(j<i)return;const a=num[i],c=num[j];if(!a||!c)return;
+    const shouldOpen=Math.abs(a-c)===1||gcd(a,c)>1;if(shouldOpen!==P.open[i][k])bad.add(i+'-'+j)});
+  (P.clues||[]).forEach((v,c)=>{if(v&&num[c]&&num[c]!==v)bad.add('clue'+c)});
+  return bad;
+}
+function render(){
+  svg.innerHTML='';const b=P.board,num=numbers(),bad=conflicts(num),showBad=true;
+  const tail=path[path.length-1];const inPath=new Set(path);
+  // cells
+  for(let c=0;c<b.n;c++){
+    const pts=[0,1,2,3,4,5].map(i=>corner(c,60*i-30,S*0.97)).map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+    let fill=inPath.has(c)?'var(--cell-dug)':'var(--cell)';
+    const poly=el('polygon',{points:pts,fill,stroke:'none'});
+    if(eatPending&&c===tail&&path.length>1)poly.setAttribute('class','bite');
+    const pts2=[0,1,2,3,4,5].map(i=>corner(c,60*i-30)).map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+    el('polygon',{points:pts2,fill:'none',stroke:'var(--grid)','stroke-width':1.5});
+  }
+  // reachable hint
+  if(!won) b.nb[tail].forEach((d,k)=>{if(P.open[tail][k]&&!inPath.has(d))el('circle',{cx:centers[d].x,cy:centers[d].y,r:S*0.62,fill:'none',stroke:'var(--reach)','stroke-width':3,'stroke-dasharray':'5 5'})});
+  // edges
+  for(let i=0;i<b.n;i++){
+    b.nb[i].forEach((j,k)=>{if(j<i)return;
+      const th=Math.atan2(centers[j].y-centers[i].y,centers[j].x-centers[i].x)*180/Math.PI;
+      const p1=corner(i,th-30),p2=corner(i,th+30);
+      const isBad=flash===(i+'-'+j)||flash===(j+'-'+i);
+      if(!P.open[i][k]) el('line',{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,stroke:isBad?'var(--bad)':'var(--wall)','stroke-width':6,'stroke-linecap':'round'});
+      else if(isBad) el('line',{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,stroke:'var(--bad)','stroke-width':5,'stroke-linecap':'round','stroke-dasharray':'6 6'});
+    });
+    // outer boundary
+    const DIR=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+    const ci=b.cells[i];
+    DIR.forEach(([dq,dr])=>{const has=b.nb[i].some(j=>b.cells[j].q===ci.q+dq&&b.cells[j].r===ci.r+dr);if(has)return;
+      const x=S*SQ3*(dq+dr/2),y=S*1.5*dr;const th=Math.atan2(y,x)*180/Math.PI;const p1=corner(i,th-30),p2=corner(i,th+30);
+      el('line',{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,stroke:'var(--outline)','stroke-width':8,'stroke-linecap':'round'})});
+  }
+  // worm
+  const eating=eatPending&&path.length>1;eatPending=false;
+  const L0=path.length;
+  const wid=i=>S*(0.38+0.26*Math.min(1,i/3));
+  const seg=(i,stroke,w,cap,extra={})=>{const a=centers[path[i]],c2=centers[path[i+1]];return el('line',Object.assign({x1:a.x,y1:a.y,x2:c2.x,y2:c2.y,stroke,'stroke-width':w,'stroke-linecap':cap},extra))};
+  for(let i=0;i<L0-1;i++)seg(i,'var(--worm-dark)',wid(i+1)+S*0.12,'round');
+  for(let i=0;i<L0-1;i++)seg(i,'var(--worm)',wid(i+1),'round');
+  if(L0>=6){const i=L0-4;seg(i,'var(--saddle)',wid(i+1)+S*0.1,'butt',{opacity:.85})}
+  for(let i=0;i<L0-1;i++)seg(i,'var(--worm-light)',wid(i+1)*0.22,'round',{opacity:.45});
+  // segment rings
+  for(let i=0;i<L0-1;i++){const a=centers[path[i]],c2=centers[path[i+1]];const dx=c2.x-a.x,dy=c2.y-a.y,len=Math.hypot(dx,dy),px=-dy/len,py=dx/len;
+    for(const t of [0.33,0.67]){const w=(wid(i)+(wid(i+1)-wid(i))*t)*0.5;const x=a.x+dx*t,y=a.y+dy*t;
+      el('line',{x1:x+px*w,y1:y+py*w,x2:x-px*w,y2:y-py*w,stroke:'var(--worm-dark)','stroke-width':2,'stroke-linecap':'round',opacity:.45})}}
+  // head
+  const h=centers[tail];let ang=0;
+  if(L0>1){const pr=centers[path[L0-2]];ang=Math.atan2(h.y-pr.y,h.x-pr.x)*180/Math.PI}
+  const hg=el('g',{transform:`translate(${h.x.toFixed(1)} ${h.y.toFixed(1)}) rotate(${ang.toFixed(1)})`});
+  const hi=el('g',{},hg);if(eating)hi.setAttribute('class','chomp');
+  el('ellipse',{cx:S*0.04,cy:0,rx:S*0.56,ry:S*0.48,fill:'var(--worm)',stroke:'var(--worm-dark)','stroke-width':3.5},hi);
+  el('ellipse',{cx:-S*0.06,cy:-S*0.16,rx:S*0.2,ry:S*0.08,fill:'var(--worm-light)',opacity:.5},hi);
+  // crumbs
+  if(eating){for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.random()*0.5,r=S*(0.55+Math.random()*0.35);
+    const cr=el('circle',{cx:h.x,cy:h.y,r:S*(0.05+Math.random()*0.04),fill:'var(--crumb)',class:'crumb'});
+    cr.style.setProperty('--dx',(Math.cos(a)*r).toFixed(1)+'px');cr.style.setProperty('--dy',(Math.sin(a)*r).toFixed(1)+'px')}}
+  // numbers
+  for(let c=0;c<b.n;c++){
+    const clue=P.clues[c];let v=num[c]||clue;if(c===P.start)v=2;if(!v)continue;
+    const isClue=!!clue||c===P.start;const wrong=showBad&&bad.has('clue'+c);
+    const t=el('text',{x:centers[c].x,y:centers[c].y+S*0.02,'text-anchor':'middle','dominant-baseline':'central',
+      'font-size':isClue?S*0.66:S*0.56,'font-weight':isClue?800:600,fill:wrong?'var(--bad)':(inPath.has(c)?'#1E2A0E':'var(--ink)'),
+      'paint-order':'stroke',stroke:inPath.has(c)?'var(--worm-light)':'var(--cell)','stroke-width':inPath.has(c)?4:0,
+      'font-family':'Bricolage Grotesque, system-ui, sans-serif'});
+    t.textContent=(wrong?num[c]:v);
+    if(isClue&&!inPath.has(c)){t.setAttribute('fill','var(--muted)')}
+  }
+  { const eg=el('g',{transform:`translate(${h.x.toFixed(1)} ${h.y.toFixed(1)}) rotate(${ang.toFixed(1)})`});const ei=el('g',{},eg);if(eating)ei.setAttribute('class','chomp');
+    for(const sy of [-1,1]){
+      el('circle',{cx:S*0.38,cy:sy*S*0.27,r:S*0.12,fill:'#fff',stroke:'var(--worm-dark)','stroke-width':1.8},ei);
+      el('circle',{cx:S*0.42,cy:sy*S*0.26,r:S*0.06,fill:'#1a1a1a'},ei);
+    }
+    el('path',{d:`M ${S*0.55} ${-S*0.09} Q ${S*0.63} 0 ${S*0.55} ${S*0.09}`,fill:'none',stroke:'var(--worm-dark)','stroke-width':2.5,'stroke-linecap':'round'},ei);
+  }
+  const L=LEVELS[level];
+  statusEl.innerHTML=`<span>Puzzle <b>nº ${P.seed}</b></span><span>Casillas <b>${path.length}/${b.n}</b></span><span>Bifurcaciones <b>${P.forks}</b></span><span>Resueltos <b>${solvedCount(level)}</b></span>`;
+  if(path.length===b.n&&bad.size===0&&!won){won=true;if(!revealed){sfx.win();hap.win();bumpSolved()}
+    const secs=Math.round((Date.now()-t0)/1000);
+    setMsg(revealed?'Esta es la solución. Prueba con otro puzzle.':`¡Recorrido completo en ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}${hints?` con ${hints} pista${hints>1?'s':''}`:' sin pistas'}! 🪱`,'good');
+    svg.classList.remove('win');void svg.getBBox();svg.classList.add('win');render();
+  } else if(path.length===b.n&&bad.size>0){setMsg('Has recorrido todo, pero alguna pared no cuadra. Busca las marcas rojas.','bad')}
+  document.querySelectorAll('.levels button').forEach(bt=>bt.setAttribute('aria-pressed',String(+bt.dataset.level===level)));
+}
+function reject(text,edge){setMsg(text,'bad');sfx.block();hap.bad();flash=edge||null;clearTimeout(flashTimer);if(edge){render();flashTimer=setTimeout(()=>{flash=null;render()},900)}}
+function setMsg(t,cls){msgEl.textContent=t;msgEl.className='msg'+(cls?' '+cls:'')}
+
+// interaction
+function cellAt(evt){
+  const pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;const m=svg.getScreenCTM();if(!m)return -1;
+  const p=pt.matrixTransform(m.inverse());let best=-1,bd=1e9;
+  centers.forEach((c,i)=>{const d=(c.x-p.x)**2+(c.y-p.y)**2;if(d<bd){bd=d;best=i}});
+  return bd<(S*0.9)**2?best:-1;
+}
+function tryStep(c){
+  if(won)return false;const tail=path[path.length-1];
+  if(path.length>1&&c===path[path.length-2]){path.pop();sfx.back();setMsg('');return true}
+  if(path.includes(c))return false;
+  const k=P.board.nb[tail].indexOf(c);if(k<0)return false;
+  if(!P.open[tail][k]){reject('Hay una pared en medio.',tail+'-'+c);return false}
+  const n=path.length+2;
+  if(P.clues[c]&&P.clues[c]!==n){reject(`Esa casilla es el ${P.clues[c]}, no el ${n}.`);return false}
+  const clueCell=P.clues.indexOf(n);if(clueCell>=0&&clueCell!==c){reject(`El ${n} tiene que ir en su casilla marcada.`);return false}
+  const num=numbers();const nb=P.board.nb[c];
+  for(let t=0;t<nb.length;t++){const d=nb[t],m=num[d];if(!m||d===tail)continue;
+    const g=gcd(n,m);const isOpen=P.open[c][t];
+    if(isOpen&&g===1){reject(`El ${n} no cabe aquí: el paso hacia el ${m} está abierto, pero ${n} y ${m} no comparten ningún factor primo.`,c+'-'+d);return false}
+    if(!isOpen&&g>1){reject(`El ${n} no cabe aquí: hay pared con el ${m}, pero ambos son múltiplos de ${spf(g)}.`,c+'-'+d);return false}
+  }
+  path.push(c);setMsg('');sfx.step(n);sfx.crunch();hap.eat();eatPending=true;armHistory();return true;
+}
+let dragging=false,last=-1;
+svg.addEventListener('pointerdown',e=>{if(!P||won)return;const c=cellAt(e);if(c<0)return;
+  e.preventDefault();svg.setPointerCapture(e.pointerId);dragging=true;last=c;
+  const i=path.indexOf(c);if(i>=0){path=path.slice(0,i+1);setMsg('');render();return}
+  if(tryStep(c))render();else render();
+});
+svg.addEventListener('pointermove',e=>{if(!dragging)return;const c=cellAt(e);if(c<0||c===last)return;last=c;if(tryStep(c))render()});
+const end=()=>{dragging=false;last=-1};
+svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+
+document.getElementById('undo').onclick=()=>{if(won||path.length<2)return;path.pop();sfx.back();setMsg('');render()};
+document.getElementById('reset').onclick=()=>{if(revealed)return;path=[P.start];won=false;setMsg('');render()};
+document.getElementById('hint').onclick=()=>{
+  if(won)return;const inv=[];P.num.forEach((v,c)=>inv[v]=c);
+  let i=0;while(i<path.length&&path[i]===inv[i+2])i++;
+  hints++;sfx.hint();
+  if(i<path.length){path=path.slice(0,i);setMsg(`Te desviaste al colocar el ${i+2}. He recortado la lombriz hasta el ${i+1}.`,'bad')}
+  else{path.push(inv[path.length+2]);eatPending=true;sfx.crunch();armHistory();setMsg(`El ${path.length+1} va aquí.`)}
+  render();
+};
+document.getElementById('show').onclick=()=>{const inv=[];P.num.forEach((v,c)=>inv[v]=c);path=inv.slice(2,P.board.n+2);revealed=true;won=false;render()};
+document.getElementById('new').onclick=()=>newGame();
+const sb=document.getElementById('sound');
+function syncSound(){sb.textContent=soundOn?'🔊 Sonido activado':'🔇 Sonido desactivado';sb.setAttribute('aria-pressed',String(soundOn))}
+sb.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('mimizu-sound',soundOn?'1':'0')}catch(e){}syncSound();if(soundOn)sfx.hint()};syncSound();
+document.querySelectorAll('.levels button').forEach(bt=>bt.onclick=()=>{level=+bt.dataset.level;try{localStorage.setItem('mimizu-level',level)}catch(e){}newGame()});
+const vb=document.getElementById('vibe');
+function syncVibe(){vb.textContent=vibeOn?'📳 Vibración activada':'📴 Vibración desactivada';vb.setAttribute('aria-pressed',String(vibeOn))}
+vb.onclick=()=>{vibeOn=!vibeOn;try{localStorage.setItem('mimizu-vibe',vibeOn?'1':'0')}catch(e){}syncVibe();hap.eat()};syncVibe();
+if(!canVibe)vb.style.display='none';
+if(Plug.App){Plug.App.addListener('backButton',()=>{
+  const det=document.querySelector('details');
+  if(det&&det.open){det.open=false;return}
+  if(!won&&!revealed&&path.length>1){path.pop();sfx.back();setMsg('');render();return}
+  Plug.App.minimizeApp();
+});
+  Plug.App.addListener('pause',()=>{if(actx&&actx.state==='running')actx.suspend()});
+}
+newGame();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>

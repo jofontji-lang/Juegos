@@ -1,0 +1,52 @@
+{
+  "name": "Mimizu — la lombriz de los factores",
+  "short_name": "Mimizu",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E9B949",
+  "theme_color": "#E9B949",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "/mimizu/",
+  "description": "Guía a la lombriz por el panal desde el 2. Paso abierto si los números son consecutivos o comparten un factor primo; pared si son coprimos. Puzles infinitos con solución única.",
+  "categories": [
+    "games",
+    "education",
+    "puzzle"
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/juego.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tablero de Mimizu en juego"
+    },
+    {
+      "src": "screenshots/resuelto.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Puzle resuelto"
+    }
+  ]
+}
