@@ -19,5 +19,13 @@
         "90:82:C9:30:A9:18:EC:84:D1:F4:0C:C8:48:37:E2:7A:31:DB:61:9C:8C:C1:BC:B2:46:91:77:57:C4:64:3D:C5"
       ]
     }
-  }
+  },
+{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "es.matematicasjosepfont.mimizu",
+        "sha256_cert_fingerprints": ["7C:76:09:93:49:F6:09:1A:13:18:5F:FF:C7:CF:C1:EE:84:AF:48:8A:27:09:EB:B0:80:F4:B9:B3:EA:3F:71:E9"]
+      }
+    }
 ]
