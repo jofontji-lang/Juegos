@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ═══ NOMBRE DE LA COLECCIÓN ═══════════════════════════════════════════
+     Provisional: «Matemáticas jugables». Si lo cambias, hay que tocarlo en
+     cuatro sitios: <title>, og:title, twitter:title y el <h1>.
+     Están todos marcados con el comentario NOMBRE.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- NOMBRE -->
+<title>Matemáticas jugables — juegos de Josep Font</title>
+<meta name="description" content="Cuatro puzles matemáticos para jugar en el navegador o en el móvil: grafos, áreas, divisibilidad y multiplicación. Gratuitos, sin anuncios y sin recoger datos.">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/">
+<!-- NOMBRE -->
+<meta property="og:title" content="Matemáticas jugables — juegos de Josep Font">
+<meta property="og:description" content="Cuatro puzles matemáticos para jugar en el navegador o en el móvil. Gratuitos, sin anuncios y sin recoger datos.">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<!-- NOMBRE -->
+<meta name="twitter:title" content="Matemáticas jugables — juegos de Josep Font">
+<meta name="twitter:description" content="Cuatro puzles matemáticos para jugar en el navegador o en el móvil. Gratuitos y sin anuncios.">
+<meta name="twitter:image" content="https://juegos.matematicasjosepfont.es/icons/og.png">
+
+<link rel="icon" href="/icons/icono-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/icons/icono-512.png" sizes="512x512" type="image/png">
+<meta name="theme-color" content="#13295E" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13295E" media="(prefers-color-scheme: dark)">
+
+<link rel="preload" href="/fuentes/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fuentes/figtree.woff2" as="font" type="font/woff2" crossorigin>
+
+<style>
+/* ═══ 1. Tipografía ══════════════════════════════════════════════════════
+   Dos familias, ambas variables y ambas servidas desde /fuentes/: no hay
+   ninguna llamada a Google Fonts ni a ningún otro servidor.
+
+   Fraunces  titulares y contenido matemático. Lleva el eje WONK fijado en 1,
+             que es de donde salen la pata de la «g» y la cola de la «y».
+             También van fijados SOFT=0 y opsz=48; queda libre el peso.
+   Figtree   todo el texto corrido.
+
+   Los dos .woff2 van recortados al alfabeto que usa la página: 25 kB y 12 kB.
+   Si algún día traduces la portada a un idioma con caracteres nuevos, hay que
+   volver a generarlos.
+
+   Ninguna de las dos tiene cursiva en este recorte, y es a propósito: lo que
+   antes iba en cursiva ahora se distingue por familia, peso y color. Si
+   pusiéramos font-style:italic, el navegador la falsificaría inclinando la
+   redonda, que es justo lo que no queremos.
+
+   Licencia: las dos con SIL Open Font License 1.1. Los OFL-*.txt viajan en
+   /fuentes/ y tienen que quedarse ahí.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@font-face{
+  font-family:"Fraunces";
+  src:url("/fuentes/fraunces.woff2") format("woff2-variations");
+  font-weight:400 700; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"Figtree";
+  src:url("/fuentes/figtree.woff2") format("woff2-variations");
+  font-weight:300 800; font-style:normal; font-display:swap;
+}
+
+:root{
+  --titular: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
+  --texto:   "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* ── La banda de la cabecera: el color de la colección ──────────────
+     Es el único color que es de la portada y no de ningún juego. Va en
+     la banda, en el favicon, en la barra del navegador y en la imagen
+     que sale al compartir. Cambiarlo aquí los cambia todos menos las
+     imágenes, que se rehacen con generar-imagenes.py.                  */
+  --banda:        #13295E;
+  --banda-tinta:  #FFFFFF;
+  --banda-2:      #B3C6EC;   /* la frase */
+  --banda-3:      #8CA7DA;   /* la autoría */
+
+  /* ── Neutros ──────────────────────────────────────────────────────── */
+  --muro:       #FAF7F2;   /* la pared de la sala */
+  --papel:      #FFFFFF;   /* el papel de cada obra */
+  --papel-b:    #E8E3D9;   /* filete del marco */
+  --hilo:       #D5CFC3;   /* riel y cables */
+  --tinta:      #22201F;
+  --tinta-2:    #6B655D;
+  --sombra:     rgba(34,32,31,.16);
+
+  /* ── Cada juego, en tres tonos ────────────────────────────────────────
+     marca  el color de identidad: reglas, trazos, rellenos grandes
+     texto  el mismo color, oscurecido hasta poder llevar texto (4,5:1)
+     tinte  el mismo color, muy claro, para rellenos bajo texto oscuro   */
+  --c-ruta:              #008A7B;
+  --c-ruta-texto:        #007064;
+  --c-ruta-tinte:        #C9E8E2;
+  --c-mondrian:          #DC4430;
+  --c-mondrian-texto:    #C13521;
+  --c-mondrian-tinte:    #F8D0C6;
+  --c-mimizu:            #E9A016;
+  --c-mimizu-texto:      #8A5D06;
+  --c-mimizu-tinte:      #F8DCA2;
+  --c-productos:         #3A62C6;
+  --c-productos-texto:   #3A62C6;
+  --c-productos-tinte:   #D2DDF6;
+
+  --hueco: clamp(22px, 3.4vw, 52px);
+  --medida: 1180px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --banda:       #13295E;
+    --banda-tinta: #FFFFFF;
+    --banda-2:     #B3C6EC;
+    --banda-3:     #8CA7DA;
+
+    --muro:    #1C1B20;
+    --papel:   #26252C;
+    --papel-b: #3A3842;
+    --hilo:    #4A4854;
+    --tinta:   #F0EDE6;
+    --tinta-2: #A8A29A;
+    --sombra:  rgba(0,0,0,.55);
+
+    --c-ruta:            #2FC3B1;
+    --c-ruta-texto:      #2FC3B1;
+    --c-ruta-tinte:      #124A44;
+    --c-mondrian:        #FF7A66;
+    --c-mondrian-texto:  #FF7A66;
+    --c-mondrian-tinte:  #5A281F;
+    --c-mimizu:          #F5B942;
+    --c-mimizu-texto:    #F5B942;
+    --c-mimizu-tinte:    #4E3A15;
+    --c-productos:       #7B9BF0;
+    --c-productos-texto: #7B9BF0;
+    --c-productos-tinte: #24325C;
+  }
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--muro);
+  color:var(--tinta);
+  font:400 16.5px/1.6 var(--texto);
+  font-kerning:normal;
+  text-rendering:optimizeLegibility;
+  padding:0 clamp(18px,5vw,56px) 0;
+}
+.limite{max-width:var(--medida); margin-inline:auto}
+
+a{color:inherit}
+:focus-visible{outline:2px solid var(--tinta); outline-offset:4px; border-radius:2px}
+
+/* ═══ 2. Entrada ═══════════════════════════════════════════════════════ */
+.entrada{
+  padding:clamp(56px,10vh,116px) 0 clamp(48px,8vh,88px);
+  position:relative;
+  color:var(--banda-tinta);
+}
+.entrada > *{position:relative; z-index:1}
+/* La banda va a sangre aunque el body tenga márgenes laterales. */
+.entrada::before{
+  content:""; position:absolute; z-index:0; inset:0;
+  left:50%; transform:translateX(-50%); width:100vw;
+  background:var(--banda);
+}
+.entrada .frase{color:var(--banda-2)}
+.entrada .autoria{color:var(--banda-2)}
+.entrada .autoria a{color:var(--banda-tinta)}
+
+/* Espiral de Ulam: los 519 primos menores que 3721, colocados en espiral.
+   Vive en el hueco que deja la cabecera, no debajo del texto, y se disuelve
+   por los bordes. Si algún día estorba, se borra el <svg class="ulam">. */
+.ulam{
+  position:absolute; z-index:0; pointer-events:none;
+  right:0; top:50%; transform:translateY(-50%);
+  width:min(42%, 448px); height:auto;
+  fill:var(--banda-tinta);
+  opacity:.14;
+  shape-rendering:crispEdges;
+  -webkit-mask-image:radial-gradient(closest-side, #000 40%, transparent 100%);
+          mask-image:radial-gradient(closest-side, #000 40%, transparent 100%);
+}
+
+h1{
+  margin:0;
+  font-family:var(--titular);
+  font-size:clamp(2.7rem, 7.8vw, 4.7rem);
+  font-weight:600;
+  line-height:.96;
+  letter-spacing:-.018em;
+  max-width:12ch;
+  text-wrap:balance;
+}
+.entrada .frase{
+  margin:1.1em 0 0;
+  font-size:clamp(1.06rem,2.1vw,1.28rem);
+  line-height:1.55;
+  max-width:31ch;
+}
+.entrada .autoria{
+  margin:1.5em 0 0;
+  font-size:.95rem;
+  color:var(--tinta-2);
+}
+.entrada .autoria a{text-decoration-thickness:1px; text-underline-offset:3px}
+
+/* ═══ 3. La sala ═══════════════════════════════════════════════════════
+   Cada juego es una obra colgada de un riel. Las obras tienen anchos y
+   proporciones distintas y se cuelgan por su centro, como en una pared
+   de verdad; el cable se estira solo hasta llegar al riel. Las cartelas
+   arrancan todas a la misma altura porque la rejilla comparte filas.    */
+
+.pared{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  grid-auto-rows:320px auto;
+  column-gap:var(--hueco);
+  row-gap:clamp(40px,6vh,72px);
+  padding-bottom:clamp(56px,9vh,96px);
+}
+.obra{
+  display:grid;
+  grid-row:span 2;
+  grid-template-rows:subgrid;
+  row-gap:16px;              /* la cartela va pegada a su obra */
+  position:relative;
+}
+
+/* colgadura: riel + cable + marco centrado */
+.colgadura{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:0;
+}
+.colgadura::before{                   /* el riel, continuo de lado a lado */
+  content:"";
+  position:absolute; top:0;
+  left:calc(-1 * var(--hueco) / 2 - 1px);
+  right:calc(-1 * var(--hueco) / 2 - 1px);
+  height:1px; background:var(--hilo);
+}
+.cable, .lastre{flex:1 1 0; min-height:0}
+.cable{width:1px; background:var(--hilo)}
+
+figure{
+  margin:0;
+  background:var(--papel);
+  border:1px solid var(--papel-b);
+  box-shadow:0 10px 16px -12px var(--sombra), 0 1px 0 var(--papel-b);
+  padding:11px;
+  flex:0 0 auto;
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+figure svg{display:block; width:100%; height:auto}
+
+/* anchos y proporciones distintas: la pared no es un muestrario */
+.obra--ruta      figure{width:min(78%, 206px)}
+.obra--mondrian  figure{width:min(100%, 268px)}
+.obra--mimizu    figure{width:min(94%, 250px)}
+.obra--productos figure{width:min(84%, 222px)}
+
+/* ═══ 4. Cartela ══════════════════════════════════════════════════════ */
+.cartela{padding-top:2px}
+.cartela h2{
+  margin:0;
+  font-family:var(--titular);
+  font-size:1.3rem;
+  font-weight:600;
+  line-height:1.15;
+  letter-spacing:-.01em;
+}
+.cartela h2 a{text-decoration:none}
+.cartela h2 a::after{                  /* toda la obra es el enlace */
+  content:""; position:absolute; inset:0; z-index:1;
+}
+.materia{
+  margin:.35em 0 0;
+  font-family:var(--titular);
+  font-weight:500;
+  color:var(--tinta-2);
+  font-size:.95rem;
+}
+.regla{
+  height:1px; width:26px; margin:.85em 0;
+  background:var(--acento, var(--hilo));
+}
+.cartela p.nota{margin:0; font-size:.97rem; line-height:1.5; max-width:30ch}
+.ficha{
+  margin:.8em 0 0;
+  font-size:.84rem;
+  letter-spacing:.005em;
+  color:var(--tinta-2);
+}
+.tienda{
+  position:relative; z-index:2;
+  font-weight:500;
+  display:inline-block; margin-top:.5em;
+  font-size:.86rem;
+  text-decoration-color:var(--acento);
+  text-underline-offset:3px;
+}
+
+/* respuesta al gesto: la obra se despega un poco de la pared */
+.obra:hover figure,
+.obra:focus-within figure{
+  transform:translateY(-3px);
+  box-shadow:0 18px 26px -16px var(--sombra), 0 1px 0 var(--papel-b);
+}
+.obra:focus-within figure{outline:2px solid var(--tinta); outline-offset:5px}
+
+/* ═══ 5. Pie ══════════════════════════════════════════════════════════ */
+footer{
+  border-top:1px solid var(--hilo);
+  padding:clamp(28px,5vh,48px) 0 clamp(40px,7vh,64px);
+  color:var(--tinta-2);
+  font-size:.96rem;
+  display:flex; flex-wrap:wrap; gap:.6em clamp(20px,4vw,44px);
+  align-items:baseline;
+}
+footer p{margin:0; max-width:40ch}
+footer nav{display:flex; flex-wrap:wrap; gap:.6em 1.4em}
+footer a{text-underline-offset:3px}
+
+/* ═══ 6. Pantallas ════════════════════════════════════════════════════ */
+@media (max-width:1080px){
+  .pared{grid-template-columns:repeat(2, 1fr)}
+}
+@media (max-width:700px){
+  body{font-size:16.5px}
+  .pared{
+    display:flex; flex-direction:column;
+    gap:clamp(44px,7vh,64px);
+    padding-bottom:64px;
+  }
+  .obra{display:block}
+  .colgadura{display:block}
+  .colgadura::before{display:none}
+  .cable,.lastre{display:none}
+  /* Las obras se acotan para que entren dos por pantalla: en el móvil,
+     quien mira no desplaza cuatro veces para ver qué hay. */
+  figure{width:min(100%, 248px) !important; margin:0 0 16px}
+  .cartela p.nota{max-width:38ch}
+  .ulam{display:none}          /* en el móvil la cabecera ocupa todo el ancho */
+}
+
+@media (prefers-reduced-motion: reduce){
+  figure{transition:none}
+  .obra:hover figure, .obra:focus-within figure{transform:none}
+}
+
+@media print{
+  .colgadura::before,.cable{display:none}
+  figure{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+
+<header class="entrada limite">
+  <svg class="ulam" viewBox="0 0 61 61" aria-hidden="true" focusable="false"><path d="M0 6h1v1h-1zM0 12h1v1h-1zM0 16h1v1h-1zM0 22h1v1h-1zM0 30h1v1h-1zM0 36h1v1h-1zM0 42h1v1h-1zM0 58h1v1h-1zM1 7h1v1h-1zM1 9h1v1h-1zM1 25h1v1h-1zM1 27h1v1h-1zM1 43h1v1h-1zM1 49h1v1h-1zM2 2h1v1h-1zM2 28h1v1h-1zM2 32h1v1h-1zM2 34h1v1h-1zM2 46h1v1h-1zM2 52h1v1h-1zM2 56h1v1h-1zM3 3h1v1h-1zM3 13h1v1h-1zM3 25h1v1h-1zM3 39h1v1h-1zM3 43h1v1h-1zM3 49h1v1h-1zM3 55h1v1h-1zM3 57h1v1h-1zM4 6h1v1h-1zM4 10h1v1h-1zM4 12h1v1h-1zM4 18h1v1h-1zM4 28h1v1h-1zM4 30h1v1h-1zM4 40h1v1h-1zM4 48h1v1h-1zM4 52h1v1h-1zM5 1h1v1h-1zM5 7h1v1h-1zM5 25h1v1h-1zM5 35h1v1h-1zM5 43h1v1h-1zM5 47h1v1h-1zM5 53h1v1h-1zM5 55h1v1h-1zM6 10h1v1h-1zM6 12h1v1h-1zM6 34h1v1h-1zM6 40h1v1h-1zM6 42h1v1h-1zM6 48h1v1h-1zM6 52h1v1h-1zM7 1h1v1h-1zM7 19h1v1h-1zM7 21h1v1h-1zM7 27h1v1h-1zM7 31h1v1h-1zM7 33h1v1h-1zM7 43h1v1h-1zM7 51h1v1h-1zM8 0h1v1h-1zM8 20h1v1h-1zM8 22h1v1h-1zM8 44h1v1h-1zM8 50h1v1h-1zM9 21h1v1h-1zM9 27h1v1h-1zM9 31h1v1h-1zM9 33h1v1h-1zM9 45h1v1h-1zM10 4h1v1h-1zM10 10h1v1h-1zM10 16h1v1h-1zM10 18h1v1h-1zM10 22h1v1h-1zM10 28h1v1h-1zM10 30h1v1h-1zM10 36h1v1h-1zM10 46h1v1h-1zM10 54h1v1h-1zM10 60h1v1h-1zM11 3h1v1h-1zM11 7h1v1h-1zM11 13h1v1h-1zM11 17h1v1h-1zM11 19h1v1h-1zM11 25h1v1h-1zM11 37h1v1h-1zM11 47h1v1h-1zM11 49h1v1h-1zM11 55h1v1h-1zM11 59h1v1h-1zM12 8h1v1h-1zM12 12h1v1h-1zM12 16h1v1h-1zM12 18h1v1h-1zM12 22h1v1h-1zM12 34h1v1h-1zM12 36h1v1h-1zM12 42h1v1h-1zM12 58h1v1h-1zM12 60h1v1h-1zM13 7h1v1h-1zM13 19h1v1h-1zM13 27h1v1h-1zM13 37h1v1h-1zM13 43h1v1h-1zM13 51h1v1h-1zM14 6h1v1h-1zM14 8h1v1h-1zM14 10h1v1h-1zM14 20h1v1h-1zM14 22h1v1h-1zM14 28h1v1h-1zM14 38h1v1h-1zM14 40h1v1h-1zM14 52h1v1h-1zM14 56h1v1h-1zM15 9h1v1h-1zM15 21h1v1h-1zM15 25h1v1h-1zM15 33h1v1h-1zM15 43h1v1h-1zM15 47h1v1h-1zM15 49h1v1h-1zM16 4h1v1h-1zM16 18h1v1h-1zM16 28h1v1h-1zM16 40h1v1h-1zM16 42h1v1h-1zM16 60h1v1h-1zM17 3h1v1h-1zM17 11h1v1h-1zM17 13h1v1h-1zM17 17h1v1h-1zM17 23h1v1h-1zM17 31h1v1h-1zM17 41h1v1h-1zM17 49h1v1h-1zM18 0h1v1h-1zM18 2h1v1h-1zM18 6h1v1h-1zM18 12h1v1h-1zM18 14h1v1h-1zM18 18h1v1h-1zM18 28h1v1h-1zM18 34h1v1h-1zM18 40h1v1h-1zM18 42h1v1h-1zM18 46h1v1h-1zM18 58h1v1h-1zM19 1h1v1h-1zM19 13h1v1h-1zM19 21h1v1h-1zM19 25h1v1h-1zM19 33h1v1h-1zM19 37h1v1h-1zM20 0h1v1h-1zM20 2h1v1h-1zM20 4h1v1h-1zM20 12h1v1h-1zM20 14h1v1h-1zM20 20h1v1h-1zM20 28h1v1h-1zM20 38h1v1h-1zM20 40h1v1h-1zM20 46h1v1h-1zM20 52h1v1h-1zM21 9h1v1h-1zM21 17h1v1h-1zM21 27h1v1h-1zM21 33h1v1h-1zM21 41h1v1h-1zM21 45h1v1h-1zM21 49h1v1h-1zM22 4h1v1h-1zM22 22h1v1h-1zM22 28h1v1h-1zM22 34h1v1h-1zM22 36h1v1h-1zM23 1h1v1h-1zM23 3h1v1h-1zM23 11h1v1h-1zM23 23h1v1h-1zM23 25h1v1h-1zM23 37h1v1h-1zM23 43h1v1h-1zM23 47h1v1h-1zM23 53h1v1h-1zM24 6h1v1h-1zM24 18h1v1h-1zM24 20h1v1h-1zM24 28h1v1h-1zM24 30h1v1h-1zM24 36h1v1h-1zM24 42h1v1h-1zM24 44h1v1h-1zM24 52h1v1h-1zM24 54h1v1h-1zM24 56h1v1h-1zM25 7h1v1h-1zM25 19h1v1h-1zM25 25h1v1h-1zM25 27h1v1h-1zM25 31h1v1h-1zM25 33h1v1h-1zM25 39h1v1h-1zM25 45h1v1h-1zM25 51h1v1h-1zM26 4h1v1h-1zM26 12h1v1h-1zM26 14h1v1h-1zM26 18h1v1h-1zM26 28h1v1h-1zM26 32h1v1h-1zM26 34h1v1h-1zM26 38h1v1h-1zM26 44h1v1h-1zM26 46h1v1h-1zM26 50h1v1h-1zM26 52h1v1h-1zM26 58h1v1h-1zM27 9h1v1h-1zM27 11h1v1h-1zM27 23h1v1h-1zM27 27h1v1h-1zM27 31h1v1h-1zM27 33h1v1h-1zM27 35h1v1h-1zM27 39h1v1h-1zM27 49h1v1h-1zM27 59h1v1h-1zM28 10h1v1h-1zM28 16h1v1h-1zM28 22h1v1h-1zM28 28h1v1h-1zM28 30h1v1h-1zM29 5h1v1h-1zM29 11h1v1h-1zM29 15h1v1h-1zM29 21h1v1h-1zM29 23h1v1h-1zM29 25h1v1h-1zM29 29h1v1h-1zM29 31h1v1h-1zM30 0h1v1h-1zM30 2h1v1h-1zM30 6h1v1h-1zM30 12h1v1h-1zM30 14h1v1h-1zM30 24h1v1h-1zM30 26h1v1h-1zM30 32h1v1h-1zM30 36h1v1h-1zM30 38h1v1h-1zM30 40h1v1h-1zM30 42h1v1h-1zM30 44h1v1h-1zM30 52h1v1h-1zM30 54h1v1h-1zM30 58h1v1h-1zM30 60h1v1h-1zM31 29h1v1h-1zM31 30h1v1h-1zM31 33h1v1h-1zM31 39h1v1h-1zM31 45h1v1h-1zM31 57h1v1h-1zM32 4h1v1h-1zM32 8h1v1h-1zM32 10h1v1h-1zM32 12h1v1h-1zM32 16h1v1h-1zM32 18h1v1h-1zM32 20h1v1h-1zM32 24h1v1h-1zM32 26h1v1h-1zM32 28h1v1h-1zM32 30h1v1h-1zM32 34h1v1h-1zM32 38h1v1h-1zM32 40h1v1h-1zM32 44h1v1h-1zM32 50h1v1h-1zM33 3h1v1h-1zM33 5h1v1h-1zM33 9h1v1h-1zM33 11h1v1h-1zM33 15h1v1h-1zM33 17h1v1h-1zM33 21h1v1h-1zM33 27h1v1h-1zM33 29h1v1h-1zM33 41h1v1h-1zM33 43h1v1h-1zM33 51h1v1h-1zM33 55h1v1h-1zM33 57h1v1h-1zM34 30h1v1h-1zM34 36h1v1h-1zM34 42h1v1h-1zM34 54h1v1h-1zM35 1h1v1h-1zM35 7h1v1h-1zM35 15h1v1h-1zM35 17h1v1h-1zM35 21h1v1h-1zM35 27h1v1h-1zM35 33h1v1h-1zM35 37h1v1h-1zM35 41h1v1h-1zM35 47h1v1h-1zM35 59h1v1h-1zM36 26h1v1h-1zM36 30h1v1h-1zM36 42h1v1h-1zM36 50h1v1h-1zM36 54h1v1h-1zM36 56h1v1h-1zM36 60h1v1h-1zM37 1h1v1h-1zM37 7h1v1h-1zM37 19h1v1h-1zM37 25h1v1h-1zM37 27h1v1h-1zM37 33h1v1h-1zM37 39h1v1h-1zM37 45h1v1h-1zM38 4h1v1h-1zM38 6h1v1h-1zM38 8h1v1h-1zM38 18h1v1h-1zM38 20h1v1h-1zM38 22h1v1h-1zM38 24h1v1h-1zM38 30h1v1h-1zM38 34h1v1h-1zM38 36h1v1h-1zM38 40h1v1h-1zM38 50h1v1h-1zM38 52h1v1h-1zM38 56h1v1h-1zM38 58h1v1h-1zM39 5h1v1h-1zM39 15h1v1h-1zM39 21h1v1h-1zM39 35h1v1h-1zM39 47h1v1h-1zM39 49h1v1h-1zM39 59h1v1h-1zM40 10h1v1h-1zM40 16h1v1h-1zM40 22h1v1h-1zM40 28h1v1h-1zM40 34h1v1h-1zM40 48h1v1h-1zM40 60h1v1h-1zM41 3h1v1h-1zM41 7h1v1h-1zM41 9h1v1h-1zM41 13h1v1h-1zM41 17h1v1h-1zM41 19h1v1h-1zM41 21h1v1h-1zM41 25h1v1h-1zM41 33h1v1h-1zM41 39h1v1h-1zM41 43h1v1h-1zM41 59h1v1h-1zM42 0h1v1h-1zM42 6h1v1h-1zM42 14h1v1h-1zM42 24h1v1h-1zM42 30h1v1h-1zM42 44h1v1h-1zM42 54h1v1h-1zM43 1h1v1h-1zM43 7h1v1h-1zM43 21h1v1h-1zM43 25h1v1h-1zM43 27h1v1h-1zM43 37h1v1h-1zM43 57h1v1h-1zM44 0h1v1h-1zM44 6h1v1h-1zM44 8h1v1h-1zM44 10h1v1h-1zM44 16h1v1h-1zM44 22h1v1h-1zM44 30h1v1h-1zM44 34h1v1h-1zM44 40h1v1h-1zM44 46h1v1h-1zM44 52h1v1h-1zM44 56h1v1h-1zM45 23h1v1h-1zM45 27h1v1h-1zM45 29h1v1h-1zM45 33h1v1h-1zM45 47h1v1h-1zM45 55h1v1h-1zM45 59h1v1h-1zM46 4h1v1h-1zM46 16h1v1h-1zM46 24h1v1h-1zM46 30h1v1h-1zM46 36h1v1h-1zM46 40h1v1h-1zM46 48h1v1h-1zM46 54h1v1h-1zM47 1h1v1h-1zM47 5h1v1h-1zM47 11h1v1h-1zM47 13h1v1h-1zM47 19h1v1h-1zM47 27h1v1h-1zM47 33h1v1h-1zM47 39h1v1h-1zM47 43h1v1h-1zM47 45h1v1h-1zM47 53h1v1h-1zM47 55h1v1h-1zM47 59h1v1h-1zM48 14h1v1h-1zM48 24h1v1h-1zM48 36h1v1h-1zM48 42h1v1h-1zM48 44h1v1h-1zM48 56h1v1h-1zM48 60h1v1h-1zM49 19h1v1h-1zM49 37h1v1h-1zM49 45h1v1h-1zM49 51h1v1h-1zM50 2h1v1h-1zM50 4h1v1h-1zM50 12h1v1h-1zM50 18h1v1h-1zM50 22h1v1h-1zM50 28h1v1h-1zM50 40h1v1h-1zM50 48h1v1h-1zM50 56h1v1h-1zM51 9h1v1h-1zM51 11h1v1h-1zM51 23h1v1h-1zM51 33h1v1h-1zM51 35h1v1h-1zM51 39h1v1h-1zM51 53h1v1h-1zM51 57h1v1h-1zM52 4h1v1h-1zM52 12h1v1h-1zM52 22h1v1h-1zM52 24h1v1h-1zM52 28h1v1h-1zM52 30h1v1h-1zM52 34h1v1h-1zM52 40h1v1h-1zM52 54h1v1h-1zM53 1h1v1h-1zM53 9h1v1h-1zM53 15h1v1h-1zM53 25h1v1h-1zM53 39h1v1h-1zM53 49h1v1h-1zM53 51h1v1h-1zM54 0h1v1h-1zM54 12h1v1h-1zM54 20h1v1h-1zM54 24h1v1h-1zM54 26h1v1h-1zM54 42h1v1h-1zM54 50h1v1h-1zM55 9h1v1h-1zM55 15h1v1h-1zM55 19h1v1h-1zM55 33h1v1h-1zM55 39h1v1h-1zM55 45h1v1h-1zM55 57h1v1h-1zM56 2h1v1h-1zM56 10h1v1h-1zM56 24h1v1h-1zM56 36h1v1h-1zM56 40h1v1h-1zM56 48h1v1h-1zM57 5h1v1h-1zM57 9h1v1h-1zM57 15h1v1h-1zM57 23h1v1h-1zM57 29h1v1h-1zM57 33h1v1h-1zM57 47h1v1h-1zM58 4h1v1h-1zM58 16h1v1h-1zM58 22h1v1h-1zM58 34h1v1h-1zM58 42h1v1h-1zM58 46h1v1h-1zM58 60h1v1h-1zM59 1h1v1h-1zM59 7h1v1h-1zM59 9h1v1h-1zM59 37h1v1h-1zM59 49h1v1h-1zM59 51h1v1h-1zM59 55h1v1h-1zM59 57h1v1h-1zM60 0h1v1h-1zM60 2h1v1h-1zM60 8h1v1h-1zM60 12h1v1h-1zM60 14h1v1h-1zM60 24h1v1h-1zM60 30h1v1h-1zM60 42h1v1h-1zM60 50h1v1h-1z"/></svg>
+  <!-- NOMBRE -->
+  <h1>Matemáticas jugables</h1>
+  <p class="frase">Cuatro puzles para jugar en el navegador o en el móvil. Gratuitos, sin anuncios y sin recoger datos.</p>
+  <p class="autoria">Los hace <a href="https://matematicasjosepfont.es">Josep Font</a>, profesor de matemáticas.</p>
+</header>
+
+<main class="pared limite">
+
+  <!-- ══════════════ 1 · RUTA MÍNIMA ══════════════ -->
+  <article class="obra obra--ruta" style="--acento:var(--c-ruta)">
+    <div class="colgadura">
+      <span class="cable" aria-hidden="true"></span>
+      <figure>
+        <svg viewBox="0 0 200 288" role="img" aria-label="Un grafo de siete vértices con las aristas numeradas; el camino más corto entre los dos vértices marcados, de peso doce, aparece resaltado.">
+          <!-- 7 vértices, 10 aristas. El camino resaltado A-C-D-F-G pesa
+               3+4+3+2 = 12 y es el mínimo entre los dos vértices marcados. -->
+          <g fill="none" stroke="var(--tinta-2)" stroke-width="1.1">
+            <path d="M36 44 L150 34"/><path d="M36 44 L96 118"/><path d="M150 34 L96 118"/>
+            <path d="M150 34 L184 120"/><path d="M96 118 L184 120"/><path d="M96 118 L42 182"/>
+            <path d="M184 120 L150 196"/><path d="M42 182 L150 196"/><path d="M42 182 L96 262"/>
+            <path d="M150 196 L96 262"/>
+          </g>
+          <g fill="none" stroke="var(--c-ruta)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M36 44 L96 118 L184 120 L150 196 L96 262"/>
+          </g>
+          <g font-family="Fraunces, serif" font-size="11.5" font-weight="500" fill="var(--tinta-2)" text-anchor="middle">
+            <text x="93" y="32">7</text><text x="52" y="86">3</text><text x="135" y="84">2</text>
+            <text x="178" y="72">5</text><text x="140" y="110">4</text><text x="57" y="146">6</text>
+            <text x="180" y="158">3</text><text x="96" y="181">4</text>
+            <text x="55" y="226">8</text><text x="136" y="233">2</text>
+          </g>
+          <g fill="var(--papel)" stroke="var(--tinta)" stroke-width="1.4">
+            <circle cx="150" cy="34" r="6"/><circle cx="96" cy="118" r="6"/>
+            <circle cx="184" cy="120" r="6"/><circle cx="42" cy="182" r="6"/>
+            <circle cx="150" cy="196" r="6"/>
+          </g>
+          <g fill="var(--c-ruta)" stroke="var(--papel)" stroke-width="2">
+            <circle cx="36" cy="44" r="8"/><circle cx="96" cy="262" r="8"/>
+          </g>
+        </svg>
+      </figure>
+      <span class="lastre" aria-hidden="true"></span>
+    </div>
+    <div class="cartela">
+      <h2><a href="/ruta-minima/">Ruta mínima</a></h2>
+      <p class="materia">Grafos y optimización</p>
+      <div class="regla"></div>
+      <p class="nota">Encuentra el camino más corto entre todos los posibles.</p>
+      <p class="ficha">Navegador y móvil</p>
+    </div>
+  </article>
+
+  <!-- ══════════════ 2 · MONDRIAN ══════════════ -->
+  <article class="obra obra--mondrian" style="--acento:var(--c-mondrian)">
+    <div class="colgadura">
+      <span class="cable" aria-hidden="true"></span>
+      <figure>
+        <svg viewBox="0 0 242 242" role="img" aria-label="Un cuadrado de once por once dividido en cinco rectángulos de medidas distintas; tres están pintados.">
+          <rect x="1" y="1" width="240" height="240" fill="var(--papel)"/>
+          <!-- 11×11 → 11×2 | 5×5 | 6×4 | 5×4 | 6×5 -->
+          <g>
+            <rect x="1"   y="1"   width="240" height="43.6" fill="var(--c-mondrian)"/>
+            <rect x="110" y="44.6" width="131" height="87.2" fill="var(--c-mimizu)"/>
+            <rect x="110" y="131.8" width="131" height="109.2" fill="var(--c-productos)"/>
+          </g>
+          <g stroke="var(--tinta)" stroke-width="3.2" fill="none" shape-rendering="crispEdges">
+            <path d="M1 44.6 H241"/><path d="M110 44.6 V241"/>
+            <path d="M1 153.6 H110"/><path d="M110 131.8 H241"/>
+            <rect x="1.6" y="1.6" width="238.8" height="238.8"/>
+          </g>
+        </svg>
+      </figure>
+      <span class="lastre" aria-hidden="true"></span>
+    </div>
+    <div class="cartela">
+      <h2><a href="/mondrian/">Mondrian</a></h2>
+      <p class="materia">Áreas y optimización</p>
+      <div class="regla"></div>
+      <p class="nota">Divide el cuadrado en rectángulos distintos y minimiza la diferencia entre el mayor y el menor.</p>
+      <p class="ficha">Navegador y Android</p>
+      <!-- Cuando tengas el id del paquete, descomenta esta línea y ponlo:
+      <a class="tienda" href="https://play.google.com/store/apps/details?id=EL_ID_DEL_PAQUETE">En Google Play</a>
+      -->
+    </div>
+  </article>
+
+  <!-- ══════════════ 3 · MIMIZU ══════════════ -->
+  <article class="obra obra--mimizu" style="--acento:var(--c-mimizu)">
+    <div class="colgadura">
+      <span class="cable" aria-hidden="true"></span>
+      <figure>
+        <svg viewBox="0 0 236 244" role="img" aria-label="Una cuadrícula de dieciséis números recorrida por una lombriz que solo pasa entre números consecutivos o con un factor común.">
+          <g fill="none" stroke="var(--hilo)" stroke-width="1" opacity=".55">
+            <path d="M18 18 H218 M18 70 H218 M18 122 H218 M18 174 H218 M18 226 H218"/>
+            <path d="M18 18 V226 M68 18 V226 M118 18 V226 M168 18 V226 M218 18 V226"/>
+          </g>
+          <path d="M43 44 L43 96 L93 96 L93 44 L143 44 L193 44 L193 96 L143 96 L143 148 L193 148 L193 200 L143 200 L93 200 L93 148 L43 148 L43 200"
+                fill="none" stroke="var(--c-mimizu-tinte)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="43" cy="44" r="9.5" fill="var(--c-mimizu)"/>
+          <circle cx="43" cy="200" r="4" fill="var(--c-mimizu)"/>
+          <g font-family="Fraunces, serif" font-size="19" fill="var(--tinta)" text-anchor="middle" dominant-baseline="central">
+            <text x="43" y="44">6</text><text x="93" y="44">18</text><text x="143" y="44">24</text><text x="193" y="44">25</text>
+            <text x="43" y="96">3</text><text x="93" y="96">9</text><text x="143" y="96">15</text><text x="193" y="96">5</text>
+            <text x="43" y="148">4</text><text x="93" y="148">2</text><text x="143" y="148">16</text><text x="193" y="148">20</text>
+            <text x="43" y="200">8</text><text x="93" y="200">14</text><text x="143" y="200">7</text><text x="193" y="200">21</text>
+          </g>
+        </svg>
+      </figure>
+      <span class="lastre" aria-hidden="true"></span>
+    </div>
+    <div class="cartela">
+      <h2><a href="/mimizu/">Mimizu</a></h2>
+      <p class="materia">Primos y divisibilidad</p>
+      <div class="regla"></div>
+      <p class="nota">La lombriz solo pasa entre números consecutivos o con un factor común.</p>
+      <p class="ficha">Navegador y Android, funciona sin conexión</p>
+    </div>
+  </article>
+
+  <!-- ══════════════ 4 · PRODUCTOS CRUZADOS ══════════════ -->
+  <article class="obra obra--productos" style="--acento:var(--c-productos)">
+    <div class="colgadura">
+      <span class="cable" aria-hidden="true"></span>
+      <figure>
+        <svg viewBox="0 0 216 244" role="img" aria-label="Una tabla de tres por tres con huecos, y al margen el producto que debe dar cada fila y cada columna.">
+          <g stroke="var(--tinta-2)" stroke-width="1.2" fill="none">
+            <rect x="14" y="14" width="150" height="150"/>
+            <path d="M64 14 V164 M114 14 V164 M14 64 H164 M14 114 H164"/>
+          </g>
+          <g font-family="Fraunces, serif" font-size="21" fill="var(--tinta)" text-anchor="middle" dominant-baseline="central">
+            <text x="39" y="40">2</text><text x="139" y="40">4</text>
+            <text x="39" y="90">7</text><text x="89" y="90">5</text>
+            <text x="89" y="140">1</text><text x="139" y="140">8</text>
+          </g>
+          <g stroke="var(--hilo)" stroke-width="1.6" fill="none">
+            <path d="M78 34 H100 M28 134 H50 M128 84 H150"/>
+          </g>
+          <g font-family="Fraunces, serif" font-size="17" font-weight="500" fill="var(--c-productos-texto)" text-anchor="middle" dominant-baseline="central">
+            <text x="190" y="40">72</text><text x="190" y="90">105</text><text x="190" y="140">48</text>
+            <text x="39" y="190">84</text><text x="89" y="190">45</text><text x="139" y="190">96</text>
+          </g>
+        </svg>
+      </figure>
+      <span class="lastre" aria-hidden="true"></span>
+    </div>
+    <div class="cartela">
+      <h2><a href="/productos/">Productos cruzados</a></h2>
+      <p class="materia">Multiplicación y divisibilidad</p>
+      <div class="regla"></div>
+      <p class="nota">Completa la tabla para que cada fila y cada columna den su producto.</p>
+      <p class="ficha">Navegador, en seis idiomas, con reto diario</p>
+    </div>
+  </article>
+
+</main>
+
+<footer class="limite">
+  <p>Los cuatro juegos son gratuitos, no llevan anuncios y se pueden instalar en el móvil. Los hace Josep Font, profesor de matemáticas en Valencia.</p>
+  <nav aria-label="Enlaces del pie">
+    <a href="mailto:hola@matematicasjosepfont.es">Escribir</a>
+    <a href="/privacidad/">Privacidad</a>
+    <a href="https://matematicasjosepfont.es">Sobre mí</a>
+  </nav>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"CollectionPage",
+  "name":"Matemáticas jugables",
+  "url":"https://juegos.matematicasjosepfont.es/",
+  "author":{"@type":"Person","name":"Josep Font"},
+  "hasPart":[
+    {"@type":"Game","name":"Ruta mínima","url":"https://juegos.matematicasjosepfont.es/ruta-minima/","about":"Grafos y caminos óptimos"},
+    {"@type":"Game","name":"Mondrian","url":"https://juegos.matematicasjosepfont.es/mondrian/","about":"Áreas y optimización"},
+    {"@type":"Game","name":"Mimizu","url":"https://juegos.matematicasjosepfont.es/mimizu/","about":"Primos y divisibilidad"},
+    {"@type":"Game","name":"Productos cruzados","url":"https://juegos.matematicasjosepfont.es/productos/","about":"Multiplicación y divisibilidad"}
+  ]
+}
+</script>
+
+</body>
+</html>

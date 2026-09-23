@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://juegos.matematicasjosepfont.es/sitemap.xml
