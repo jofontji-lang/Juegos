@@ -35,7 +35,7 @@ self.addEventListener('activate', evento => {
   evento.waitUntil(
     caches.keys()
       .then(claves => Promise.all(
-        claves.filter(k => k !== VERSION).map(k => caches.delete(k))
+        claves.filter(k => k.startsWith('mondrian-') && k !== VERSION).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   );

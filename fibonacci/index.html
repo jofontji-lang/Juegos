@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- NOMBRE: «Fibo» es provisional; la carpeta /fibonacci/ no cambia aunque cambie el nombre -->
+<title>Fibo · el juego de Leonardo de Pisa</title>
+<meta name="description" content="Un 2048 con la sucesión de Fibonacci: solo se unen vecinos de la sucesión y tu mejor ficha te acerca al número áureo φ. Con reto diario.">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/fibonacci/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#EEE2C4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1D170F" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/fibonacci/">
+<meta property="og:title" content="Fibo · el juego de Leonardo de Pisa">
+<meta property="og:description" content="Un 2048 con la sucesión de Fibonacci: solo se unen vecinos de la sucesión y tu mejor ficha te acerca al número áureo φ. Con reto diario.">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/fibonacci/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="preload" href="fonts/gabarito-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Lo oculto se oculta siempre, aunque la clase diga display:flex (si no, el panel final tapa el tablero) */
+[hidden]{display:none!important}
+/* Fuentes alojadas en el propio sitio (sin Google Fonts) para poder jugar sin conexión */
+@font-face{font-family:"Gabarito";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/gabarito-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Gabarito";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/gabarito-latin-800-normal.woff2") format("woff2")}
+@font-face{font-family:"Gabarito";font-style:normal;font-weight:900;font-display:swap;src:url("fonts/gabarito-latin-900-normal.woff2") format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Texturina";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/texturina-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"EB Garamond";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/eb-garamond-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"EB Garamond";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/eb-garamond-latin-400-italic.woff2") format("woff2")}
+@font-face{font-family:"EB Garamond";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/eb-garamond-latin-600-normal.woff2") format("woff2")}
+
+/* ---------- Portada: folio de manuscrito iluminado (Liber Abaci, Pisa, 1202) ----------
+   Layout: un folio enmarcado con doble filete rubricado; arriba el íncipit en rojo, la inicial
+   iluminada F sobre lapislázuli y oro, el diagrama de cuadrados de Fibonacci con la espiral
+   en pan de oro, los modos como capítulos con calderón, y la glosa marginal de los conejos al pie. */
+:root{
+  --vellum:#EEE2C4; --vellum-2:#E2D2AC; --iron:#2A1C10; --faded:#6B5638;
+  --rubric:#A8321F; --lapis:#24427F; --verdigris:#3B735A; --gold:#B8872A; --gold-hi:#E6C266;
+  --grain:.5;
+  --gothic:"Texturina", "UnifrakturMaguntia", "Old English Text MT", Georgia, serif;
+  --book:"EB Garamond", Garamond, "Palatino Linotype", Georgia, serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --vellum:#1D170F; --vellum-2:#2A2116; --iron:#ECDFC2; --faded:#B5A07C;
+  --rubric:#E06A4E; --lapis:#5C7FC4; --verdigris:#6AAE8C; --gold:#D9AE4C; --gold-hi:#F3D27E; --grain:.25 } }
+:root[data-theme="dark"]{
+  --vellum:#1D170F; --vellum-2:#2A2116; --iron:#ECDFC2; --faded:#B5A07C;
+  --rubric:#E06A4E; --lapis:#5C7FC4; --verdigris:#6AAE8C; --gold:#D9AE4C; --gold-hi:#F3D27E; --grain:.25 }
+
+.cover{position:fixed;inset:0;z-index:30;overflow-y:auto;background:radial-gradient(120% 90% at 50% 40%,var(--vellum) 55%,var(--vellum-2));color:var(--iron);font-family:var(--book);transition:opacity .35s ease,transform .35s ease}
+.cover::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--grain);mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45  0 0 0 0 .33  0 0 0 0 .18  0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cover.leaving{opacity:0;transform:scale(1.02)}
+.folio{position:relative;max-width:440px;margin:0 auto;padding-inline:16px;padding-block:14px;box-sizing:border-box;min-height:100%;display:flex}
+.frame{flex:1;border:3px double var(--rubric);outline:1px solid var(--lapis);outline-offset:-9px;padding:22px 18px 16px;display:flex;flex-direction:column;gap:14px}
+.incipit{margin:0;text-align:center;font:700 .82rem/1.35 var(--gothic);color:var(--rubric);letter-spacing:.01em;text-wrap:balance}
+.incipit span{color:var(--lapis)}
+.titling{display:flex;align-items:flex-end;justify-content:center;gap:6px}
+.initial{width:84px;height:84px;flex:none;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle,rgba(255,255,255,.35) 1px,transparent 1.6px) 0 0/9px 9px,var(--lapis);
+  border:3px solid var(--gold);outline:2px solid var(--rubric);outline-offset:2px;box-shadow:inset 0 0 0 3px var(--vellum)}
+.initial::before,.initial::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:var(--rubric);border:2px solid var(--gold)}
+.initial::before{top:-10px;left:-10px}.initial::after{bottom:-10px;right:-10px}
+.initial span{font:700 4.1rem/1 var(--gothic);color:var(--gold-hi);text-shadow:0 1px 0 var(--gold),0 0 1px #000;transform:translateY(-2px)}
+.word{font:700 3.9rem/.9 var(--gothic);color:var(--iron);letter-spacing:-.01em;padding-bottom:4px}
+.sub{margin:0;text-align:center;font:italic 400 1.08rem/1.35 var(--book);color:var(--faded);text-wrap:balance}
+.diagram{width:100%;max-width:100%;height:auto;display:block}
+.diagram .sq{stroke:var(--iron);stroke-width:.06}
+.diagram text{font-family:var(--book);font-weight:600;font-feature-settings:"onum";fill:var(--vellum)}
+.diagram .spiral{fill:none;stroke:var(--gold-hi);stroke-width:.32;stroke-linecap:round;filter:drop-shadow(0 0 .12px var(--iron))}
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:ink 2.2s .25s cubic-bezier(.45,.05,.3,1) forwards}
+@keyframes ink{to{stroke-dashoffset:0}}
+.cap{margin:0;text-align:center;font:italic 400 .86rem/1.3 var(--book);color:var(--faded)}
+.modes{display:flex;flex-direction:column;border-top:1px solid var(--faded);margin-top:2px}
+.mode{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 12px;text-align:left;width:100%;border:0;border-bottom:1px solid var(--faded);background:none;color:var(--iron);padding:12px 6px;cursor:pointer;font-family:var(--book)}
+.mode:hover{background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.mode:focus-visible{outline:2px solid var(--rubric);outline-offset:-2px}
+.mode .pil{grid-row:span 2;font:600 1.9rem/1 var(--book);color:var(--rubric)}
+.mode b{font:700 1.3rem/1.1 var(--gothic);color:var(--iron)}
+.mode small{grid-column:2;font:400 .98rem/1.3 var(--book);color:var(--faded);min-width:0}
+.mode .rec{grid-row:1/span 2;grid-column:3;text-align:right;font:400 .78rem/1.25 var(--book);color:var(--faded);font-feature-settings:"onum";font-variant-numeric:oldstyle-nums}
+.mode .rec em{display:block;font:600 1.15rem var(--book);color:var(--lapis);font-style:normal}
+.gloss{margin:auto 0 0;padding-top:8px;font:italic 400 .82rem/1.45 var(--book);color:var(--faded);text-align:center;text-wrap:balance}
+.gloss b{font-style:normal;font-weight:600;color:var(--rubric)}
+@media (prefers-reduced-motion: reduce){.draw{animation:none;stroke-dashoffset:0}.cover{transition:none}}
+@media (max-height:640px){.diagram{max-height:150px}.initial{width:68px;height:68px}.initial span{font-size:3.3rem}.word{font-size:3.1rem}}
+
+/* botón de vuelta a la portada en la pantalla de juego */
+.back{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;width:38px;height:38px;font:700 1.2rem/1 var(--body);cursor:pointer;flex:none}
+.modechip{font:700 .78rem/1 var(--body);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 12px}
+.brand{display:flex;align-items:center;gap:10px}
+/* Layout: one-screen sliding puzzle — score + golden-ratio readout, 4×4 board in sunflower tones, a fact line that updates with every new record tile */
+:root{
+  --bg:#E8EEE5; --surface:#FFFFFF; --ink:#1C2618; --muted:#5D6B57; --line:#CCD8C6; --cell:#D9E2D4;
+  --t1:#FBF1C7; --t2:#F8E39A; --t3:#F5CF5E; --t4:#F0B634; --t5:#E99A1E; --t6:#D9781A; --t7:#BC571B; --t8:#8E3F1C; --t9:#5E3A20; --t10:#3C5A2A; --t11:#24452A;
+  --phi:#B8860B;
+  --display:"Gabarito", "Avenir Next", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#111810; --surface:#1A2318; --ink:#E8EFE4; --muted:#9AAA93; --line:#2A3626; --cell:#222D1F; --phi:#F2C14E; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#111810; --surface:#1A2318; --ink:#E8EFE4; --muted:#9AAA93; --line:#2A3626; --cell:#222D1F; --phi:#F2C14E; color-scheme:dark }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-tap-highlight-color:transparent;overflow:hidden}
+.app{height:100%;max-width:480px;margin:0 auto;padding-inline:16px;padding-block:10px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font:900 2rem/1 var(--display);margin:0;letter-spacing:-.03em}
+h1 span{color:var(--t5)}
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;color:var(--muted);font:700 .78rem/1 var(--body);padding:8px 11px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.scores{display:flex;gap:8px}
+.box{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.box small{display:block;font:700 .62rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.box b{font:800 1.3rem var(--display);font-variant-numeric:tabular-nums}
+.phi{font:400 .9rem/1.4 var(--body);color:var(--muted);margin:0;min-height:2.6em}
+.phi b{color:var(--phi);font-weight:700;font-variant-numeric:tabular-nums}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.board{position:relative;background:var(--line);border-radius:16px;touch-action:none;user-select:none}
+.cell{position:absolute;background:var(--cell);border-radius:10px}
+.tile{position:absolute;border-radius:10px;display:grid;place-items:center;font:900 var(--fs,2rem)/1 var(--display);font-variant-numeric:tabular-nums;transition:transform .11s ease-in-out;will-change:transform}
+.tile.new{animation:appear .16s ease-out}
+.tile.merged{animation:pop .18s ease-out}
+@keyframes appear{from{opacity:0;scale:.4}to{opacity:1;scale:1}}
+@keyframes pop{50%{scale:1.15}}
+.tools{display:flex;gap:8px}
+.tools button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 6px;font:700 .85rem var(--body);cursor:pointer}
+.tools button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:3px solid var(--t5);outline-offset:2px}
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding-inline:16px;padding-block:16px calc(16px + env(safe-area-inset-bottom,0px));z-index:10}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;width:100%;max-width:440px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.panel h2{font:900 1.6rem/1.1 var(--display);margin:0;text-wrap:balance}
+.panel p{margin:0;line-height:1.5;color:var(--muted)}
+.panel p strong{color:var(--ink)}
+.chain{font:800 1.05rem var(--display);text-align:center;color:var(--ink)}
+.emoji{text-align:center;font-size:1.3rem;line-height:1.2;white-space:pre}
+.primary{border:0;background:var(--ink);color:var(--bg);border-radius:14px;padding:14px;font:900 1rem var(--display);cursor:pointer}
+.ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:13px;font:700 .95rem var(--body);cursor:pointer}
+.row{display:flex;gap:10px}.row>*{flex:1}
+textarea{width:100%;box-sizing:border-box;font:400 .8rem var(--body);border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font:700 .85rem var(--body);padding:10px 16px;border-radius:999px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion: reduce){.tile{transition:none}.tile.new,.tile.merged{animation:none}}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <button class="back" id="back" aria-label="Volver a la portada">‹</button>
+      <h1>Fibo<span>.</span></h1>
+    </div>
+    <span class="modechip" id="modechip">Libre</span>
+  </header>
+  <div class="scores">
+    <div class="box"><small>Puntos</small><b id="score">0</b></div>
+    <div class="box"><small>Mejor ficha</small><b id="max">1</b></div>
+    <div class="box"><small>Récord</small><b id="best">0</b></div>
+  </div>
+  <p class="phi" id="phi">Desliza para mover. Solo se unen vecinos de Fibonacci: 1+1, 1+2, 2+3, 3+5…</p>
+  <div class="stage" id="stage"><div class="board" id="board" aria-label="Tablero"></div></div>
+  <div class="tools">
+    <button id="undo">Deshacer (1)</button>
+    <button id="restart">Nueva partida</button>
+  </div>
+</div>
+
+<section class="cover" id="cover" aria-label="Portada">
+  <div class="folio"><div class="frame">
+    <p class="incipit">Incipit liber Abaci compositus a <span>Leonardo filio Bonacci Pisano</span> in anno M·cc·ii</p>
+    <div class="titling" aria-label="Fibo">
+      <div class="initial" aria-hidden="true"><span>F</span></div>
+      <div class="word" aria-hidden="true">ibo</div>
+    </div>
+    <p class="sub">El juego de los números de Leonardo de Pisa</p>
+    <svg class="diagram" id="diagram" role="img" aria-label="Cuadrados de lados 1, 1, 2, 3, 5, 8 y 13 con la espiral áurea"></svg>
+    <p class="cap">Cada cuadrado mide lo que los dos anteriores juntos.</p>
+    <nav class="modes" aria-label="Modos de juego">
+      <button class="mode" id="m-free">
+        <span class="pil" aria-hidden="true">¶</span>
+        <b>Partida libre</b>
+        <small id="m-free-sub">Juega sin prisa y supera tu récord.</small>
+        <span class="rec">récord<em id="m-free-rec">0</em></span>
+      </button>
+      <button class="mode" id="m-day">
+        <span class="pil" aria-hidden="true">¶</span>
+        <b>Reto del día</b>
+        <small id="m-day-sub">Las mismas fichas para todos hoy.</small>
+        <span class="rec">hoy<em id="m-day-rec">0</em></span>
+      </button>
+    </nav>
+    <p class="gloss">En el margen del manuscrito, las parejas de conejos mes a mes:<br><b>Par</b> 1 · <b>Primus</b> 2 · <b>Secundus</b> 3 · <b>Tercius</b> 5 · <b>Quartus</b> 8 · <b>Quintus</b> 13 · <b>Sextus</b> 21 · <b>Septimus</b> 34 · <b>Octavus</b> 55 · <b>Nonus</b> 89 · <b>Decimus</b> 144 · <b>Undecimus</b> 233 · <b>Duodecimus</b> 377</p>
+  </div></div>
+</section>
+
+<div class="sheet" id="over" hidden>
+  <div class="panel">
+    <h2 id="o-title">Sin movimientos</h2>
+    <p id="o-text"></p>
+    <div class="chain" id="o-phi"></div>
+    <div class="emoji" id="o-grid"></div>
+    <textarea id="o-copy" rows="5" hidden aria-label="Texto para compartir"></textarea>
+    <div class="row"><button class="ghost" id="o-home">Portada</button><button class="ghost" id="o-share">Compartir</button><button class="primary" id="o-again">Otra</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  // mulberry32 con estado legible y restaurable: deshacer devuelve también el generador
+  // al punto anterior, así repetir el movimiento produce exactamente la misma ficha.
+  function rng(seed){
+    const f = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    f.get = () => seed; f.set = s => { seed = s; };
+    return f;
+  }
+  const FIB = [1, 2]; while (FIB.length < 60) FIB.push(FIB.at(-1) + FIB.at(-2));
+  const FSET = new Set(FIB);
+  const canMerge = (a, b) => FSET.has(a + b) && (a !== b || a === 1);
+  const rank = v => FIB.indexOf(v); // 1→0, 2→1, 3→2, 5→3…
+  const PHI = (1 + Math.sqrt(5)) / 2;
+  const FACTS = {
+    3: "Muchas flores tienen 3, 5 u 8 pétalos.",
+    5: "Suma las diagonales del triángulo de Pascal: salen 1, 1, 2, 3, 5, 8…",
+    8: "Cada número es la suma de los dos anteriores. Leonardo de Pisa los usó en 1202 para contar conejos.",
+    13: "Las piñas suelen tener 8 espirales en un sentido y 13 en el otro.",
+    21: "La razón entre vecinos se acerca a φ alternando: un poco por encima, un poco por debajo.",
+    34: "Los girasoles muestran a menudo 34 y 55 espirales.",
+    55: "55 = 1 + 2 + … + 10. Es Fibonacci y triangular a la vez.",
+    89: "1/89 = 0,0112359…: sus decimales empiezan con los números de Fibonacci.",
+    144: "144 = 12² es el único cuadrado perfecto de la sucesión, aparte de 1.",
+    233: "233 es primo. Si un Fibonacci es primo, su posición también lo es (salvo el 3).",
+    377: "377 millas ≈ 607 km: para pasar de millas a km, salta al siguiente Fibonacci.",
+    610: "La fórmula de Binet da cada término con potencias de φ, aunque φ sea irracional.",
+    987: "Dos Fibonacci consecutivos nunca tienen un divisor común.",
+    1597: "Eres de los pocos que ven esta ficha. Cada nueva cuesta unas φ veces más que la anterior.",
+    2584: "2584 = 2³ · 17 · 19 es el término 18 de la sucesión. Muy pocos llegan hasta aquí."
+  };
+
+  const N = 4;
+  let mode = "free", R = rng(1), G = null, undoState = null, undoLeft = 1, nextId = 1;
+  let busy = false;
+  function todayKey(){ const d = new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; }
+
+  // ---------- board geometry ----------
+  let size = 320, gap = 10, cellSize = 0;
+  function layout(){
+    const st = $("stage").getBoundingClientRect();
+    size = Math.floor(Math.min(st.width, st.height, 460)); gap = Math.max(6, Math.round(size * .03));
+    cellSize = (size - gap * (N + 1)) / N;
+    const b = $("board"); b.style.width = b.style.height = size + "px";
+    b.querySelectorAll(".cell").forEach(c => c.remove());
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+      const el = document.createElement("div"); el.className = "cell";
+      Object.assign(el.style, { width: cellSize + "px", height: cellSize + "px", left: gap + c * (cellSize + gap) + "px", top: gap + r * (cellSize + gap) + "px" });
+      b.prepend(el);
+    }
+    G && G.tiles.forEach(t => place(t, false));
+  }
+  const xy = (r, c) => [gap + c * (cellSize + gap), gap + r * (cellSize + gap)];
+  function tileColors(v){
+    const k = Math.min(rank(v), 10), css = getComputedStyle(document.documentElement);
+    const bg = css.getPropertyValue("--t" + (k + 1)).trim();
+    return { bg, fg: k >= 5 ? "#FFF8EC" : "#2A1E08" };
+  }
+  function place(t, animate){
+    if (!t.el){
+      t.el = document.createElement("div"); t.el.className = "tile new";
+      $("board").append(t.el);
+    }
+    const [x, y] = xy(t.r, t.c), { bg, fg } = tileColors(t.v), digits = String(t.v).length;
+    Object.assign(t.el.style, { width: cellSize + "px", height: cellSize + "px", background: bg, color: fg, transform: `translate(${x}px, ${y}px)` });
+    t.el.style.setProperty("--fs", (cellSize * (digits <= 2 ? .44 : digits === 3 ? .36 : digits === 4 ? .28 : .22)) + "px");
+    t.el.textContent = t.v;
+    if (!animate) t.el.style.transition = "none", requestAnimationFrame(() => t.el && (t.el.style.transition = ""));
+  }
+
+  // ---------- game logic ----------
+  function emptyCells(){ const occ = new Set(G.tiles.map(t => t.r * N + t.c)); const e = []; for (let k = 0; k < N * N; k++) if (!occ.has(k)) e.push(k); return e; }
+  function spawn(){
+    const e = emptyCells(); if (!e.length) return;
+    const k = e[Math.floor(R() * e.length)];
+    const t = { id: nextId++, v: R() < .9 ? 1 : 2, r: Math.floor(k / N), c: k % N };
+    G.tiles.push(t); place(t, false);
+  }
+  function newGame(){
+    R = rng(mode === "day" ? Number(todayKey()) : (Math.random() * 4294967296) >>> 0);
+    $("board").querySelectorAll(".tile").forEach(e => e.remove());
+    G = { tiles: [], score: 0, max: 1, over: false };
+    undoState = null; undoLeft = 1;
+    spawn(); spawn(); hud();
+    $("phi").textContent = "Desliza para mover. Solo se unen vecinos de Fibonacci: 1+1, 1+2, 2+3, 3+5…";
+    $("over").hidden = true;
+  }
+  function snapshot(){ return { tiles: G.tiles.map(t => ({ v: t.v, r: t.r, c: t.c })), score: G.score, max: G.max, seedState: R.get() }; }
+  function move(dir){
+    if (!G || G.over || busy) return;
+    const before = snapshot();
+    const grid = Array.from({ length: N }, () => Array(N).fill(null));
+    G.tiles.forEach(t => grid[t.r][t.c] = t);
+    let moved = false, gained = 0; const absorbed = [];
+    for (let i = 0; i < N; i++){
+      const line = [];
+      for (let j = 0; j < N; j++){
+        const [r, c] = dir === 0 ? [j, i] : dir === 2 ? [N - 1 - j, i] : dir === 3 ? [i, j] : [i, N - 1 - j];
+        line.push([r, c]);
+      }
+      const out = [];
+      for (const [r, c] of line){
+        const t = grid[r][c]; if (!t) continue;
+        const last = out.at(-1);
+        if (last && !last.merged && canMerge(last.t.v, t.v)){
+          last.merged = true; t.r = last.t.r; t.c = last.t.c; absorbed.push(t);
+          last.t.v += t.v; gained += last.t.v; moved = true;
+        } else {
+          const [nr, nc] = line[out.length];
+          if (nr !== t.r || nc !== t.c) moved = true;
+          t.r = nr; t.c = nc; out.push({ t, merged: false });
+        }
+      }
+      out.filter(o => o.merged).forEach(o => o.t.justMerged = true);
+    }
+    if (!moved) return;
+    undoState = before;
+    busy = true;
+    G.tiles.forEach(t => { if (!absorbed.includes(t)) place(t, true); });
+    absorbed.forEach(t => { const [x, y] = xy(t.r, t.c); t.el.style.transform = `translate(${x}px, ${y}px)`; t.el.style.zIndex = 0; });
+    setTimeout(() => {
+      absorbed.forEach(t => t.el.remove());
+      G.tiles = G.tiles.filter(t => !absorbed.includes(t));
+      G.tiles.forEach(t => { if (t.justMerged){ t.justMerged = false; place(t, true); t.el.classList.remove("new", "merged"); void t.el.offsetWidth; t.el.classList.add("merged"); } });
+      G.score += gained;
+      const top = Math.max(...G.tiles.map(t => t.v));
+      if (top > G.max){ G.max = top; record(top); }
+      spawn(); hud(); busy = false;
+      if (!canMove()) end();
+    }, 115);
+    try { navigator.vibrate && navigator.vibrate(gained ? 8 : 3); } catch {}
+  }
+  function canMove(){
+    if (emptyCells().length) return true;
+    const grid = Array.from({ length: N }, () => Array(N).fill(0)); G.tiles.forEach(t => grid[t.r][t.c] = t.v);
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+      if (c + 1 < N && canMerge(grid[r][c], grid[r][c + 1])) return true;
+      if (r + 1 < N && canMerge(grid[r][c], grid[r + 1][c])) return true;
+    }
+    return false;
+  }
+  function ratioLine(v){
+    const k = rank(v); if (k < 1) return "";
+    const prev = FIB[k - 1], q = v / prev;
+    return `${v}/${prev} = <b>${q.toFixed(7).replace(".", ",")}</b> · φ = ${PHI.toFixed(7).replace(".", ",")}`;
+  }
+  function record(v){
+    const fact = FACTS[v];
+    $("phi").innerHTML = `${ratioLine(v)}${fact ? "<br>" + fact : ""}`;
+    if (v >= 89) toast(`¡Nueva ficha: ${v}!`);
+  }
+  function hud(){
+    $("score").textContent = G.score.toLocaleString("es-ES");
+    $("max").textContent = G.max;
+    const key = mode === "day" ? "fb.day." + todayKey() : "fb.best";
+    const best = Math.max(store.get(key, 0), G.score); store.set(key, best);
+    $("best").textContent = best.toLocaleString("es-ES");
+    $("undo").disabled = !undoState || undoLeft <= 0 || G.over;
+    $("undo").textContent = `Deshacer (${undoLeft})`;
+  }
+  function undo(){
+    if (!undoState || undoLeft <= 0 || busy) return;
+    $("board").querySelectorAll(".tile").forEach(e => e.remove());
+    G.tiles = undoState.tiles.map(t => ({ ...t, id: nextId++ })); G.score = undoState.score; G.max = undoState.max; G.over = false;
+    R.set(undoState.seedState);
+    G.tiles.forEach(t => place(t, false));
+    undoLeft--; undoState = null; hud();
+  }
+  const EMO = ["⬜", "🟨", "🟨", "🟧", "🟧", "🟥", "🟥", "🟫", "🟫", "🟩", "🟩"];
+  function emojiGrid(){
+    const g = Array.from({ length: N }, () => Array(N).fill("⬛"));
+    G.tiles.forEach(t => g[t.r][t.c] = EMO[Math.min(rank(t.v), 10)]);
+    return g.map(r => r.join("")).join("\n");
+  }
+  function end(){
+    G.over = true; hud();
+    setTimeout(() => {
+      $("o-title").textContent = G.max >= 233 ? "¡Partidón!" : "Sin movimientos";
+      $("o-text").innerHTML = `<strong>${G.score.toLocaleString("es-ES")} puntos</strong>. Tu mejor ficha: <strong>${G.max}</strong>.`;
+      $("o-phi").innerHTML = ratioLine(G.max);
+      $("o-grid").textContent = emojiGrid();
+      $("o-copy").hidden = true; $("over").hidden = false;
+    }, 500);
+  }
+  function shareText(){
+    const d = todayKey(), head = mode === "day" ? `Fibo · Reto ${d.slice(6)}/${d.slice(4,6)}/${d.slice(0,4)}` : "Fibo";
+    const k = rank(G.max), q = k > 0 ? (G.max / FIB[k - 1]).toFixed(6).replace(".", ",") : "1";
+    return `${head}\nLlegué a ${G.max} · ${G.score.toLocaleString("es-ES")} puntos\nφ ≈ ${q}\n${emojiGrid()}\njuegos.matematicasjosepfont.es/fibonacci/`;
+  }
+  function toast(t){ const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 1800); }
+
+  // ---------- input ----------
+  document.addEventListener("keydown", e => {
+    const m = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, ArrowLeft: 3 }[e.key];
+    if (m !== undefined && $("cover").hidden){ e.preventDefault(); move(m); }
+  });
+  let sx = 0, sy = 0, tracking = false;
+  const board = $("stage");
+  board.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; tracking = true; });
+  board.addEventListener("pointerup", e => {
+    if (!tracking) return; tracking = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
+  });
+  board.addEventListener("pointercancel", () => tracking = false);
+  board.style.touchAction = "none";
+
+  $("undo").onclick = undo;
+  $("restart").onclick = newGame;
+  $("o-again").onclick = newGame;
+  // ---------- portada ----------
+  // Diagrama de cuadrados 1,1,2,3,5,8,13 y su espiral, calculados (no dibujados a mano).
+  function drawDiagram(){
+    const F = [1, 1, 2, 3, 5, 8, 13], sq = [{ x: 0, y: 0, s: 1 }], prev = [null];
+    let b = [0, 0, 1, 1];
+    for (let i = 1; i < F.length; i++){
+      const s = F[i], d = (i - 1) % 4;
+      const [x, y] = d === 0 ? [b[2], b[1]] : d === 1 ? [b[0], b[1] - s] : d === 2 ? [b[0] - s, b[1]] : [b[0], b[3]];
+      prev.push(b.slice()); sq.push({ x, y, s });
+      b = [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x + s), Math.max(b[3], y + s)];
+    }
+    const eq = (p, q) => p[0] === q[0] && p[1] === q[1];
+    const corners = q => [[q.x, q.y], [q.x + q.s, q.y], [q.x + q.s, q.y + q.s], [q.x, q.y + q.s]];
+    function chain(C0, P0, Q0){
+      const arcs = [{ C: C0, P: P0, Q: Q0, s: 1 }]; let Q = Q0;
+      for (let i = 1; i < sq.length; i++){
+        const pb = prev[i], cs = corners(sq[i]);
+        const sh = cs.filter(([x, y]) => x >= pb[0] && x <= pb[2] && y >= pb[1] && y <= pb[3]);
+        if (!sh.some(p => eq(p, Q))) return null;
+        const C = sh.find(p => !eq(p, Q));
+        const Qn = cs.find(p => !sh.some(z => eq(z, p)) && (p[0] === C[0] || p[1] === C[1]));
+        arcs.push({ C, P: Q, Q: Qn, s: sq[i].s }); Q = Qn;
+      }
+      return arcs;
+    }
+    let arcs = null;
+    const c0 = corners(sq[0]);
+    for (let k = 0; k < 4 && !arcs; k++){
+      const C = c0[k], A = c0[(k + 1) % 4], B = c0[(k + 3) % 4];
+      arcs = chain(C, A, B) || chain(C, B, A);
+    }
+    // el montaje sale vertical (13×21): se traspone para que quede apaisado (21×13)
+    const T = p => [p[1] - b[1], p[0] - b[0]];
+    const W = b[3] - b[1], H = b[2] - b[0], pad = .25;
+    const fills = ["--lapis", "--rubric", "--verdigris", "--vellum-2", "--lapis", "--rubric", "--verdigris"];
+    let svg = "";
+    sq.forEach((q, i) => {
+      const [x, y] = T([q.x, q.y]), fs = Math.max(.55, q.s * .42);
+      svg += `<rect class="sq" x="${x}" y="${y}" width="${q.s}" height="${q.s}" style="fill:var(${fills[i]})"/>`;
+      svg += `<text x="${x + q.s / 2}" y="${y + q.s / 2 + fs * .34}" text-anchor="middle" font-size="${fs}" style="fill:var(${fills[i] === "--vellum-2" ? "--iron" : "--vellum"})">${q.s}</text>`;
+    });
+    let d = "";
+    arcs.forEach((a, i) => {
+      const C = T(a.C), P = T(a.P), Q = T(a.Q);
+      const cross = (P[0] - C[0]) * (Q[1] - C[1]) - (P[1] - C[1]) * (Q[0] - C[0]);
+      if (!i) d += `M${P[0]} ${P[1]}`;
+      d += ` A${a.s} ${a.s} 0 0 ${cross > 0 ? 1 : 0} ${Q[0]} ${Q[1]}`;
+    });
+    svg += `<path class="spiral draw" d="${d}"/>`;
+    const el = $("diagram");
+    el.setAttribute("viewBox", `${-pad} ${-pad} ${W + 2 * pad} ${H + 2 * pad}`);
+    el.innerHTML = svg;
+    const path = el.querySelector(".spiral");
+    path.style.setProperty("--len", Math.ceil(path.getTotalLength() + 1));
+  }
+  const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = m => G && !G.over && mode === m && (m !== "day" || G.day === todayKey());
+  function coverInfo(){
+    $("m-free-rec").textContent = store.get("fb.best", 0).toLocaleString("es-ES");
+    $("m-day-rec").textContent = store.get("fb.day." + todayKey(), 0).toLocaleString("es-ES");
+    $("m-free-sub").textContent = live("free") ? "Continúa tu partida." : "Juega sin prisa y supera tu récord.";
+    const fecha = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+    $("m-day-sub").textContent = live("day") ? "Continúa el reto de hoy." : `Las mismas fichas para todos, ${fecha}.`;
+  }
+  function showCover(){
+    coverInfo(); $("over").hidden = true;
+    const c = $("cover"); c.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => c.classList.remove("leaving")));
+    $(mode === "day" ? "m-day" : "m-free").focus({ preventScroll: true });
+  }
+  function play(m){
+    const resume = live(m);
+    mode = m; $("modechip").textContent = m === "day" ? "Reto del día" : "Partida libre";
+    const c = $("cover"); c.classList.add("leaving");
+    setTimeout(() => { c.hidden = true; }, reduced() ? 0 : 340);
+    layout();
+    if (!resume){ newGame(); G.day = todayKey(); if (m === "day") toast("Mismas fichas para todos hoy"); }
+  }
+  $("m-free").onclick = () => play("free"); $("m-day").onclick = () => play("day");
+  $("back").onclick = showCover; $("o-home").onclick = showCover;
+  $("o-share").onclick = () => {
+    const txt = shareText(), ta = $("o-copy"), fallback = () => { ta.value = txt; ta.hidden = false; ta.select(); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Resultado copiado"), fallback); } catch { fallback(); }
+  };
+  addEventListener("resize", layout);
+  layout(); drawDiagram(); coverInfo();
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
