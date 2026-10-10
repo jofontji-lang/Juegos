@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Puzle de lógica y cálculo: números del 1 al n sin repetir en filas ni columnas, y cada jaula da su resultado con su operación. Carrera de niveles y reto diario.">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/jaulas/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#15274A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/jaulas/">
+<meta property="og:title" content="Jaulas · números en jaulas">
+<meta property="og:description" content="Puzle diario de lógica y cálculo. Del 1 al n sin repetir, y cada jaula da su resultado. ¿Superas mi tiempo?">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/jaulas/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Jaulas · números en jaulas</title>
+<link rel="preload" href="fonts/shippori-mincho-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/zen-kaku-gothic-new-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fuentes alojadas en el propio sitio (sin Google Fonts) para poder jugar sin conexión. Los kanji van en recortes mínimos. */
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/shippori-mincho-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/shippori-mincho-latin-800-normal.woff2") format("woff2")}
+@font-face{font-family:"Zen Kaku Gothic New";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/zen-kaku-gothic-new-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Zen Kaku Gothic New";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/zen-kaku-gothic-new-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/shippori-mincho-kanji-600-0.woff2") format("woff2");unicode-range:U+6570}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/shippori-mincho-kanji-600-1.woff2") format("woff2");unicode-range:U+306E}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/shippori-mincho-kanji-600-2.woff2") format("woff2");unicode-range:U+6ABB}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/shippori-mincho-kanji-800-0.woff2") format("woff2");unicode-range:U+6ABB}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/shippori-mincho-kanji-800-1.woff2") format("woff2");unicode-range:U+6642}
+@font-face{font-family:"Shippori Mincho";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/shippori-mincho-kanji-800-2.woff2") format("woff2");unicode-range:U+547D}
+/* Layout: indigo cover with seigaiha waves, a printed puzzle card stamped with a vermilion seal, menu under the thumb; game = lives + brush time bar, caged grid, pad */
+:root{
+  --bg:#EEF1F0; --paper:#FFFFFF; --ink:#1D2321; --muted:#66706C; --line:#CDD4D1; --thin:#D9DFDC;
+  --seal:#C8372A; --sel:#DCE9F7; --selb:#2F6FC6; --peer:#EEF3F8; --bad:#C8372A; --ok:#1E8A5C; --hint:#E3F4EA; --note:#4D5E80;
+  --ai:#15274A; --ai2:#1E3964; --wave:#3A6197; --gold:#D9B96E; --washi:#F1EDE4; --washi-ink:#22252A;
+  --display:"Shippori Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  --body:"Zen Kaku Gothic New", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#111514; --paper:#191E1C; --ink:#E6ECE9; --muted:#9AA6A1; --line:#3A4440; --thin:#29312E;
+  --seal:#EE5E4B; --sel:#1E2F45; --selb:#6EA2F0; --peer:#1C2329; --bad:#EE5E4B; --ok:#4BC28A; --hint:#183026; --note:#93A7D0; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#111514; --paper:#191E1C; --ink:#E6ECE9; --muted:#9AA6A1; --line:#3A4440; --thin:#29312E;
+  --seal:#EE5E4B; --sel:#1E2F45; --selb:#6EA2F0; --peer:#1C2329; --bad:#EE5E4B; --ok:#4BC28A; --hint:#183026; --note:#93A7D0; color-scheme:dark }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font-family:var(--body)}
+button:focus-visible{outline:3px solid var(--selb);outline-offset:2px}
+
+/* ---------- cover ---------- */
+.home{position:relative;height:100%;overflow-y:auto;background:var(--ai);color:var(--washi)}
+.home canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.moon{position:absolute;width:190px;height:190px;border-radius:50%;background:var(--gold);opacity:.13;top:-50px;left:-60px;pointer-events:none}
+.vert{position:absolute;top:22px;right:18px;writing-mode:vertical-rl;font:600 1.05rem/1 var(--display);letter-spacing:.35em;color:var(--gold);opacity:.9}
+.home-in{position:relative;min-height:100%;max-width:440px;margin:0 auto;padding-inline:20px;padding-block:30px 22px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.brand{display:flex;flex-direction:column;gap:6px}
+.brand h1{margin:0;font:800 clamp(3.2rem,15vw,4.4rem)/.95 var(--display);letter-spacing:-.01em;color:var(--washi)}
+.tag{margin:0;font:500 .92rem/1.45 var(--body);color:color-mix(in srgb,var(--washi) 72%,var(--ai));max-width:28ch}
+.card-wrap{display:flex;justify-content:center;padding-block:6px}
+.card{position:relative;background:var(--washi);padding:14px;border-radius:3px;transform:rotate(-3deg);box-shadow:0 18px 40px rgba(4,10,24,.45)}
+.mini{display:grid;border:2.5px solid var(--washi-ink);width:min(54vw,200px);aspect-ratio:1;max-width:100%}
+.mini div{position:relative;display:grid;place-items:center;font:700 clamp(.9rem,4.2vw,1.15rem) var(--body);color:var(--washi-ink)}
+.mini b{position:absolute;top:2px;left:3px;font:700 .55rem/1 var(--body)}
+.seal{display:grid;place-items:center;background:var(--seal);color:#FFF6EE;font:800 1.5rem/1 var(--display);border-radius:7px}
+.card .seal{position:absolute;right:-16px;bottom:-16px;width:52px;height:52px;transform:rotate(-4deg);box-shadow:0 0 0 3px color-mix(in srgb,var(--seal) 40%,transparent);animation:stamp .7s .25s both cubic-bezier(.3,1.4,.5,1)}
+@keyframes stamp{0%{transform:scale(1.8) rotate(-18deg);opacity:0}100%{transform:scale(1) rotate(-4deg);opacity:1}}
+.menu{display:flex;flex-direction:column;gap:10px}
+.mbtn{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;text-align:left;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--ai2) 85%,transparent);color:var(--washi);border-radius:14px;padding:13px 16px;cursor:pointer}
+.mbtn.main{background:var(--washi);color:var(--washi-ink);border-color:var(--washi)}
+.mt{font:800 1.2rem/1.1 var(--display)}
+.ms{grid-column:1;font:500 .82rem var(--body);opacity:.75}
+.mbtn .hearts,.mbtn .badge{grid-row:1/3;grid-column:2}
+.badge{font:700 .8rem var(--body);color:var(--gold)}
+.mbtn.plain{display:block;text-align:center;background:none;border-color:transparent;color:var(--gold);font:700 .9rem var(--body);padding:8px}
+.foot{margin:0;text-align:center;font:500 .8rem var(--body);color:color-mix(in srgb,var(--washi) 60%,var(--ai))}
+.foot a{color:var(--gold);text-underline-offset:3px}
+.hearts{display:flex;gap:3px;align-items:center}
+.hrt{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;opacity:.45}
+.hrt.on{fill:var(--seal);stroke:var(--seal);opacity:1}
+.regen{font:500 .75rem var(--body);opacity:.75;grid-column:1}
+
+/* ---------- game ---------- */
+.app{height:100%;max-width:500px;margin:0 auto;padding-inline:16px;padding-block:10px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px}
+.gbar{display:flex;align-items:center;gap:10px}
+.back{border:1px solid var(--line);background:var(--paper);color:var(--ink);width:40px;height:40px;border-radius:12px;font:700 1.3rem/1 var(--body);cursor:pointer;flex:none}
+.lvl{flex:1;font:800 1.2rem var(--display);display:flex;align-items:center;gap:8px;min-width:0}
+.lvl .seal{width:26px;height:26px;font-size:.85rem;border-radius:5px;flex:none}
+.gbar .hrt{width:22px;height:22px}
+.timebar{display:flex;align-items:center;gap:10px}
+.track{flex:1;height:8px;border-radius:99px;background:var(--thin);overflow:hidden}
+.fill{height:100%;background:var(--ink);border-radius:99px;transition:width .25s linear}
+.timebar.low .fill{background:var(--bad)}
+.timebar.low .clock{color:var(--bad)}
+.timebar.up .track{visibility:hidden}
+.clock{font:700 1rem var(--body);color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
+.rule{margin:0;font:500 .8rem/1.4 var(--body);color:var(--muted)}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.grid{display:grid;background:var(--ink);border:3px solid var(--ink);border-radius:6px;overflow:hidden;user-select:none}
+.cell{position:relative;background:var(--paper);border:0;padding:0;cursor:pointer;font:700 var(--fs,1.6rem)/1 var(--body);color:var(--ink);display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.cell .lab{position:absolute;top:3px;left:4px;font:700 var(--ls,.72rem)/1 var(--body);color:var(--ink);pointer-events:none}
+.cell .lab.bad{color:var(--bad)}
+.cell .nt{position:absolute;inset:30% 6% 4% 6%;display:grid;grid-template-columns:repeat(3,1fr);place-items:center;font:700 var(--ns,.6rem)/1 var(--body);color:var(--note);pointer-events:none}
+.cell .nt i{font-style:normal}
+.cell.peer{background:var(--peer)}
+.cell.sel{background:var(--sel);box-shadow:inset 0 0 0 2px var(--selb)}
+.cell.clash{color:var(--bad)}
+.cell.given{background:var(--hint)}
+.grid.won .cell{color:var(--ok)}
+.pad{display:grid;gap:8px}
+.pad button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:12px 0;font:700 1.3rem var(--body);cursor:pointer;min-width:0}
+.pad.notes button[data-v]:not(.erase){color:var(--note);font-size:1rem;border-style:dashed}
+.pad .erase{font:700 .85rem var(--body)}
+.tools{display:flex;gap:8px}
+.tools button{flex:1;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 4px;font:700 .82rem var(--body);cursor:pointer;min-width:0}
+.tools button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- sheets ---------- */
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--ai) 55%,transparent);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;padding-inline:16px;padding-block:16px calc(16px + env(safe-area-inset-bottom,0px));z-index:10}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:22px;width:100%;max-width:440px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.panel h2{font:800 1.7rem/1.1 var(--display);margin:0;text-wrap:balance}
+.panel p{margin:0;line-height:1.55;color:var(--muted)}
+.panel p strong{color:var(--ink)}
+.panel .seal{width:44px;height:44px;font-size:1.3rem}
+.stars{font-size:1.9rem;text-align:center;letter-spacing:.15em}
+.primary{border:0;background:var(--ink);color:var(--bg);border-radius:14px;padding:14px;font:700 1rem var(--body);cursor:pointer}
+.primary.red{background:var(--seal);color:#FFF6EE}
+.primary:disabled{opacity:.45;cursor:default}
+.ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:14px;padding:13px;font:700 .95rem var(--body);cursor:pointer}
+.link{border:0;background:none;color:var(--muted);font:700 .88rem var(--body);padding:6px;cursor:pointer}
+.row{display:flex;gap:10px}.row>*{flex:1}
+textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px}
+.adbox{aspect-ratio:16/10;max-width:100%;border:2px dashed var(--line);border-radius:14px;display:grid;place-items:center;text-align:center;background:var(--bg);gap:4px;padding:12px;box-sizing:border-box}
+.adbox strong{font:800 2.6rem/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.adbox span{font:500 .8rem var(--body);color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font:700 .85rem var(--body);padding:10px 16px;border-radius:999px;z-index:20}
+@media (prefers-reduced-motion: reduce){ .card .seal{animation:none} .fill{transition:none} }
+</style>
+</head>
+<body>
+
+
+<!-- ============ COVER ============ -->
+<div class="home" id="home">
+  <canvas id="waves" aria-hidden="true"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="vert" aria-hidden="true">数の檻</div>
+  <div class="home-in">
+    <div class="brand">
+      <h1>Jaulas</h1>
+      <p class="tag">Números en jaulas. Lógica y cálculo, del 3×3 al 6×6.</p>
+    </div>
+    <div class="card-wrap"><div class="card"><div class="mini" id="mini"></div><div class="seal" aria-hidden="true">檻</div></div></div>
+    <nav class="menu" aria-label="Menú">
+      <button class="mbtn main" id="m-run"><span class="mt" id="m-run-t">Empezar carrera</span><span class="ms" id="m-run-s">Nivel 1 · 3×3</span><span class="hearts" id="m-hearts"></span><span class="regen" id="m-regen"></span></button>
+      <button class="mbtn" id="m-day"><span class="mt">Reto del día</span><span class="ms" id="m-day-s">n.º 1 · 5×5</span><span class="badge" id="m-day-b"></span></button>
+      <button class="mbtn plain" id="m-rules">Cómo se juega</button>
+    </nav>
+    <p class="foot"><span id="m-foot">Racha del reto diario: 0 días</span> · <a href="/">Más juegos</a></p>
+  </div>
+</div>
+
+<!-- ============ GAME ============ -->
+<div class="app" id="game" hidden>
+  <header class="gbar">
+    <button class="back" id="g-back" aria-label="Volver a la portada">‹</button>
+    <span class="lvl"><span class="seal" aria-hidden="true">檻</span><span id="lvl">Nivel 1 · 3×3</span></span>
+    <span class="hearts" id="g-hearts"></span>
+  </header>
+  <div class="timebar" id="timebar"><div class="track"><div class="fill" id="fill"></div></div><span class="clock" id="clock">0:00</span></div>
+  <p class="rule" id="rule"></p>
+  <div class="stage" id="stage"><div class="grid" id="grid" aria-label="Cuadrícula"></div></div>
+  <div class="pad" id="pad"></div>
+  <div class="tools"><button id="undo">Deshacer</button><button id="notes" aria-pressed="false">Notas</button><button id="hint">Pista</button><button id="reset">Borrar todo</button></div>
+</div>
+
+<!-- ============ SHEETS ============ -->
+<div class="sheet" id="rules" hidden>
+  <div class="panel">
+    <h2>Cómo se juega</h2>
+    <p>En un tablero n×n pon los números del <strong>1 al n</strong> sin repetir en ninguna fila ni columna.</p>
+    <p>Las cifras de cada <strong>jaula</strong> (borde grueso) dan el número de su esquina con esa operación. En «−» y «÷» da igual el orden: «2÷» vale con 3 y 6.</p>
+    <p>En la <strong>carrera</strong> tienes tres vidas. Si se acaba el tiempo de un nivel, pierdes una. Con <strong>Notas</strong> apuntas candidatos pequeños.</p>
+    <button class="primary" id="r-ok">Entendido</button>
+  </div>
+</div>
+<div class="sheet" id="win" hidden>
+  <div class="panel">
+    <div class="stars" id="w-stars">⭐⭐⭐</div>
+    <h2 id="w-title">¡Resuelto!</h2>
+    <p id="w-text"></p>
+    <textarea id="w-copy" rows="3" hidden aria-label="Texto para compartir"></textarea>
+    <div class="row"><button class="ghost" id="w-share">Compartir</button><button class="primary" id="w-next">Siguiente</button></div>
+    <button class="link" id="w-home">Portada</button>
+  </div>
+</div>
+<div class="sheet" id="timeout" hidden>
+  <div class="panel">
+    <div class="seal" aria-hidden="true">時</div>
+    <h2>Se acabó el tiempo</h2>
+    <p id="to-text"></p>
+    <div class="row"><button class="ghost" id="to-home">Portada</button><button class="primary" id="to-retry">Reintentar</button></div>
+  </div>
+</div>
+<div class="sheet" id="nolives" hidden>
+  <div class="panel">
+    <div class="seal" aria-hidden="true">命</div>
+    <h2>Sin vidas</h2>
+    <p id="nl-text">Las vidas se recuperan solas.</p>
+    <button class="primary red" id="nl-ad">Jugar el reto del día</button>
+    <button class="link" id="nl-home">Portada</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) ?? d : d; } catch { return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const shuf = (a, r) => { for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // ---------- generation ----------
+  function latin(n, r){
+    const rows = shuf([...Array(n).keys()], r), cols = shuf([...Array(n).keys()], r), syms = shuf([...Array(n).keys()].map(x => x + 1), r);
+    return Array.from({ length: n * n }, (_, k) => syms[(rows[Math.floor(k / n)] + cols[k % n]) % n]);
+  }
+  function cages(n, r, maxSize){
+    const id = Array(n * n).fill(-1), list = [];
+    for (const start of shuf([...Array(n * n).keys()], r)){
+      if (id[start] >= 0) continue;
+      const want = r() < .12 ? 1 : 2 + Math.floor(r() * (maxSize - 1));
+      const cells = [start]; id[start] = list.length;
+      while (cells.length < want){
+        const opts = [];
+        cells.forEach(c => { const rr = Math.floor(c / n), cc = c % n; [[rr - 1, cc], [rr + 1, cc], [rr, cc - 1], [rr, cc + 1]].forEach(([a, b]) => { if (a >= 0 && b >= 0 && a < n && b < n && id[a * n + b] < 0) opts.push(a * n + b); }); });
+        if (!opts.length) break;
+        const pick = opts[Math.floor(r() * opts.length)]; id[pick] = list.length; cells.push(pick);
+      }
+      list.push({ cells });
+    }
+    return { id, list };
+  }
+  function assignOps(sol, cg, r, ops){
+    cg.list.forEach(c => {
+      const v = c.cells.map(k => sol[k]);
+      if (v.length === 1){ c.op = ""; c.t = v[0]; return; }
+      if (v.length === 2){
+        const [a, b] = [Math.max(...v), Math.min(...v)];
+        const opts = [["+", a + b]];
+        if (ops.includes("-")) opts.push(["−", a - b]);
+        if (ops.includes("x")) opts.push(["×", a * b]);
+        if (ops.includes("/") && a % b === 0) opts.push(["÷", a / b], ["÷", a / b]);
+        [c.op, c.t] = opts[Math.floor(r() * opts.length)]; return;
+      }
+      if (ops.includes("x") && r() < .4 && v.reduce((p, x) => p * x, 1) <= 400){ c.op = "×"; c.t = v.reduce((p, x) => p * x, 1); }
+      else { c.op = "+"; c.t = v.reduce((p, x) => p + x, 0); }
+    });
+  }
+  function cageOK(c, vals, complete){
+    if (!complete) return true;
+    if (c.op === "") return vals[0] === c.t;
+    if (c.op === "+") return vals.reduce((a, b) => a + b, 0) === c.t;
+    if (c.op === "×") return vals.reduce((a, b) => a * b, 1) === c.t;
+    const [a, b] = [Math.max(...vals), Math.min(...vals)];
+    if (c.op === "−") return a - b === c.t;
+    return a === b * c.t;
+  }
+  function partialOK(c, vals){
+    if (c.op === "+") return vals.reduce((a, b) => a + b, 0) < c.t || vals.length === c.cells.length;
+    if (c.op === "×") return c.t % vals.reduce((a, b) => a * b, 1) === 0;
+    return true;
+  }
+  function countSolutions(n, cg, limit = 2){
+    const g = Array(n * n).fill(0); let count = 0, nodes = 0;
+    const rec = k => {
+      if (count >= limit || ++nodes > 400000) return;
+      if (k === n * n){ count++; return; }
+      const r = Math.floor(k / n), c = k % n, cage = cg.list[cg.id[k]];
+      for (let v = 1; v <= n; v++){
+        let ok = true;
+        for (let i = 0; i < n && ok; i++){ if (g[r * n + i] === v || g[i * n + c] === v) ok = false; }
+        if (!ok) continue;
+        g[k] = v;
+        const vals = cage.cells.map(x => g[x]).filter(Boolean), complete = vals.length === cage.cells.length;
+        if (partialOK(cage, vals) && cageOK(cage, vals, complete)) rec(k + 1);
+        g[k] = 0;
+      }
+    };
+    rec(0);
+    return nodes > 400000 ? 99 : count;
+  }
+  function spec(L){
+    if (L <= 3) return { n: 3, ops: "+", max: 2 };
+    if (L <= 7) return { n: 4, ops: "+-", max: 3 };
+    if (L <= 12) return { n: 4, ops: "+-x/", max: 3 };
+    if (L <= 20) return { n: 5, ops: "+-x/", max: 3 };
+    return { n: 6, ops: "+-x/", max: 4 };
+  }
+  function generate(seed, sp){
+    const r = rng(seed);
+    for (let t = 0; t < 300; t++){
+      const sol = latin(sp.n, r), cg = cages(sp.n, r, sp.max); assignOps(sol, cg, r, sp.ops);
+      if (countSolutions(sp.n, cg) === 1) return { n: sp.n, sol, cg };
+    }
+    return null;
+  }
+
+  // ---------- run state: level, lives ----------
+  const MAXL = 3, REGEN = 20 * 60 * 1000, DAYSPEC = { n: 5, ops: "+-x/", max: 3 }, LAUNCH = new Date(2026, 9, 10);
+  let R = store.get("jl.run", null) || { level: store.get("jl.level", 1), attempt: 0, lives: MAXL, regenAt: 0 };
+  const saveR = () => store.set("jl.run", R);
+  function regen(){
+    if (R.lives >= MAXL){ R.regenAt = 0; return false; }
+    const now = Date.now(); let got = false;
+    if (!R.regenAt) R.regenAt = now;
+    while (R.lives < MAXL && now - R.regenAt >= REGEN){ R.lives++; R.regenAt += REGEN; got = true; }
+    if (R.lives >= MAXL) R.regenAt = 0;
+    if (got) saveR();
+    return got;
+  }
+  const nextLife = () => Math.max(0, (R.regenAt + REGEN - Date.now()) / 1000);
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const heart = on => `<svg viewBox="0 0 24 24" class="hrt${on ? " on" : ""}" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.6 14.5 2.5 11.7 2.5 8.3 2.5 5.6 4.6 3.5 7.3 3.5c1.6 0 3.1.7 4.7 2.4 1.6-1.7 3.1-2.4 4.7-2.4 2.7 0 4.8 2.1 4.8 4.8 0 3.4-3.1 6.2-8.2 10.8L12 20.3z"/></svg>`;
+  const hearts = () => Array.from({ length: MAXL }, (_, i) => heart(i < R.lives)).join("");
+  function dayKey(d = new Date()){ return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`; }
+  const dayNum = () => { const t = new Date(); t.setHours(0, 0, 0, 0); return Math.round((t - LAUNCH) / 86400000) + 1; };
+  const daily = () => store.get("jl.daily", {});
+  function streak(){
+    const res = daily(), d = new Date(); let s = 0;
+    if (!res[dayKey(d)]) d.setDate(d.getDate() - 1);
+    while (res[dayKey(d)]){ s++; d.setDate(d.getDate() - 1); }
+    return s;
+  }
+
+  // ---------- puzzles ----------
+  const G = {}; let cur = "run", S = null, P = null, notesMode = false, screen = "home";
+  const curKey = m => m === "run" ? `${R.level}-${R.attempt}` : dayKey();
+  function ensure(m){
+    const key = curKey(m); if (G[m] && G[m].key === key) return G[m];
+    const p = m === "run" ? generate(R.level * 3571 + 9 + R.attempt * 7919, spec(R.level)) : generate(Number(key), DAYSPEC);
+    const N = p.n * p.n, s = { key, P: p, g: Array(N).fill(0), notes: Array.from({ length: N }, () => []), given: new Set(), sel: 0, hist: [], hints: 0, done: false, elapsed: 0 };
+    const sv = store.get("jl.prog." + m, null);
+    if (sv && sv.key === key){ s.g = sv.g; s.notes = sv.notes; s.given = new Set(sv.given); s.hints = sv.hints; s.elapsed = sv.elapsed; }
+    return G[m] = s;
+  }
+  function saveProg(){ if (S && !S.done) store.set("jl.prog." + cur, { key: S.key, g: S.g, notes: S.notes, given: [...S.given], hints: S.hints, elapsed: S.elapsed }); }
+  const clearProg = m => store.set("jl.prog." + m, null);
+  const limit = () => P.n * P.n * 15;
+  const sheetOpen = () => !!document.querySelector(".sheet:not([hidden])");
+  const running = () => screen === "game" && S && !S.done && !sheetOpen() && document.visibilityState === "visible";
+
+  function show(s){ screen = s; $("home").hidden = s !== "home"; $("game").hidden = s !== "game"; if (s === "home"){ paintHome(); waves(); } }
+  function openGame(m){
+    if (m === "run"){ regen(); if (R.lives <= 0){ paintNoLives(); $("nolives").hidden = false; return; } }
+    cur = m; S = ensure(m); P = S.P; notesMode = false;
+    ["win", "timeout", "nolives"].forEach(id => $(id).hidden = true);
+    show("game"); build(); render(); paintClock();
+    if (m === "day"){ const res = daily()[S.key]; if (res){ S.done = true; S.g = P.sol.slice(); S.elapsed = res.secs; render(); showWin(res, true); } }
+    if (!store.get("jl.seen", 0)) $("rules").hidden = false;
+  }
+
+  // ---------- board ----------
+  function build(){
+    const n = P.n, st = $("stage").getBoundingClientRect(), side = Math.floor(Math.min(st.width, st.height) - 6), cs = Math.max(30, Math.floor(side / n));
+    const g = $("grid"); g.className = "grid"; g.innerHTML = "";
+    g.style.gridTemplateColumns = `repeat(${n}, ${cs}px)`; g.style.gridAutoRows = `${cs}px`;
+    g.style.setProperty("--fs", Math.max(1.1, cs / 34) + "rem"); g.style.setProperty("--ls", Math.max(.62, cs / 80) + "rem"); g.style.setProperty("--ns", Math.max(.52, cs / 95) + "rem");
+    const cid = P.cg.id;
+    for (let k = 0; k < n * n; k++){
+      const r = Math.floor(k / n), c = k % n, b = document.createElement("button"); b.className = "cell"; b.dataset.k = k;
+      const thick = "3px solid var(--ink)", thin = "1px solid var(--thin)";
+      b.style.borderRight = c < n - 1 ? (cid[k] !== cid[k + 1] ? thick : thin) : "0";
+      b.style.borderBottom = r < n - 1 ? (cid[k] !== cid[k + n] ? thick : thin) : "0";
+      const cage = P.cg.list[cid[k]];
+      if (Math.min(...cage.cells) === k){ const l = document.createElement("span"); l.className = "lab"; l.dataset.c = cid[k]; l.textContent = `${cage.t}${cage.op}`; b.append(l); }
+      const nt = document.createElement("span"); nt.className = "nt"; b.append(nt);
+      const v = document.createElement("span"); v.className = "v"; b.append(v);
+      b.setAttribute("aria-label", `fila ${r + 1} columna ${c + 1}, jaula ${cage.t}${cage.op}`);
+      g.append(b);
+    }
+    const pad = $("pad"); pad.innerHTML = ""; pad.style.gridTemplateColumns = `repeat(${n + 1}, 1fr)`;
+    for (let v = 1; v <= n; v++){ const b = document.createElement("button"); b.textContent = v; b.dataset.v = v; pad.append(b); }
+    const e = document.createElement("button"); e.className = "erase"; e.textContent = "Borrar"; e.dataset.v = 0; pad.append(e);
+    $("lvl").textContent = cur === "day" ? `Reto n.º ${dayNum()} · ${n}×${n}` : `Nivel ${R.level} · ${n}×${n}`;
+    $("rule").textContent = cur === "day" ? `Del 1 al ${n} sin repetir en filas ni columnas. Sin límite de tiempo: cuenta tu marca.` : `Del 1 al ${n} sin repetir en filas ni columnas. Tienes ${fmt(limit())} para resolverlo.`;
+    $("g-hearts").innerHTML = cur === "run" ? hearts() : ""; $("g-hearts").setAttribute("aria-label", cur === "run" ? `${R.lives} vidas de ${MAXL}` : "");
+    $("timebar").classList.toggle("up", cur === "day");
+    paintNotesBtn();
+  }
+  function clashes(){
+    const n = P.n, bad = new Set();
+    for (let k = 0; k < n * n; k++){ const v = S.g[k]; if (!v) continue; const r = Math.floor(k / n), c = k % n;
+      for (let i = 0; i < n; i++){ const a = r * n + i, b = i * n + c; if (a !== k && S.g[a] === v) bad.add(k); if (b !== k && S.g[b] === v) bad.add(k); } }
+    return bad;
+  }
+  function render(){
+    const n = P.n, bad = clashes(), sr = Math.floor(S.sel / n), sc = S.sel % n;
+    document.querySelectorAll(".cell").forEach(b => {
+      const k = +b.dataset.k, r = Math.floor(k / n), c = k % n, v = S.g[k];
+      b.querySelector(".v").textContent = v || "";
+      b.querySelector(".nt").innerHTML = v ? "" : Array.from({ length: n }, (_, i) => `<i>${S.notes[k].includes(i + 1) ? i + 1 : ""}</i>`).join("");
+      b.classList.toggle("sel", k === S.sel); b.classList.toggle("peer", k !== S.sel && (r === sr || c === sc));
+      b.classList.toggle("clash", bad.has(k)); b.classList.toggle("given", S.given.has(k));
+    });
+    document.querySelectorAll(".lab").forEach(l => {
+      const cage = P.cg.list[+l.dataset.c], vals = cage.cells.map(x => S.g[x]), full = vals.every(Boolean);
+      l.classList.toggle("bad", full && !cageOK(cage, vals, true));
+    });
+    $("grid").classList.toggle("won", S.done && S.g.every((v, i) => v === P.sol[i]));
+    if (!S.done && S.g.every(Boolean) && !bad.size && P.cg.list.every(c => cageOK(c, c.cells.map(x => S.g[x]), true))) win();
+  }
+  const snap = () => { S.hist.push({ g: S.g.slice(), notes: S.notes.map(a => a.slice()), sel: S.sel }); if (S.hist.length > 300) S.hist.shift(); };
+  function put(v){
+    if (!S || S.done || S.given.has(S.sel)) return;
+    const k = S.sel, n = P.n;
+    if (notesMode && v > 0){
+      if (S.g[k]) return;
+      snap(); const a = S.notes[k], i = a.indexOf(v); i >= 0 ? a.splice(i, 1) : a.push(v);
+    } else {
+      snap(); S.g[k] = v;
+      if (v > 0){ S.notes[k] = []; const r = Math.floor(k / n), c = k % n;
+        for (let i = 0; i < n; i++){ [r * n + i, i * n + c].forEach(x => { S.notes[x] = S.notes[x].filter(d => d !== v); }); } }
+    }
+    render(); saveProg();
+    try { navigator.vibrate && navigator.vibrate(4); } catch {}
+  }
+  function paintNotesBtn(){ $("notes").setAttribute("aria-pressed", String(notesMode)); $("pad").classList.toggle("notes", notesMode); }
+
+  // ---------- clock ----------
+  function paintClock(){
+    if (!S) return;
+    if (cur === "day"){ $("clock").textContent = fmt(S.elapsed); $("timebar").classList.remove("low"); return; }
+    const L = limit(), rem = Math.max(0, L - S.elapsed);
+    $("clock").textContent = fmt(Math.ceil(rem)); $("fill").style.width = (rem / L * 100) + "%";
+    $("timebar").classList.toggle("low", rem / L < .2);
+  }
+  let last = performance.now(), ticks = 0;
+  setInterval(() => {
+    const now = performance.now(), dt = Math.min(1, (now - last) / 1000); last = now;
+    if (running()){
+      S.elapsed += dt; paintClock();
+      if (cur === "run" && S.elapsed >= limit()) timeout();
+      else if (++ticks % 8 === 0) saveProg();
+    }
+    if (regen()){ if (screen === "game" && cur === "run") $("g-hearts").innerHTML = hearts(); }
+    if (screen === "home") paintRegen();
+    if (!$("nolives").hidden){ if (R.lives > 0){ $("nolives").hidden = true; openGame("run"); } else paintNoLives(); }
+  }, 250);
+  document.addEventListener("visibilitychange", () => { last = performance.now(); if (document.hidden) saveProg(); });
+
+  function timeout(){
+    S.done = true; paintClock(); clearProg("run");
+    R.lives = Math.max(0, R.lives - 1); if (R.lives < MAXL && !R.regenAt) R.regenAt = Date.now();
+    R.attempt++; saveR(); $("g-hearts").innerHTML = hearts();
+    if (R.lives <= 0){ paintNoLives(); $("nolives").hidden = false; return; }
+    $("to-text").innerHTML = `Pierdes una vida. Te ${R.lives === 1 ? "queda" : "quedan"} <strong>${R.lives}</strong>. El nivel ${R.level} vuelve con otro puzle.`;
+    $("timeout").hidden = false;
+  }
+  function paintNoLives(){
+    $("nl-text").innerHTML = `Las vidas vuelven solas: la próxima llega en <strong>${fmt(Math.ceil(nextLife()))}</strong>. Mientras, puedes jugar el reto del día, que no gasta vidas.`;
+  }
+
+  // ---------- win ----------
+  function stars(secs){ if (S.hints) return 1; const par = P.n * P.n * 6; return secs <= par ? 3 : secs <= par * 2 ? 2 : 1; }
+  function win(){
+    S.done = true; const secs = S.elapsed, st = stars(secs), res = { secs, st, hints: S.hints, n: P.n };
+    clearProg(cur);
+    if (cur === "run"){
+      const best = store.get("jl.best", {}); best[R.level] = Math.max(best[R.level] || 0, st); store.set("jl.best", best);
+      res.level = R.level; R.level++; R.attempt = 0; saveR();
+    } else { const d = daily(); d[S.key] = res; store.set("jl.daily", d); }
+    setTimeout(() => showWin(res, false), 450);
+  }
+  let lastRes = null;
+  function showWin(res, already){
+    lastRes = res;
+    $("w-stars").textContent = "⭐".repeat(res.st) + "☆".repeat(3 - res.st);
+    $("w-title").textContent = already ? "Reto de hoy resuelto" : res.st === 3 ? "¡Impecable!" : "¡Resuelto!";
+    const hint = res.hints ? ` con ${res.hints} pista${res.hints > 1 ? "s" : ""}` : "";
+    $("w-text").innerHTML = cur === "run"
+      ? `Nivel ${res.level}: ${res.n}×${res.n} en <strong>${fmt(res.secs)}</strong>${hint}. Vidas: ${R.lives} de ${MAXL}.`
+      : `Reto n.º ${dayNum()}: ${res.n}×${res.n} en <strong>${fmt(res.secs)}</strong>${hint}. Racha: <strong>${streak()} día${streak() === 1 ? "" : "s"}</strong>.${already ? " Mañana hay otro." : ""}`;
+    $("w-next").textContent = cur === "run" ? `Nivel ${R.level}` : "Ir a la carrera";
+    $("w-copy").hidden = true; $("win").hidden = false;
+  }
+  function share(){
+    const r = lastRes; if (!r) return;
+    const st = "⭐".repeat(r.st), hint = r.hints ? ` (${r.hints} pista${r.hints > 1 ? "s" : ""})` : "";
+    const txt = cur === "day"
+      ? `Jaulas n.º ${dayNum()} · ${r.n}×${r.n}\n${fmt(r.secs)} ${st}${hint}\nRacha: ${streak()} días\njuegos.matematicasjosepfont.es/jaulas/`
+      : `Jaulas · Nivel ${r.level}\n${r.n}×${r.n} en ${fmt(r.secs)} ${st}${hint}\njuegos.matematicasjosepfont.es/jaulas/`;
+    const ta = $("w-copy"), fallback = () => { ta.value = txt; ta.hidden = false; ta.select(); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Resultado copiado"), fallback); } catch { fallback(); }
+  }
+  function toast(m){ const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 1800); }
+
+  // ---------- cover ----------
+  function paintRegen(){ $("m-regen").textContent = R.lives < MAXL ? `+1 vida en ${fmt(Math.ceil(nextLife()))}` : ""; $("m-hearts").innerHTML = hearts(); }
+  function paintHome(){
+    regen();
+    const sp = spec(R.level), sv = store.get("jl.prog.run", null), going = sv && sv.key === curKey("run") && sv.elapsed > 1;
+    $("m-run-t").textContent = going ? "Continuar carrera" : R.level > 1 ? "Carrera" : "Empezar carrera";
+    $("m-run-s").textContent = `Nivel ${R.level} · ${sp.n}×${sp.n}`;
+    $("m-hearts").setAttribute("aria-label", `${R.lives} vidas de ${MAXL}`);
+    paintRegen();
+    const res = daily()[dayKey()];
+    $("m-day-s").textContent = res ? `n.º ${dayNum()} · hecho en ${fmt(res.secs)}` : `n.º ${dayNum()} · 5×5 · igual para todos`;
+    $("m-day-b").textContent = res ? "⭐".repeat(res.st) : "";
+    const s = streak(); $("m-foot").textContent = `Racha del reto diario: ${s} día${s === 1 ? "" : "s"}`;
+  }
+  function mini(){
+    const p = generate(20261010, spec(9)), n = p.n, r = rng(7), m = $("mini");
+    m.style.gridTemplateColumns = `repeat(${n},1fr)`;
+    for (let k = 0; k < n * n; k++){
+      const d = document.createElement("div"), c = k % n, row = Math.floor(k / n), cid = p.cg.id, cage = p.cg.list[cid[k]];
+      d.style.borderRight = c < n - 1 ? (cid[k] !== cid[k + 1] ? "2.5px solid var(--washi-ink)" : "1px solid color-mix(in srgb,var(--washi-ink) 25%,transparent)") : "0";
+      d.style.borderBottom = row < n - 1 ? (cid[k] !== cid[k + n] ? "2.5px solid var(--washi-ink)" : "1px solid color-mix(in srgb,var(--washi-ink) 25%,transparent)") : "0";
+      if (Math.min(...cage.cells) === k){ const b = document.createElement("b"); b.textContent = `${cage.t}${cage.op}`; d.append(b); }
+      if (r() < .55) d.append(document.createTextNode(p.sol[k]));
+      m.append(d);
+    }
+  }
+  function waves(){
+    const c = $("waves"), dpr = Math.min(2, devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight; if (!w || !h) return;
+    c.width = w * dpr; c.height = h * dpr; const x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cs = getComputedStyle(document.documentElement), bg = cs.getPropertyValue("--ai").trim(), ln = cs.getPropertyValue("--wave").trim();
+    const r = 30, y0 = h * .38; x.lineWidth = 1.5; x.strokeStyle = ln;
+    for (let j = 0; y0 + j * r / 2 < h + r; j++){
+      const y = y0 + j * r / 2, off = j % 2 ? r : 0;
+      for (let cx = off - 2 * r; cx < w + 2 * r; cx += 2 * r){
+        for (let k = 4; k >= 1; k--){ x.beginPath(); x.arc(cx, y, r * k / 4.2, 0, Math.PI * 2); x.fillStyle = bg; x.fill(); x.stroke(); }
+      }
+    }
+    x.globalCompositeOperation = "destination-in";
+    const gr = x.createLinearGradient(0, y0 - r, 0, h * .75); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.95)");
+    x.fillStyle = gr; x.fillRect(0, 0, w, h); x.globalCompositeOperation = "source-over";
+  }
+
+  // ---------- events ----------
+  $("grid").addEventListener("click", e => { const b = e.target.closest(".cell"); if (b){ S.sel = +b.dataset.k; render(); } });
+  $("pad").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (b) put(+b.dataset.v); });
+  document.addEventListener("keydown", e => {
+    if (screen !== "game" || !P || sheetOpen()) return; const n = P.n;
+    if (/^[0-9]$/.test(e.key) && +e.key <= n) put(+e.key);
+    if (e.key === "Backspace" || e.key === "Delete") put(0);
+    if (e.key === "n" || e.key === "N"){ notesMode = !notesMode; paintNotesBtn(); }
+    const mv = { ArrowUp: -n, ArrowDown: n, ArrowLeft: -1, ArrowRight: 1 }[e.key];
+    if (mv){ e.preventDefault(); const k = S.sel + mv; if (k >= 0 && k < n * n && !(Math.abs(mv) === 1 && Math.floor(k / n) !== Math.floor(S.sel / n))){ S.sel = k; render(); } }
+  });
+  $("undo").onclick = () => { if (S.done || !S.hist.length) return; const h = S.hist.pop(); S.g = h.g; S.notes = h.notes; S.sel = h.sel; render(); saveProg(); };
+  $("notes").onclick = () => { notesMode = !notesMode; paintNotesBtn(); };
+  $("hint").onclick = () => {
+    if (S.done) return;
+    const k = S.g.findIndex((v, i) => v !== P.sol[i] && !S.given.has(i)); if (k < 0) return;
+    snap(); S.g[k] = P.sol[k]; S.notes[k] = []; S.given.add(k); S.sel = k; S.hints++; render(); saveProg();
+  };
+  $("reset").onclick = () => { if (S.done) return; snap(); S.g = S.g.map((v, i) => S.given.has(i) ? v : 0); S.notes = S.notes.map(() => []); render(); saveProg(); };
+  $("g-back").onclick = () => { saveProg(); show("home"); };
+  $("r-ok").onclick = () => { $("rules").hidden = true; store.set("jl.seen", 1); last = performance.now(); };
+  $("m-run").onclick = () => openGame("run");
+  $("m-day").onclick = () => openGame("day");
+  $("m-rules").onclick = () => { $("rules").hidden = false; };
+  $("w-share").onclick = share;
+  $("w-next").onclick = () => openGame("run");
+  $("w-home").onclick = () => { $("win").hidden = true; show("home"); };
+  $("to-retry").onclick = () => openGame("run");
+  $("to-home").onclick = () => { $("timeout").hidden = true; show("home"); };
+  $("nl-ad").onclick = () => { $("nolives").hidden = true; openGame("day"); };
+  $("nl-home").onclick = () => { $("nolives").hidden = true; show("home"); };
+  addEventListener("resize", () => { if (screen === "game" && P){ build(); render(); } else waves(); });
+
+  mini(); show("home");
+})();
+</script>
+
+<script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body>
+</html>
