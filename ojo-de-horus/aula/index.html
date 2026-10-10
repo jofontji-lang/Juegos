@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>El Ojo de Horus · Aula</title>
+<meta name="description" content="Puzle de fracciones egipcias: une fichas vecinas que sumen exactamente 1 y vacía el tablero. Niveles infinitos, contrarreloj y reto diario.">
+<meta name="theme-color" content="#0C1838">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ojo de Horus Aula">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/ojo-de-horus/aula/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="El Ojo de Horus · Aula">
+<meta property="og:description" content="Puzle de fracciones egipcias: une fichas vecinas que sumen exactamente 1 y vacía el tablero. Niveles infinitos, contrarreloj y reto diario.">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/ojo-de-horus/aula/">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/ojo-de-horus/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.OJO_BUILD = true; window.OJO_EDITION = "aula"; window.OJO_VERSION = "1.0.0"; window.OJO_URL = "https://juegos.matematicasjosepfont.es/ojo-de-horus/aula/"; window.OJO_PRIVACY = "https://juegos.matematicasjosepfont.es/ojo-de-horus/privacidad/";</script>
+
+</head>
+<body>
+<style>
+@font-face{font-family:"Marcellus";src:url("fonts/marcellus-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Outfit";src:url("fonts/outfit-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Outfit";src:url("fonts/outfit-latin-700-normal.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Outfit";src:url("fonts/outfit-latin-800-normal.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap}
+/* Layout: a starry lapis tomb ceiling; limestone fraction blocks on a gold-rimmed tray are the hero, HUD above, tools below */
+:root{
+  color-scheme:dark;
+  --night:#0C1838; --lapis:#17306A; --lapis-hi:#2A4E9E;
+  --gold:#D4A23A; --gold-hi:#F2D17C; --gold-lo:#8A6118;
+  --stone-hi:#F5E9CC; --stone-lo:#DEC797; --stone-edge:#A5844C; --ink:#2B1D0C; --ink-soft:#7A5F38;
+  --text:#F2E8CF; --muted:#A8B2D2;
+  --turq:#24A897; --turq-hi:#62D8C6; --carn:#C2432D; --carn-hi:#E8715A; --mal:#4F8F3B; --ame:#8A5DB8;
+  --display:"Marcellus", "Trajan Pro", Georgia, serif;
+  --body:"Outfit", system-ui, -apple-system, sans-serif;
+  --gap:8px;
+}
+html,body{height:100%}
+body{
+  color:var(--text);font-family:var(--body);-webkit-tap-highlight-color:transparent;overflow:hidden;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(42,78,158,.55), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cg fill='%23D4A23A'%3E%3Cpath opacity='.17' d='M11 3l1.7 4.9h5.1l-4.1 3 1.6 4.9-4.3-3-4.3 3 1.6-4.9-4.1-3h5.1z'/%3E%3Cpath opacity='.1' d='M34 26l1.2 3.4h3.6l-2.9 2.1 1.1 3.4-3-2.1-3 2.1 1.1-3.4-2.9-2.1h3.6z'/%3E%3C/g%3E%3C/svg%3E"),
+    var(--night);
+}
+.app{height:100%;max-width:520px;margin:0 auto;padding-inline:16px;padding-block:8px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px}
+.frieze{height:8px;border-radius:2px;flex:none;background:repeating-linear-gradient(90deg,var(--lapis-hi) 0 12px,var(--gold) 12px 15px,var(--turq) 15px 27px,var(--gold) 27px 30px,var(--carn) 30px 42px,var(--gold) 42px 45px);opacity:.9}
+header{display:flex;justify-content:center;align-items:center;flex:none}
+.brand{display:flex;align-items:center;gap:8px;min-width:0;color:var(--gold-hi)}
+.brand svg{width:40px;height:25px;flex:none}
+h1{font:400 1.35rem/1 var(--display);margin:0;letter-spacing:.06em;color:var(--text);white-space:nowrap}
+h1 b{font-weight:400;color:var(--gold-hi)}
+.tabs{position:relative;z-index:15;display:flex;background:rgba(12,24,56,.92);border:1px solid rgba(212,162,58,.35);border-radius:999px;padding:3px;flex:none}
+.tabs button{flex:1;border:0;background:none;color:var(--muted);font:700 .8rem/1 var(--body);padding:9px 6px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:linear-gradient(var(--gold-hi),var(--gold));color:var(--night)}
+
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;flex:none}
+.hud small{display:block;font:700 .62rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.hud .l b,.hud .r b{font:800 1.6rem/1.1 var(--body);font-variant-numeric:tabular-nums;color:var(--text)}
+.hud .r{text-align:right}
+.time.low{color:var(--carn-hi);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.pie{width:78px;height:78px;border-radius:50%;background:var(--lapis);position:relative;display:grid;place-items:center;box-shadow:0 0 0 3px var(--gold),0 0 0 5px var(--gold-lo),0 6px 18px rgba(0,0,0,.45)}
+.pie .sum{position:relative;z-index:1;background:var(--night);border-radius:50%;width:48px;height:48px;display:grid;place-items:center;font:800 .95rem var(--body);font-variant-numeric:tabular-nums;color:var(--gold-hi);box-shadow:0 0 0 2px var(--gold-lo)}
+.pie.over .sum{color:var(--carn-hi)} .pie.done .sum{color:var(--turq-hi)}
+
+.combo,.lvrow{display:flex;align-items:center;gap:10px;flex:none}
+.combo{opacity:.5;transition:opacity .2s}
+.combo.on{opacity:1}
+.chip{font:800 .84rem/1 var(--body);color:var(--night);background:linear-gradient(var(--gold-hi),var(--gold));border-radius:999px;padding:6px 11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip.bump{animation:bump .35s ease-out}
+@keyframes bump{40%{transform:scale(1.25)}}
+.combo .bar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;min-width:0}
+.combo .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--turq),var(--gold-hi));border-radius:99px}
+.combo .n,.lvrow .n{font:700 .76rem var(--body);color:var(--muted);white-space:nowrap}
+.lvrow .n{white-space:normal;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.lvrow .n svg{width:13px;height:13px;color:var(--gold-hi)}
+
+.msg{text-align:center;font:700 .88rem var(--body);min-height:1.3em;color:var(--muted);margin:0;flex:none;overflow-wrap:anywhere}
+.msg.good{color:var(--turq-hi)} .msg.bad{color:var(--carn-hi)}
+
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.board{box-sizing:border-box;padding:10px;border-radius:20px;width:300px;height:300px;max-width:100%;
+  background:linear-gradient(160deg,var(--lapis-hi),var(--lapis) 45%,#10245A);
+  box-shadow:0 0 0 2px var(--gold),0 0 0 4px var(--gold-lo),inset 0 2px 10px rgba(0,0,0,.45),0 14px 34px rgba(0,0,0,.5)}
+.grid{display:grid;gap:var(--gap);touch-action:none;user-select:none;-webkit-user-select:none;width:100%;height:100%}
+.cell{border-radius:12px;min-width:0}
+.cell.hole{background:rgba(5,12,32,.5);box-shadow:inset 0 3px 7px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.07)}
+.cell.void{visibility:hidden}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font:800 var(--fs,1.3rem)/1 var(--body);font-variant-numeric:tabular-nums;color:var(--ink);
+  background:linear-gradient(180deg,var(--stone-hi),var(--stone-lo));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -2px 0 rgba(120,90,40,.25),0 4px 0 var(--stone-edge),0 6px 10px rgba(0,0,0,.4);
+  transition:transform .1s,background .12s,box-shadow .12s}
+.tile .num{padding:0 .2em}
+.tile .den{border-top:2px solid currentColor;padding:2px .2em 0;margin-top:2px}
+.tile.u .num{color:var(--ink-soft)}
+.tile.gold{background:linear-gradient(180deg,var(--gold-hi),var(--gold));box-shadow:inset 0 1px 0 rgba(255,255,255,.8),inset 0 -2px 0 rgba(90,60,10,.3),0 4px 0 var(--gold-lo),0 0 14px rgba(242,209,124,.45),0 6px 10px rgba(0,0,0,.4)}
+.tile.gold::after{content:"";position:absolute;top:5px;right:5px;width:16px;height:10px;opacity:.75;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40' fill='none' stroke='%232B1D0C' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M6 9Q30 0 58 8'/%3E%3Cpath d='M8 20Q30 6 52 18Q30 29 8 20Z'/%3E%3Ccircle cx='30' cy='18' r='5' fill='%232B1D0C'/%3E%3Cpath d='M24 26L21 38M34 26Q38 38 46 36'/%3E%3C/svg%3E") center/contain no-repeat}
+.tile.sel{background:linear-gradient(180deg,var(--turq-hi),var(--turq));color:#fff;transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 #157A6D,0 0 16px rgba(98,216,198,.55)}
+.tile.sel .num{color:#fff}
+.tile.over{background:linear-gradient(180deg,var(--carn-hi),var(--carn));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 0 #7E2617,0 0 14px rgba(232,113,90,.5)}
+.tile.hint{box-shadow:inset 0 0 0 3px var(--gold-hi),0 4px 0 var(--stone-edge),0 0 18px rgba(242,209,124,.8);animation:glow 1s ease-in-out infinite}
+@keyframes glow{50%{filter:brightness(1.12)}}
+.tile.dead{box-shadow:inset 0 0 0 3px var(--carn-hi),0 4px 0 var(--stone-edge),0 0 16px rgba(232,113,90,.7);animation:shake .4s ease-in-out 2}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.tile.falling{animation:fall calc(.24s + var(--fall) * .05s) cubic-bezier(.33,1.3,.55,1) var(--delay,0s) backwards}
+@keyframes fall{from{transform:translateY(calc(var(--fall) * (-100% - var(--gap))));opacity:var(--o0,1)}to{transform:none;opacity:1}}
+.tile.pop{animation:popin .28s ease-out backwards}
+@keyframes popin{from{transform:scale(.6);opacity:.3}}
+.tile.gone{animation:gone .24s ease-in forwards}
+@keyframes gone{35%{transform:scale(1.1);filter:brightness(1.5)}to{transform:scale(.2);opacity:0}}
+.float{position:absolute;transform:translate(-50%,-50%);pointer-events:none;text-align:center;z-index:5;animation:floatup .95s ease-out forwards;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.float b{display:block;font:800 1.7rem/1 var(--body);color:var(--gold-hi)}
+.float small{display:block;font:700 .8rem var(--body);color:var(--text);margin-top:2px}
+@keyframes floatup{from{opacity:0;transform:translate(-50%,-30%) scale(.8)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.05)}to{opacity:0;transform:translate(-50%,-170%)}}
+
+.tools{display:flex;gap:8px;flex:none}
+.tools button{flex:1;border:1px solid rgba(212,162,58,.4);background:rgba(255,255,255,.05);color:var(--text);border-radius:12px;padding:11px 6px;font:700 .86rem var(--body);cursor:pointer}
+.tools button:active{background:rgba(212,162,58,.18)}
+.tools button.attn{border-color:var(--gold-hi);background:rgba(212,162,58,.22);animation:glow 1s ease-in-out infinite}
+button:focus-visible{outline:3px solid var(--gold-hi);outline-offset:2px}
+
+.sheet{position:fixed;inset:0;background:rgba(8,16,40,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;padding-inline:16px;padding-block:var(--sheet-top,16px) calc(16px + env(safe-area-inset-bottom,0px));z-index:10;box-sizing:border-box}
+.panel{position:relative;background:linear-gradient(180deg,#1A3473,var(--night));border-radius:22px;padding:24px 20px 20px;width:100%;max-width:440px;max-height:100%;overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;
+  box-shadow:0 0 0 2px var(--gold),0 0 0 4px var(--gold-lo),0 24px 60px rgba(0,0,0,.55)}
+.panel .logo{width:70px;height:44px;color:var(--gold-hi);align-self:center;flex:none}
+.panel h2{font:400 1.9rem/1.1 var(--display);margin:0;text-align:center;letter-spacing:.04em;text-wrap:balance;color:var(--text)}
+.panel .eyebrow{margin:0;text-align:center;font:700 .66rem var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.panel p{margin:0;line-height:1.5;color:var(--muted)}
+.panel p strong{color:var(--text)}
+.panel .center{text-align:center}
+.panel .lore{font-size:.84rem;text-align:center;color:var(--gold-hi);opacity:.9}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:rgba(255,255,255,.05);border:1px solid rgba(212,162,58,.25);border-radius:12px;padding:8px 4px;text-align:center;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
+.stat small{display:block;font:700 .58rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;font:800 1.1rem/1.3 var(--body);font-variant-numeric:tabular-nums;color:var(--text);overflow-wrap:anywhere}
+.score{font:800 3rem/1 var(--body);text-align:center;color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.score small{display:block;font:700 .7rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.chain{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}
+.chain .mini{width:40px;height:44px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 .95rem/1 var(--body);color:var(--ink);background:linear-gradient(180deg,var(--stone-hi),var(--stone-lo));box-shadow:0 3px 0 var(--stone-edge)}
+.chain .mini.gold{background:linear-gradient(180deg,var(--gold-hi),var(--gold));box-shadow:0 3px 0 var(--gold-lo)}
+.chain .mini .den{border-top:2px solid currentColor;padding-top:2px;margin-top:2px}
+.chain .op{font:800 1rem var(--body);color:var(--gold)}
+.primary{border:0;background:linear-gradient(var(--gold-hi),var(--gold));color:var(--night);border-radius:14px;padding:14px;font:800 1rem var(--body);cursor:pointer;box-shadow:0 3px 0 var(--gold-lo)}
+.ghost{border:1px solid rgba(212,162,58,.5);background:rgba(255,255,255,.05);color:var(--text);border-radius:14px;padding:13px 8px;font:700 .92rem var(--body);cursor:pointer}
+.row{display:flex;gap:10px}.row>*{flex:1}
+textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px solid rgba(212,162,58,.4);border-radius:10px;background:var(--night);color:var(--text);padding:8px}
+.toast{position:fixed;left:50%;top:var(--sheet-top,80px);transform:translateX(-50%);max-width:min(420px,calc(100vw - 32px));box-sizing:border-box;text-align:center;line-height:1.4;background:linear-gradient(var(--gold-hi),var(--gold));color:var(--night);font:700 .86rem var(--body);padding:10px 16px;border-radius:16px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+
+/* level map */
+.chap{display:flex;flex-direction:column;gap:8px}
+.chap-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:1px solid rgba(212,162,58,.3);padding-bottom:4px}
+.chap-h b{font:400 1.05rem var(--display);color:var(--text);letter-spacing:.03em}
+.chap-h span{font:700 .8rem var(--body);color:var(--gold-hi);white-space:nowrap}
+.lv-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.lv{border:0;border-radius:10px;padding:7px 0 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;
+  background:linear-gradient(180deg,var(--stone-hi),var(--stone-lo));box-shadow:0 3px 0 var(--stone-edge);color:var(--ink)}
+.lv b{font:800 1rem/1 var(--body);font-variant-numeric:tabular-nums}
+.lv .st{display:flex;gap:1px}
+.lv .st svg{width:9px;height:9px}
+.lv .st .on{color:var(--gold-lo)} .lv .st .off{color:rgba(43,29,12,.2)}
+.lv.next{outline:3px solid var(--gold-hi);outline-offset:2px;animation:glow 1.2s ease-in-out infinite}
+.lv.locked{background:rgba(255,255,255,.06);box-shadow:none;color:var(--muted);cursor:default}
+.lv.locked .st{visibility:hidden}
+.bigstars{display:flex;justify-content:center;gap:10px}
+.bigstars svg{width:46px;height:46px}
+.bigstars .on{color:var(--gold-hi);filter:drop-shadow(0 0 10px rgba(242,209,124,.6));animation:starin .45s cubic-bezier(.3,1.6,.5,1) backwards}
+.bigstars .off{color:rgba(255,255,255,.14)}
+@keyframes starin{from{transform:scale(0) rotate(-40deg);opacity:0}}
+.lives{display:flex;gap:4px;margin-top:3px}
+.lives svg{width:24px;height:15px}
+.lives .on,.biglives .on{color:var(--gold-hi)}
+.lives .off,.biglives .off{color:rgba(255,255,255,.16)}
+.biglives{display:flex;justify-content:center;gap:12px}
+.biglives svg{width:58px;height:36px}
+.biglives .lost{color:var(--carn-hi);animation:lose .9s ease-in forwards}
+@keyframes lose{30%{transform:scale(1.25) rotate(-8deg)}60%{transform:translateY(4px) rotate(6deg);opacity:.8}to{transform:translateY(10px);opacity:.16;color:#fff}}
+.biglives .gain{animation:starin .6s cubic-bezier(.3,1.6,.5,1) backwards}
+.sheet.adsheet{z-index:30;align-items:center;padding-block:16px}
+.adbox{aspect-ratio:16/10;max-width:100%;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:16px;box-sizing:border-box;
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 12px,rgba(255,255,255,.08) 12px 24px);border:1px dashed rgba(212,162,58,.5)}
+.adbox b{font:800 1.1rem var(--body);color:var(--text)}
+.adbox span{font:500 .82rem/1.4 var(--body);color:var(--muted);max-width:30ch}
+.adbar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.adbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--turq),var(--gold-hi))}
+.badge{font:800 .62rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--night);background:var(--turq-hi);border-radius:999px;padding:4px 8px;margin-left:4px}
+.mapbar{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;font:700 .84rem var(--body);color:var(--gold-hi)}
+.mapbar .lives{margin:0}
+@media (max-width:360px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion: reduce){.tile{transition:none}.tile.falling,.tile.pop,.tile.gone,.tile.hint,.tile.dead,.float,.chip.bump,.time.low,.lv.next,.bigstars .on,.tools button.attn,.biglives .gain{animation:none}.biglives .lost{animation:none;opacity:.16}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="eye" viewBox="0 0 64 40" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 9Q30 0 59 8"/>
+    <path d="M7 20Q30 6 53 18Q30 29 7 20Z"/>
+    <path d="M53 18H62"/>
+    <circle cx="30" cy="18" r="5.5" fill="currentColor"/>
+    <path d="M24 26L21 38"/>
+    <path d="M35 26Q38 37 46 36Q52 35 49 30.5Q46.5 28 44.5 31"/>
+  </symbol>
+  <symbol id="star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="frieze"></div>
+  <header><div class="brand"><svg aria-hidden="true"><use href="#eye"/></svg><h1>El Ojo de <b>Horus</b></h1><span class="badge" id="aula-badge" hidden>Aula</span></div></header>
+  <div class="tabs" role="group" aria-label="Modo">
+    <button id="t-levels" aria-pressed="true">Niveles</button>
+    <button id="t-free" aria-pressed="false">Contrarreloj</button>
+    <button id="t-day" aria-pressed="false">Reto diario</button>
+  </div>
+  <div class="hud">
+    <div class="l"><small id="h-l">Nivel</small><b id="pts">1</b><div class="lives" id="h-lives" aria-label="Vidas"></div></div>
+    <div class="pie" id="pie"><div class="sum" id="sum">0</div></div>
+    <div class="r"><small id="h-r">Tiempo</small><b class="time" id="time">0</b></div>
+  </div>
+  <div class="combo" id="combo" hidden>
+    <span class="chip" id="c-chip">Racha ×1</span>
+    <span class="bar"><i id="c-bar"></i></span>
+    <span class="n" id="c-n">Encadena en 5 s</span>
+  </div>
+  <div class="lvrow" id="lvrow">
+    <span class="chip" id="lv-chip">El Nilo</span>
+    <span class="n" id="lv-goal"></span>
+  </div>
+  <p class="msg" id="msg">Vacía el tablero con cadenas que sumen 1</p>
+  <div class="stage" id="stage"><div class="board" id="board"><div class="grid" id="grid" role="grid" aria-label="Fichas"></div></div></div>
+  <div class="tools">
+    <button id="b1">Deshacer</button>
+    <button id="b2">Reiniciar</button>
+    <button id="b3">Pista</button>
+  </div>
+  <div class="frieze"></div>
+</div>
+
+<!-- level map -->
+<div class="sheet" id="mapsheet" hidden>
+  <div class="panel">
+    <svg class="logo" aria-hidden="true"><use href="#eye"/></svg>
+    <h2>El Ojo de Horus</h2>
+    <p class="center">Vacía cada tablero uniendo fichas vecinas, también en diagonal, que sumen <strong>exactamente 1</strong>, antes de que se acabe el tiempo. Tienes <strong>3 vidas</strong>: pierdes una si el tablero se queda sin salida o se agota el tiempo. <span id="m-rules-end"></span> Cada capítulo superado te devuelve una vida.</p>
+    <div class="mapbar"><span class="lives" id="m-lives"></span><span id="m-prog"></span></div>
+    <div id="map" style="display:flex;flex-direction:column;gap:16px"></div>
+    <p class="lore" id="m-legal" hidden><a id="m-privacy" href="#" style="color:inherit">Privacidad</a></p>
+  </div>
+</div>
+
+<!-- level complete -->
+<div class="sheet" id="lvdone" hidden>
+  <div class="panel">
+    <p class="eyebrow" id="d-eyebrow">Nivel 1</p>
+    <h2 id="d-title">¡Tablero limpio!</h2>
+    <div class="bigstars" id="d-stars"></div>
+    <p class="center" id="d-text"></p>
+    <p class="lore" id="d-lore" hidden></p>
+    <textarea id="d-copy" rows="3" hidden aria-label="Texto para compartir"></textarea>
+    <button class="primary" id="d-next">Siguiente nivel</button>
+    <div class="row"><button class="ghost" id="d-map">Mapa</button><button class="ghost" id="d-again">Repetir</button><button class="ghost" id="d-share">Compartir</button></div>
+  </div>
+</div>
+
+<!-- life lost -->
+<div class="sheet" id="lvfail" hidden>
+  <div class="panel">
+    <p class="eyebrow" id="f-eyebrow">Nivel 1</p>
+    <h2 id="f-title">Sin salida</h2>
+    <div class="biglives" id="f-lives"></div>
+    <p class="center" id="f-text"></p>
+    <button class="primary" id="f-retry">Reintentar</button>
+    <button class="ghost" id="f-alt" hidden>Volver al principio del capítulo</button>
+    <button class="ghost" id="f-map">Mapa</button>
+  </div>
+</div>
+
+<!-- ad break (simulated in the preview; the real site uses Google's Ad Placement API) -->
+<div class="sheet adsheet" id="adsheet" hidden>
+  <div class="panel">
+    <p class="eyebrow" id="ad-eyebrow">Publicidad</p>
+    <div class="adbox"><b>Espacio publicitario</b><span>En la web publicada aquí se verá un anuncio real. En esta vista previa es una simulación.</span></div>
+    <div class="adbar"><i id="ad-bar"></i></div>
+    <p class="center" id="ad-count">El anuncio termina en 5 s</p>
+    <button class="primary" id="ad-claim" hidden>Recibir la vida</button>
+    <button class="ghost" id="ad-close">Cerrar</button>
+  </div>
+</div>
+
+<!-- timed start -->
+<div class="sheet" id="start" hidden>
+  <div class="panel">
+    <svg class="logo" aria-hidden="true"><use href="#eye"/></svg>
+    <p class="eyebrow" id="s-eyebrow">Contrarreloj</p>
+    <h2 id="s-title">Contrarreloj</h2>
+    <p>Une fichas vecinas que sumen <strong>exactamente 1</strong> antes de que se acabe el tiempo. Caen fichas nuevas sin parar. Las cadenas largas valen mucho más, y si encadenas aciertos en menos de 5 s el multiplicador sube hasta ×4. Las fichas de oro doblan los puntos.</p>
+    <p class="lore">Las seis partes del ojo valían ½, ¼, ⅛, 1/16, 1/32 y 1/64. Juntas suman 63/64: nunca llegan a 1.</p>
+    <div class="stats" id="s-stats"></div>
+    <button class="primary" id="go">Empezar</button>
+  </div>
+</div>
+<!-- timed over -->
+<div class="sheet" id="over" hidden>
+  <div class="panel">
+    <p class="eyebrow" id="o-eyebrow">Contrarreloj</p>
+    <h2 id="o-title">¡Tiempo!</h2>
+    <div class="score" id="o-score">0<small>puntos</small></div>
+    <div class="stats" id="o-stats"></div>
+    <p class="center" id="o-chain-label">Tu cadena más larga</p>
+    <div class="chain" id="o-chain"></div>
+    <textarea id="o-copy" rows="5" hidden aria-label="Texto para compartir"></textarea>
+    <div class="row"><button class="ghost" id="o-share">Compartir</button><button class="primary" id="o-again">Otra partida</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const D = 27720; // lcm(1..12): every fraction is an exact integer count of 1/27720
+  const frac = v => { if (v === 0) return "0"; const g = gcd(v, D); return v === D ? "1" : `${v / g}/${D / g}`; };
+  const VULGAR = {"1/2":"½","1/3":"⅓","2/3":"⅔","1/4":"¼","3/4":"¾","1/5":"⅕","2/5":"⅖","3/5":"⅗","1/6":"⅙","5/6":"⅚","1/7":"⅐","1/8":"⅛","3/8":"⅜","1/9":"⅑","1/10":"⅒"};
+  const pretty = t => VULGAR[`${t.n}/${t.d}`] || `${t.n}/${t.d}`;
+  const nf = x => x.toLocaleString("es-ES");
+  const starSvg = cls => `<svg class="${cls}" aria-hidden="true"><use href="#star"/></svg>`;
+  const stars = (k, of = 3) => Array.from({ length: of }, (_, i) => starSvg(i < k ? "on" : "off")).join("");
+
+  // fraction tiers: [numerator, denominator, weight]
+  const POOLS = [
+    [[1,2,4],[1,3,4],[1,6,4]],
+    [[1,4,3],[1,12,2],[2,3,1]],
+    [[1,8,2],[3,4,1],[3,8,1],[5,12,1]],
+    [[1,5,2],[1,10,2],[2,5,1],[3,10,1]],
+    [[1,9,2],[2,9,1],[1,18,1],[5,6,1]],
+    [[1,7,2],[1,14,1],[2,7,1],[1,11,1],[1,22,1]]
+  ];
+  const mk = (n, d) => ({ n, d, v: n * D / d });
+
+  // ---------- geometry (works for any board shape) ----------
+  function neighbours(C, R){
+    return Array.from({ length: C * R }, (_, a) => {
+      const out = [], ar = Math.floor(a / C), ac = a % C;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++){
+        if (!dr && !dc) continue; const r = ar + dr, c = ac + dc;
+        if (r >= 0 && r < R && c >= 0 && c < C) out.push(r * C + c);
+      }
+      return out;
+    });
+  }
+  const adj = (a, b) => S.nb[a].includes(b);
+
+  // Finds a valid chain among the tiles present. longest=false: the first one found.
+  // longest=true: the longest one within a search budget (for the hint).
+  function findPath(longest = false){
+    const b = S.board, nb = S.nb, path = [], used = new Uint8Array(b.length);
+    let best = null, budget = longest ? 400000 : 2000000;
+    const dfs = sum => {
+      if (--budget < 0) return true;
+      if (sum === D){
+        if (!best || path.length > best.length) best = path.slice();
+        return !longest || best.length >= 7;
+      }
+      if (path.length >= 7) return false;
+      for (const k of nb[path[path.length - 1]]){
+        if (used[k] || !b[k]) continue;
+        const s2 = sum + b[k].v; if (s2 > D) continue;
+        path.push(k); used[k] = 1;
+        const stop = dfs(s2);
+        path.pop(); used[k] = 0;
+        if (stop) return true;
+      }
+      return false;
+    };
+    for (let k = 0; k < b.length; k++){
+      if (!b[k]) continue;
+      path.push(k); used[k] = 1;
+      const stop = dfs(b[k].v);
+      path.pop(); used[k] = 0;
+      if (stop) break;
+    }
+    return best;
+  }
+  // Tiles that can no longer be part of any chain. Returns [] if unsure (search budget ran out).
+  function stuckCells(){
+    const b = S.board, nb = S.nb, present = b.map((t, k) => t ? k : -1).filter(k => k >= 0);
+    const covered = new Uint8Array(b.length), path = [], used = new Uint8Array(b.length);
+    let nCov = 0, budget = 600000;
+    const dfs = sum => {
+      if (--budget < 0) return true;
+      if (sum === D){
+        for (const k of path) if (!covered[k]){ covered[k] = 1; nCov++; }
+        return nCov === present.length;
+      }
+      if (path.length >= 8) return false;
+      for (const k of nb[path[path.length - 1]]){
+        if (used[k] || !b[k]) continue;
+        const s2 = sum + b[k].v; if (s2 > D) continue;
+        path.push(k); used[k] = 1;
+        const stop = dfs(s2);
+        path.pop(); used[k] = 0;
+        if (stop) return true;
+      }
+      return false;
+    };
+    for (const k of present){
+      if (covered[k]) continue;
+      path.push(k); used[k] = 1;
+      const stop = dfs(b[k].v);
+      path.pop(); used[k] = 0;
+      if (stop) break;
+    }
+    if (budget < 0) return [];
+    return present.filter(k => !covered[k]);
+  }
+
+  // ---------- levels ----------
+  const CHAPTERS = [
+    { name: "El Nilo", tier: 0, lore: "½ + ⅓ + ⅙ = 1 es la descomposición egipcia más famosa de la unidad." },
+    { name: "El papiro Rhind", tier: 1, lore: "El papiro Rhind, hacia 1650 a. C., trae una tabla para escribir 2/n como suma de fracciones de numerador 1." },
+    { name: "El Ojo de Horus", tier: 2, lore: "Ojo de Horus: ½ + ¼ + ⅛ + 1/16 + 1/32 + 1/64 = 63/64. Nunca llega a 1." },
+    { name: "Los escribas", tier: 3, lore: "Los escribas egipcios escribían casi todas las fracciones como suma de fracciones de numerador 1." },
+    { name: "Karnak", tier: 4, lore: "Siglos después, en 1202, Fibonacci describió un método para escribir cualquier fracción como suma de fracciones de numerador 1 distintas." },
+    { name: "Las estrellas", tier: 5, lore: "Con denominadores distintos, 1 se escribe de infinitas formas: ½ + ⅓ + ⅐ + 1/42 = 1." }
+  ];
+  const SHAPES = {
+    pyramid: ["..##..", ".####.", "######", "######"],
+    obelisk: ["..##..", "..##..", ".####.", ".####.", "######"],
+    eye:     [".####.", "######", "##..##", "######", ".####."],
+    temple:  ["######", "#.##.#", "#.##.#", "######"],
+    ankh:    [".####.", "##..##", ".####.", "..##..", "######", "..##.."],
+    bigpyr:  ["..##..", ".####.", ".####.", "######", "######", "######"]
+  };
+  const SHAPE_NAME = { pyramid: "La pirámide", obelisk: "El obelisco", eye: "El ojo", temple: "El templo", ankh: "El anj", bigpyr: "La gran pirámide" };
+  const SEQ = [
+    ["3x3", "4x3", "4x4", "5x4", "5x5", "pyramid"],
+    ["4x3", "4x4", "5x4", "5x5", "6x5", "obelisk"],
+    ["4x4", "5x4", "5x5", "6x5", "eye", "pyramid"],
+    ["4x4", "5x5", "6x5", "temple", "6x6", "ankh"],
+    ["5x4", "5x5", "6x5", "6x6", "eye", "bigpyr"],
+    ["5x5", "6x5", "temple", "6x6", "ankh", "bigpyr"]
+  ];
+  // After the six teaching chapters the journey goes on forever, with every fraction in play.
+  const PLACES = ["Tebas", "Menfis", "Guiza", "Abu Simbel", "Luxor", "Asuán", "Saqqara", "Edfu", "Dendera", "Abidos", "Amarna", "Heliópolis"];
+  const ROMAN = ["", " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", " X"];
+  const EXTRA_SIZES = ["5x5", "6x5", "6x6", "eye", "6x5", "temple", "6x6", "obelisk", "5x5"];
+  const BOSSES = ["bigpyr", "ankh", "eye", "temple", "bigpyr", "pyramid"];
+  function chapter(c){
+    if (c < CHAPTERS.length) return CHAPTERS[c];
+    const k = c - CHAPTERS.length;
+    return { name: PLACES[k % PLACES.length] + (ROMAN[Math.floor(k / PLACES.length)] ?? ` ${Math.floor(k / PLACES.length) + 1}`), tier: 5, lore: null, extra: true };
+  }
+  const chapterStart = n => Math.floor((n - 1) / 6) * 6 + 1;
+  const LIVES = 3;
+  // seconds for a level: a base plus a little per tile, tighter as levels go up
+  const timeLimit = (n, tiles) => Math.round(20 + tiles * Math.max(2.5, 5 - 0.07 * (n - 1)));
+
+  function shuffle(a, rand){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  // L fractions from the pool that add up to exactly 1, picked at random (weighted).
+  function decompose(L, pool, rand){
+    const minV = Math.min(...pool.map(p => p.v)), maxV = Math.max(...pool.map(p => p.v)), out = [];
+    let budget = 20000;
+    const go = (count, rem) => {
+      if (--budget < 0) return false;
+      if (count === 0) return rem === 0;
+      const order = pool.map(p => ({ p, key: Math.pow(rand(), 1 / p.w) })).sort((a, b) => b.key - a.key);
+      for (const { p } of order){
+        const r2 = rem - p.v; if (r2 < 0) continue;
+        if (r2 < (count - 1) * minV || r2 > (count - 1) * maxV) continue;
+        out.push(p); if (go(count - 1, r2)) return true; out.pop();
+      }
+      return false;
+    };
+    return go(L, D) ? shuffle(out.slice(), rand) : null;
+  }
+  // Cuts the shape into chains (paths of neighbouring cells) of length minL..maxL.
+  function partition(mask, C, R, minL, maxL, rand){
+    const nb = neighbours(C, R), owner = new Int8Array(C * R).fill(-1), groups = [];
+    const cells = []; mask.forEach((m, k) => { if (m) cells.push(k); });
+    const freeN = k => nb[k].reduce((s, j) => s + (mask[j] && owner[j] < 0 ? 1 : 0), 0);
+    const pickFrom = list => { let pick = -1, bf = 1e9; for (const j of list){ if (!mask[j] || owner[j] >= 0) continue; const f = freeN(j) + rand() * 0.9; if (f < bf){ bf = f; pick = j; } } return pick; };
+    let left = cells.length;
+    while (left > 0){
+      const start = pickFrom(cells);
+      let L = minL + Math.floor(rand() * (maxL - minL + 1));
+      if (left - L === 1) L = L + 1 <= maxL ? L + 1 : L - 1;
+      if (L > left) L = left;
+      const path = [start]; owner[start] = 1; left--;
+      const extend = () => { const j = pickFrom(nb[path[path.length - 1]]); if (j < 0) return false; path.push(j); owner[j] = 1; left--; return true; };
+      while (path.length < L){ if (!extend()){ path.reverse(); if (!extend()) break; } }
+      if (path.length < 2){
+        const g = groups.find(g => g.length <= maxL && (nb[g[0]].includes(start) || nb[g[g.length - 1]].includes(start)));
+        if (!g) return null;
+        if (nb[g[0]].includes(start)) g.unshift(start); else g.push(start);
+        continue;
+      }
+      groups.push(path);
+    }
+    return groups;
+  }
+  function levelInfo(n){
+    const c = Math.floor((n - 1) / 6), i = (n - 1) % 6;
+    const key = c < SEQ.length ? SEQ[c][i] : i === 5 ? BOSSES[c % BOSSES.length] : EXTRA_SIZES[(c * 7 + i * 3) % EXTRA_SIZES.length];
+    return { c, i, key };
+  }
+  function generateLevel(n){
+    const { c, i, key } = levelInfo(n);
+    const rows = SHAPES[key] || (() => { const [w, h] = key.split("x").map(Number); return Array(h).fill("#".repeat(w)); })();
+    const R = rows.length, C = rows[0].length, mask = rows.join("").split("").map(ch => ch === "#");
+    const maxL = Math.min(6, 3 + Math.min(c, 2) + (i >= 3 ? 1 : 0)), minL = c >= 3 ? 3 : 2;
+    const ch = chapter(c), tier = ch.tier;
+    // in the teaching chapters the newest fractions show up more; later, the harder tiers grow heavier
+    const boost = t => ch.extra ? 1 + 0.15 * t * Math.min(4, c - CHAPTERS.length + 1) : (t === tier && t > 0 ? 2.5 : 1);
+    const pool = POOLS.slice(0, tier + 1).flatMap((p, t) => p.map(([nn, d, w]) => ({ n: nn, d, v: nn * D / d, w: w * boost(t) })));
+    const rand = rng(7919 * n + 13);
+    for (let attempt = 0; attempt < 400; attempt++){
+      const groups = partition(mask, C, R, minL, maxL, rand); if (!groups) continue;
+      const board = Array(C * R).fill(null), sol = []; let ok = true;
+      for (const g of groups){
+        const fr = decompose(g.length, pool, rand); if (!fr){ ok = false; break; }
+        const tiles = fr.map(f => mk(f.n, f.d)); g.forEach((k, j) => board[k] = tiles[j]); sol.push({ cells: g, tiles });
+      }
+      if (ok) return { C, R, mask, board, sol, par: groups.length, c, i, key };
+    }
+    return null;
+  }
+  const levelData = () => { const lv = store.get("ojo.lv", {}); return { u: lv.u || 1, s: lv.s || {}, l: lv.l ?? LIVES, best: lv.best || 1 }; };
+  const levelName = n => { const { c, i, key } = levelInfo(n); return SHAPE_NAME[key] && i === 5 ? `${SHAPE_NAME[key]} · ${chapter(c).name}` : chapter(c).name; };
+  // ---------- ads ----------
+  // Two editions: "publica" (with ads) and "aula" (no ads). In production the edition is fixed per
+  // site; in this preview, opening the page with #aula shows the school edition.
+  // On the published site, load Google's Ad Placement API in <head> (see the project notes) and
+  // window.adBreak exists: real ads run. Without it (as in this preview), a simulated ad is shown.
+  // The published site sets window.OJO_BUILD and window.OJO_EDITION before this script.
+  const IS_BUILD = !!window.OJO_BUILD;
+  const EDITION = window.OJO_EDITION || (location.hash === "#aula" ? "aula" : "publica");
+  const Ads = {
+    // on the real site, ads run only when the AdSense script is configured; never a fake ad in production
+    enabled: EDITION !== "aula" && (!IS_BUILD || typeof window.adBreak === "function"),
+    real: () => typeof window.adBreak === "function",
+    // between screens, after a failed level
+    interstitial(done){
+      if (!this.enabled) return done();
+      if (this.real()){
+        let fired = false; const fin = () => { if (!fired){ fired = true; done(); } };
+        window.adBreak({ type: "next", name: "nivel-fallido", adBreakDone: fin });
+        setTimeout(fin, 25000); // safety net: never leave the player stuck if the ad service does not answer
+        return;
+      }
+      simAd("next", done);
+    },
+    // opt-in: the player chose to watch an ad to get a life back
+    rewarded(onReward, onFail){
+      if (!this.enabled) return onFail("off");
+      if (this.real()){
+        let settled = false;
+        const ok = () => { if (!settled){ settled = true; onReward(); } }, no = why => { if (!settled){ settled = true; onFail(why); } };
+        window.adBreak({ type: "reward", name: "vida-extra", beforeReward: showAdFn => showAdFn(), adViewed: ok, adDismissed: () => no("dismissed"), adBreakDone: () => no("unavailable") });
+        return;
+      }
+      simAd("reward", onReward, onFail);
+    }
+  };
+  function simAd(kind, onDone, onFail){
+    const SECS = 5, reward = kind === "reward", close = $("ad-close"), claim = $("ad-claim");
+    let raf = 0, finished = false; const t0 = performance.now();
+    $("ad-eyebrow").textContent = reward ? "Anuncio con recompensa" : "Publicidad";
+    claim.hidden = true; close.hidden = false; close.disabled = !reward;
+    close.textContent = reward ? "Cerrar sin recompensa" : `Continuar en ${SECS} s`;
+    $("adsheet").hidden = false;
+    const step = now => {
+      const e = (now - t0) / 1000, left = Math.max(0, SECS - e);
+      $("ad-bar").style.width = Math.min(100, e / SECS * 100) + "%";
+      if (left > 0){
+        $("ad-count").textContent = reward ? `Tu vida llega en ${Math.ceil(left)} s` : `El anuncio termina en ${Math.ceil(left)} s`;
+        if (!reward) close.textContent = `Continuar en ${Math.ceil(left)} s`;
+        raf = requestAnimationFrame(step); return;
+      }
+      finished = true;
+      $("ad-count").textContent = reward ? "Anuncio visto" : "Anuncio terminado";
+      if (reward){ claim.hidden = false; close.hidden = true; } else { close.disabled = false; close.textContent = "Continuar"; }
+    };
+    raf = requestAnimationFrame(step);
+    const end = ok => { cancelAnimationFrame(raf); $("adsheet").hidden = true; close.hidden = false; close.disabled = false; ok ? onDone() : onFail && onFail("dismissed"); };
+    claim.onclick = () => end(true);
+    close.onclick = () => { if (reward) end(false); else if (finished) end(true); };
+  }
+  // Out of lives and the player did not take the ad: back to the start of the chapter with full lives.
+  function applyGameOver(){
+    const lv = levelData(); if (lv.l > 0) return false;
+    lv.best = Math.max(lv.best, lv.u); lv.u = chapterStart(lv.u); lv.l = LIVES; store.set("ojo.lv", lv);
+    return true;
+  }
+
+  const livesHtml = (k, cls = "") => Array.from({ length: LIVES }, (_, i) => `<svg class="${i < k ? "on" : "off"} ${cls}" viewBox="0 0 64 40" aria-hidden="true"><use href="#eye"/></svg>`).join("");
+
+  // ---------- state ----------
+  let mode = "levels", S = null, timerRaf = 0, busy = false;
+  function setBoard(C, R, mask, board){
+    S.C = C; S.R = R; S.mask = mask; S.board = board; S.nb = neighbours(C, R);
+    const g = $("grid"); g.style.gridTemplateColumns = `repeat(${C},1fr)`; g.style.gridTemplateRows = `repeat(${R},1fr)`;
+    fitGrid();
+  }
+
+  // ---------- timed modes (contrarreloj and reto diario) ----------
+  const N = 5, THRESH = [0, 150, 500, 1100, 2000, 3200];
+  const LORE = [null, null, CHAPTERS[2].lore, null, null, CHAPTERS[5].lore];
+  const MAX_TIME = 90, HALF_LIFE = 90, COMBO_WINDOW = 5, MAX_MULT = 4, GOLD_P = 0.05;
+  const EPOCH = Date.UTC(2026, 9, 10); // reto n.º 1
+  // In the daily challenge every random stream is seeded from the date, so the initial board,
+  // each column's queue of new tiles, board repairs and the shuffle are the same for everyone.
+  let RND = Math.random, colR = Array(N).fill(Math.random), fixR = Math.random, mixR = Math.random;
+  function seedStreams(){
+    if (mode === "day"){
+      const s = Number(todayKey());
+      RND = rng(s); colR = Array.from({ length: N }, (_, c) => rng(s * 7 + 101 * (c + 1)));
+      fixR = rng(s ^ 0x5BD1E995); mixR = rng(s ^ 0x27D4EB2F);
+    } else { RND = Math.random; colR = Array(N).fill(Math.random); fixR = mixR = Math.random; }
+  }
+  const dateKey = d => `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+  const todayKey = () => dateKey(new Date());
+  const yesterdayKey = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dateKey(d); };
+  const dayNumber = () => { const d = new Date(); return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EPOCH) / 864e5) + 1; };
+  function tier(){ let t = 0; THRESH.forEach((v, i) => { if (S.pts >= v) t = i; }); return t; }
+  function randTile(rand = RND, allowGold = false){
+    const pool = POOLS.slice(0, tier() + 1).flat(), tot = pool.reduce((s, p) => s + p[2], 0);
+    let x = rand() * tot, t = null;
+    for (const [n, d, w] of pool){ x -= w; if (x <= 0){ t = mk(n, d); break; } }
+    if (!t) t = mk(pool[0][0], pool[0][1]);
+    if (allowGold && rand() < GOLD_P) t.gold = true;
+    return t;
+  }
+  function ensureSolvable(){
+    for (let tries = 0; tries < 60; tries++){
+      if (findPath()) return;
+      const k = Math.floor(fixR() * N * N); S.board[k] = randTile(fixR); S.board[k].pop = true;
+    }
+    if (findPath()) return;
+    const a = Math.floor(fixR() * N * N), nb = S.nb[a], b = nb[Math.floor(fixR() * nb.length)];
+    for (const k of [a, b]){ S.board[k] = mk(1, 2); S.board[k].pop = true; }
+  }
+  const stats = () => store.get("ojo.stats", { games: 0, chains: 0, bestLen: 0, bestChain: [] });
+  const bestFree = () => store.get("ojo.best", store.get("s1.best", 0));
+  const bestToday = () => store.get("ojo.day." + todayKey(), 0);
+  function streakNow(){ const s = store.get("ojo.streak", { n: 0, last: "" }); return s.last === todayKey() || s.last === yesterdayKey() ? s.n : 0; }
+  const statBox = (label, value) => `<div class="stat"><small>${label}</small><b>${value}</b></div>`;
+  function startStats(){
+    const st = stats(), today = bestToday();
+    $("s-stats").innerHTML = statBox("Récord", nf(bestFree())) + statBox("Hoy", today ? nf(today) : "—") +
+      statBox("Días seguidos", streakNow()) + statBox("Mejor cadena", st.bestLen ? `${st.bestLen} fichas` : "—");
+  }
+  function newTimedGame(){
+    seedStreams();
+    S = { pts: 0, time: 60, elapsed: 0, clears: 0, best: [], path: [], hint: null, dead: [], over: false, combo: 0, lastClear: -99, maxMult: 1, last: performance.now() };
+    const board = Array.from({ length: N * N }, (_, k) => { const t = randTile(); t.fall = N; t.o0 = 0; t.delay = (k % N) * 0.03 + (N - 1 - Math.floor(k / N)) * 0.05; return t; });
+    setBoard(N, N, Array(N * N).fill(true), board);
+    ensureSolvable(); busy = false;
+    hideSheets(); setChrome(); build(); hud(); comboUI(); msg("Une fichas vecinas que sumen exactamente 1");
+    cancelAnimationFrame(timerRaf); S.last = performance.now(); timerRaf = requestAnimationFrame(tick);
+  }
+  function tick(now){
+    if (!S || S.over) return;
+    const dt = Math.min(0.25, (now - S.last) / 1000); S.last = now;
+    if (mode === "levels"){
+      S.time -= dt;
+      if (S.time <= 0){ S.time = 0; S.path = []; paint(); return loseLife("time"); }
+      hud(); timerRaf = requestAnimationFrame(tick); return;
+    }
+    S.time -= dt; S.elapsed += dt;
+    if (S.combo && S.elapsed - S.lastClear > COMBO_WINDOW) S.combo = 0;
+    if (S.time <= 0){ S.time = 0; hud(); endTimed(); return; }
+    hud(); comboUI(); timerRaf = requestAnimationFrame(tick);
+  }
+  const multFor = combo => Math.min(MAX_MULT, 1 + 0.5 * (combo - 1));
+  function comboUI(){
+    if (mode === "levels") return;
+    const on = S.combo > 0, left = on ? Math.max(0, 1 - (S.elapsed - S.lastClear) / COMBO_WINDOW) : 0;
+    $("combo").classList.toggle("on", on);
+    $("c-chip").textContent = `Racha ×${nf(on ? multFor(S.combo) : 1)}`;
+    $("c-bar").style.width = (left * 100).toFixed(1) + "%";
+    $("c-n").textContent = on ? (S.combo === 1 ? "1 cadena" : `${S.combo} seguidas`) : `Encadena en ${COMBO_WINDOW} s`;
+  }
+  function breakCombo(){ S.combo = 0; comboUI(); }
+  const timeBonus = len => Math.max(1, Math.round((len + 1) * Math.pow(0.5, S.elapsed / HALF_LIFE)));
+
+  function clearTimedChain(p){
+    const len = p.length, gold = p.some(k => S.board[k].gold);
+    const combo = S.elapsed - S.lastClear <= COMBO_WINDOW ? S.combo + 1 : 1, m = multFor(combo);
+    const gain = Math.round(10 * len * len * m * (gold ? 2 : 1));
+    const before = S.time; S.time = Math.min(MAX_TIME, S.time + timeBonus(len) + (gold ? 2 : 0));
+    const bonus = Math.round(S.time - before), tierBefore = tier();
+    S.pts += gain; S.clears++; S.combo = combo; S.lastClear = S.elapsed; S.maxMult = Math.max(S.maxMult, m);
+    const tiles = p.map(k => S.board[k]);
+    if (len > S.best.length) S.best = tiles.map(t => ({ n: t.n, d: t.d, gold: !!t.gold }));
+    msg(tiles.map(pretty).join(" + ") + " = 1", "good");
+    floatScore(p, `+${nf(gain)}`, [m > 1 ? `×${nf(m)}` : "", gold ? "oro ×2" : "", bonus > 0 ? `+${bonus} s` : ""].filter(Boolean).join(" · "));
+    if (combo > 1){ const c = $("c-chip"); c.classList.remove("bump"); void c.offsetWidth; c.classList.add("bump"); }
+    vibrate(len >= 5 || m >= 2 ? [10, 30, 10] : 12);
+    vanish(p); hud(); comboUI();
+    setTimeout(() => {
+      // gravity: survivors drop down each column; new tiles come from that column's own queue
+      for (let c = 0; c < N; c++){
+        const removed = p.filter(k => k % N === c).length; if (!removed) continue;
+        const keep = []; for (let r = N - 1; r >= 0; r--){ const k = r * N + c; if (!p.includes(k)) keep.push({ t: S.board[k], r }); }
+        for (let r = N - 1, i = 0; r >= 0; r--, i++){
+          let t;
+          if (keep[i]){ t = keep[i].t; t.fall = r - keep[i].r; }
+          else { t = randTile(colR[c], true); t.fall = removed; t.o0 = 0; }
+          S.board[r * N + c] = t;
+        }
+      }
+      ensureSolvable(); build(); busy = false;
+      const tNow = tier();
+      if (tNow > tierBefore) toast(LORE[tNow] || `Nuevas fracciones: ${POOLS[tNow].map(([n, d]) => pretty({ n, d })).join("  ")}`, LORE[tNow] ? 4200 : 2200);
+    }, 230);
+  }
+  function endTimed(){
+    S.over = true; S.path = []; paint(); hud();
+    const day = mode === "day", prev = day ? bestToday() : bestFree();
+    if (S.pts > prev) store.set(day ? "ojo.day." + todayKey() : "ojo.best", S.pts);
+    const st = stats(); st.games++; st.chains += S.clears;
+    if (S.best.length > st.bestLen){ st.bestLen = S.best.length; st.bestChain = S.best; }
+    store.set("ojo.stats", st);
+    let streak = streakNow();
+    if (day){
+      const s = store.get("ojo.streak", { n: 0, last: "" });
+      if (s.last !== todayKey()){ streak = s.last === yesterdayKey() ? s.n + 1 : 1; store.set("ojo.streak", { n: streak, last: todayKey() }); }
+      else streak = s.n;
+    }
+    S.record = S.pts > prev && prev > 0; S.streak = streak;
+    $("o-eyebrow").textContent = day ? `Reto n.º ${dayNumber()}` : "Contrarreloj";
+    $("o-title").textContent = S.record ? "¡Nuevo récord!" : "¡Tiempo!";
+    $("o-score").innerHTML = `${nf(S.pts)}<small>puntos${!S.record && prev ? ` · récord ${nf(prev)}` : ""}</small>`;
+    $("o-stats").innerHTML = statBox("Cadenas", S.clears) + statBox("Racha máx.", `×${nf(S.maxMult)}`) +
+      statBox("Mejor cadena", S.best.length ? `${S.best.length} fichas` : "—") + statBox("Días seguidos", streak);
+    $("o-chain-label").hidden = !S.best.length;
+    $("o-chain").innerHTML = S.best.length
+      ? S.best.map(t => `<span class="mini${t.gold ? " gold" : ""}"><span>${t.n}</span><span class="den">${t.d}</span></span>`).join('<span class="op">+</span>') + '<span class="op">= 1</span>' : "";
+    $("o-copy").hidden = true; $("over").hidden = false;
+  }
+  function timedShareText(){
+    const head = mode === "day" ? `El Ojo de Horus · Reto n.º ${dayNumber()}` : "El Ojo de Horus · contrarreloj";
+    const lines = [head, `${nf(S.pts)} puntos · ${S.clears} cadenas · racha ×${nf(S.maxMult)}`];
+    if (S.best.length) lines.push(`Mejor cadena (${S.best.length} fichas): ${S.best.map(pretty).join(" + ")} = 1`);
+    if (mode === "day" && S.streak > 1) lines.push(`${S.streak} días seguidos`);
+    if (window.OJO_URL) lines.push(window.OJO_URL);
+    return lines.join("\n");
+  }
+
+  // ---------- level mode ----------
+  function startLevel(n){
+    const L = generateLevel(n), tiles = L.mask.filter(Boolean).length;
+    S = { mode: "levels", level: n, par: L.par, sol: L.sol, c: L.c, i: L.i, chains: 0, pts: 0, path: [], hint: null, dead: [], hintUsed: false, over: false,
+          time: timeLimit(n, tiles), limit: timeLimit(n, tiles), last: performance.now() };
+    L.board.forEach((t, k) => { if (!t) return; t.fall = L.R; t.o0 = 0; t.delay = (k % L.C) * 0.03 + (L.R - 1 - Math.floor(k / L.C)) * 0.05; });
+    setBoard(L.C, L.R, L.mask, L.board);
+    busy = false; hideSheets(); setChrome(); build(); hud();
+    msg("Vacía el tablero con cadenas que sumen 1");
+    const ch = chapter(L.c);
+    if (L.i === 0){
+      const fresh = L.c && !ch.extra ? `Entran ${POOLS[ch.tier].map(([a, b]) => pretty({ n: a, d: b })).join(" ")}. ` : "";
+      toast(`Capítulo ${L.c + 1}: ${ch.name}. ${fresh}${ch.lore || (ch.extra ? "Todas las fracciones en juego." : "")}`, 5200);
+    }
+    cancelAnimationFrame(timerRaf); S.last = performance.now(); timerRaf = requestAnimationFrame(tick);
+  }
+  function previewLevel(n){
+    const L = generateLevel(n);
+    S = { mode: "levels", level: n, par: L.par, sol: L.sol, c: L.c, i: L.i, chains: 0, pts: 0, path: [], hint: null, dead: [], over: true,
+          time: timeLimit(n, L.mask.filter(Boolean).length) };
+    setBoard(L.C, L.R, L.mask, L.board); setChrome(); build(); hud();
+  }
+  function clearLevelChain(p){
+    const len = p.length, gain = 10 * len * len;
+    S.chains++; S.pts += gain;
+    msg(p.map(k => pretty(S.board[k])).join(" + ") + " = 1", "good");
+    floatScore(p, `+${nf(gain)}`, `${S.chains} ${S.chains === 1 ? "cadena" : "cadenas"}`);
+    vibrate(len >= 4 ? [10, 30, 10] : 12);
+    vanish(p); hud(); setChrome();
+    setTimeout(() => {
+      p.forEach(k => S.board[k] = null);
+      build(); busy = false;
+      if (S.over) return;
+      if (S.board.every(t => !t)) return levelDone();
+      const dead = stuckCells();
+      if (dead.length){
+        // show which tiles are stranded, then take the life
+        S.dead = dead; S.over = true; busy = true; paint();
+        msg(dead.length === 1 ? "Sin salida: esa ficha ya no puede sumar 1" : "Sin salida: esas fichas ya no pueden sumar 1", "bad");
+        vibrate([40, 60, 40]);
+        setTimeout(() => { busy = false; loseLife("stuck"); }, 1400);
+      }
+    }, 230);
+  }
+  function levelHint(){
+    S.hintUsed = true;
+    const intact = S.sol.find(g => g.cells.every((k, j) => S.board[k] === g.tiles[j]));
+    S.hint = intact ? intact.cells : findPath(true);
+    S.time = Math.max(1, S.time - 10);
+    msg("Pista: −10 s, y el nivel da como mucho 2 estrellas");
+    paint(); hud(); setChrome();
+  }
+  function loseLife(reason){
+    S.over = true; cancelAnimationFrame(timerRaf); hud();
+    const lv = levelData(), before = lv.l;
+    lv.l = Math.max(0, lv.l - 1);
+    const over = lv.l === 0, back = chapterStart(lv.u);
+    store.set("ojo.lv", lv); // with 0 lives the reset waits: the player may still take the rewarded ad
+    S.failOver = over; S.back = back; $("toast").hidden = true;
+    $("f-eyebrow").textContent = `Nivel ${S.level} · ${levelName(S.level)}`;
+    $("f-title").textContent = over ? "Sin vidas" : reason === "time" ? "¡Se acabó el tiempo!" : "Sin salida";
+    $("f-lives").innerHTML = Array.from({ length: LIVES }, (_, i) => `<svg class="${i < before - 1 ? "on" : i === before - 1 ? "lost" : "off"}" viewBox="0 0 64 40" aria-hidden="true"><use href="#eye"/></svg>`).join("");
+    const left = before - 1;
+    const chName = chapter(Math.floor((back - 1) / 6)).name;
+    $("f-text").textContent = over
+      ? (Ads.enabled
+          ? `Mira un anuncio para recuperar una vida y seguir en este nivel, o vuelve al nivel ${back}, principio de ${chName}, con 3 vidas.`
+          : `Vuelves al nivel ${back}, principio de ${chName}, con 3 vidas nuevas.`)
+      : (reason === "time" ? "El tablero no se vació a tiempo. " : "Quedaron fichas que ya no podían sumar 1. ") + `Te ${left === 1 ? "queda 1 vida" : `quedan ${left} vidas`}.`;
+    $("f-retry").textContent = over ? (Ads.enabled ? "Ver anuncio: +1 vida" : `Volver al nivel ${back}`) : "Reintentar";
+    $("f-alt").textContent = `Volver al nivel ${back}`;
+    $("f-alt").hidden = !(over && Ads.enabled);
+    $("lvfail").hidden = false;
+  }
+  function levelDone(){
+    S.over = true; cancelAnimationFrame(timerRaf); hud();
+    const base = S.chains <= S.par ? 3 : S.chains <= S.par + 2 ? 2 : 1, st = S.hintUsed ? Math.min(2, base) : base;
+    const lv = levelData(), prev = lv.s[S.level] || 0;
+    lv.s[S.level] = Math.max(prev, st); lv.u = Math.max(lv.u, S.level + 1); lv.best = Math.max(lv.best, lv.u);
+    const bossDone = S.i === 5, gained = bossDone && lv.l < LIVES;
+    if (gained) lv.l++;
+    store.set("ojo.lv", lv);
+    S.stars = st; $("toast").hidden = true;
+    $("d-eyebrow").textContent = `Nivel ${S.level} · ${levelName(S.level)}`;
+    $("d-title").textContent = st === 3 ? "¡Tablero perfecto!" : "¡Tablero limpio!";
+    $("d-stars").innerHTML = Array.from({ length: 3 }, (_, i) => `<svg class="${i < st ? "on" : "off"}" style="animation-delay:${i * 0.18}s" aria-hidden="true"><use href="#star"/></svg>`).join("");
+    let txt = `${S.chains} ${S.chains === 1 ? "cadena" : "cadenas"} · ${nf(S.pts)} puntos · sobraron ${Math.ceil(S.time)} s.`;
+    if (st < 3) txt += S.hintUsed && base === 3 ? " Sin pista habrían sido 3 estrellas." : ` Para 3 estrellas: ${S.par} cadenas o menos, sin pista.`;
+    else if (S.chains < S.par) txt += " ¡Mejor que la solución prevista!";
+    $("d-text").textContent = txt;
+    const lore = $("d-lore");
+    if (bossDone){
+      const next = chapter(S.c + 1);
+      const fr = next.extra ? "todas las fracciones" : POOLS[next.tier].map(([a, b]) => pretty({ n: a, d: b })).join(" ");
+      lore.textContent = `Capítulo superado${gained ? " y recuperas una vida" : ""}. Siguiente: ${next.name}, con ${fr}.`;
+      lore.hidden = false;
+    } else lore.hidden = true;
+    $("d-copy").hidden = true; $("lvdone").hidden = false;
+  }
+  function renderMap(){
+    const lv = levelData(), lastChap = Math.max(CHAPTERS.length - 1, Math.floor((lv.u - 1) / 6) + 1);
+    let total = 0, done = 0, html = "";
+    for (let c = 0; c <= lastChap; c++){
+      const ch = chapter(c);
+      const fr = ch.extra ? "todas" : (c ? "+ " : "") + POOLS[ch.tier].map(([a, b]) => pretty({ n: a, d: b })).join(" ");
+      let btns = "";
+      for (let i = 0; i < 6; i++){
+        const n = c * 6 + i + 1, locked = n > lv.u, st = lv.s[n] || 0; total += st; if (st) done++;
+        btns += `<button class="lv${locked ? " locked" : ""}${n === lv.u ? " next" : ""}" data-n="${n}"${locked ? " disabled" : ""} aria-label="Nivel ${n}${locked ? ", bloqueado" : `, ${st} estrellas`}"><b>${n}</b><span class="st">${stars(st)}</span></button>`;
+      }
+      html += `<section class="chap"><div class="chap-h"><b>${c + 1}. ${ch.name}</b><span>${fr}</span></div><div class="lv-grid">${btns}</div></section>`;
+    }
+    $("map").innerHTML = html + `<p class="lore">Los niveles no se acaban: cada capítulo que superas abre otro.</p>`;
+    $("m-lives").innerHTML = livesHtml(lv.l);
+    $("m-rules-end").textContent = Ads.enabled ? "Sin vidas, puedes ver un anuncio para recuperar una o volver al principio del capítulo." : "Sin vidas, vuelves al principio del capítulo.";
+    $("m-prog").textContent = `${done} niveles · ${total} estrellas · récord: nivel ${lv.best}`;
+    $("map").querySelectorAll(".lv:not(.locked)").forEach(b => b.onclick = () => startLevel(+b.dataset.n));
+  }
+  function showMap(){
+    if (S) S.over = true; cancelAnimationFrame(timerRaf);
+    const reset = applyGameOver();
+    previewLevel(levelData().u);
+    renderMap(); hideSheets(); $("mapsheet").hidden = false;
+    const next = $("map").querySelector(".lv.next"); next && next.scrollIntoView({ block: "center" });
+    if (reset) toast(`Sin vidas: vuelves al nivel ${levelData().u} con 3 vidas`, 3000);
+  }
+
+  // ---------- shared rendering ----------
+  function setChrome(){
+    const lvMode = mode === "levels";
+    $("combo").hidden = lvMode; $("lvrow").hidden = !lvMode;
+    $("h-l").textContent = lvMode ? "Nivel" : "Puntos";
+    $("h-r").textContent = "Tiempo";
+    $("b1").textContent = lvMode ? "Mapa" : "Pista (−5 s)";
+    $("b2").textContent = lvMode ? "Pista (−10 s)" : "Barajar (−5 s)";
+    $("b3").hidden = true;
+    $("h-lives").hidden = !lvMode;
+    if (lvMode && S){
+      $("h-lives").innerHTML = livesHtml(levelData().l);
+      $("lv-chip").textContent = levelName(S.level);
+      $("lv-goal").innerHTML = `${S.chains || 0} ${S.chains === 1 ? "cadena" : "cadenas"} · ${stars(3)} con ${S.par} o menos`;
+    }
+  }
+  function build(){
+    const g = $("grid"); g.innerHTML = "";
+    S.board.forEach((t, k) => {
+      const el = document.createElement("div"); el.dataset.k = k;
+      if (!t){ el.className = "cell " + (S.mask[k] ? "hole" : "void"); g.append(el); return; }
+      el.className = "cell tile" + (t.n === 1 ? " u" : "") + (t.gold ? " gold" : "") + (t.fall ? " falling" : "") + (t.pop ? " pop" : "");
+      if (t.fall){ el.style.setProperty("--fall", t.fall); el.style.setProperty("--delay", (t.delay || 0) + "s"); el.style.setProperty("--o0", t.o0 ?? 1); }
+      el.innerHTML = `<span class="num">${t.n}</span><span class="den">${t.d}</span>`;
+      el.setAttribute("aria-label", `${t.n} entre ${t.d}` + (t.gold ? ", de oro" : ""));
+      g.append(el);
+      t.fall = 0; t.delay = 0; t.pop = false; delete t.o0;
+    });
+    paint();
+  }
+  const pathSum = () => S.path.reduce((s, k) => s + S.board[k].v, 0);
+  function paint(){
+    const sum = pathSum(), over = sum > D;
+    document.querySelectorAll(".tile").forEach(el => {
+      const k = +el.dataset.k, on = S.path.includes(k);
+      el.classList.toggle("sel", on); el.classList.toggle("over", on && over);
+      el.classList.toggle("hint", !!S.hint && S.hint.includes(k));
+      el.classList.toggle("dead", !!S.dead && S.dead.includes(k));
+    });
+    const css = getComputedStyle(document.documentElement), cols = ["--lapis-hi","--gold","--turq","--carn","--mal","--ame"].map(c => css.getPropertyValue(c).trim());
+    let acc = 0; const stops = [];
+    S.path.forEach((k, i) => { const a0 = Math.min(acc, D) / D * 360; acc += S.board[k].v; const a1 = Math.min(acc, D) / D * 360; stops.push(`${cols[i % cols.length]} ${a0}deg ${a1}deg`); });
+    const base = css.getPropertyValue("--lapis").trim();
+    $("pie").style.background = stops.length ? `conic-gradient(${stops.join(",")}${acc < D ? `, ${base} ${acc / D * 360}deg 360deg` : ""})` : "";
+    $("pie").classList.toggle("over", over); $("pie").classList.toggle("done", sum === D);
+    $("sum").textContent = over ? ">1" : frac(sum);
+  }
+  function hud(){
+    const t = $("time");
+    if (mode === "levels"){ $("pts").textContent = S.level; t.textContent = Math.ceil(S.time || 0); t.classList.toggle("low", !S.over && S.time < 10 && S.time > 0); return; }
+    $("pts").textContent = nf(S.pts);
+    t.textContent = Math.ceil(S.time); t.classList.toggle("low", !S.over && S.time < 10 && S.time > 0);
+  }
+  function msg(text, kind){ const m = $("msg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); }
+  function vibrate(p){ try { navigator.vibrate && navigator.vibrate(p); } catch {} }
+  function vanish(p){
+    p.forEach(k => { const el = $("grid").querySelector(`[data-k="${k}"]`); el && el.classList.add("gone"); });
+    S.path = []; S.hint = null; S.dead = []; busy = true;
+  }
+  function floatScore(keys, big, small){
+    const st = $("stage"), b = st.getBoundingClientRect(); let x = 0, y = 0, n = 0;
+    keys.forEach(k => { const el = $("grid").querySelector(`[data-k="${k}"]`); if (!el) return; const a = el.getBoundingClientRect(); x += a.left + a.width / 2; y += a.top + a.height / 2; n++; });
+    if (!n) return;
+    const d = document.createElement("div"); d.className = "float";
+    d.innerHTML = `<b>${big}</b>` + (small ? `<small>${small}</small>` : "");
+    d.style.left = (x / n - b.left) + "px"; d.style.top = (y / n - b.top) + "px";
+    st.append(d); setTimeout(() => d.remove(), 1000);
+  }
+  function fitGrid(){
+    // sheets start below the mode tabs so the tabs stay usable
+    document.documentElement.style.setProperty("--sheet-top", Math.round($("t-levels").parentElement.getBoundingClientRect().bottom + 10) + "px");
+    if (!S || !S.C) return;
+    const st = $("stage").getBoundingClientRect(), pad = 20, gap = 8;
+    const cell = Math.max(24, Math.floor(Math.min((st.width - pad - (S.C - 1) * gap) / S.C, (st.height - pad - (S.R - 1) * gap) / S.R, 96)));
+    $("board").style.width = (S.C * cell + (S.C - 1) * gap + pad) + "px";
+    $("board").style.height = (S.R * cell + (S.R - 1) * gap + pad) + "px";
+    $("grid").style.setProperty("--fs", Math.round(cell * 0.3) + "px");
+  }
+
+  // ---------- input ----------
+  const grid = $("grid"); let dragging = false;
+  const cellAt = e => { const el = document.elementFromPoint(e.clientX, e.clientY); const t = el && el.closest(".tile"); return t ? +t.dataset.k : -1; };
+  grid.addEventListener("pointerdown", e => {
+    if (!S || S.over || busy) return; const k = cellAt(e); if (k < 0) return;
+    dragging = true; grid.setPointerCapture(e.pointerId); S.path = [k]; paint();
+  });
+  grid.addEventListener("pointermove", e => {
+    if (!dragging) return; const k = cellAt(e); if (k < 0) return;
+    const p = S.path;
+    if (p.length >= 2 && k === p[p.length - 2]){ p.pop(); paint(); return; }
+    if (!p.includes(k) && adj(p[p.length - 1], k)){ p.push(k); vibrate(4); paint(); }
+  });
+  const release = () => { if (!dragging) return; dragging = false; resolve(); };
+  grid.addEventListener("pointerup", release); grid.addEventListener("pointercancel", release);
+
+  function resolve(){
+    if (S.over){ S.path = []; paint(); return; }
+    const sum = pathSum(), p = S.path.slice();
+    if (sum === D && p.length >= 2){
+      if (mode === "levels") clearLevelChain(p); else clearTimedChain(p);
+      return;
+    }
+    if (p.length > 1){
+      if (mode !== "levels") breakCombo();
+      const txt = p.map(k => pretty(S.board[k])).join(" + ");
+      msg(sum > D ? `Te pasas: ${txt} > 1` : `${txt} = ${frac(sum)}: falta ${frac(D - sum)}`);
+    }
+    S.path = []; paint();
+  }
+  $("b1").onclick = () => {
+    if (mode === "levels"){ if (!busy) showMap(); return; }
+    if (!S || S.over || busy) return;
+    breakCombo(); S.hint = findPath(true); S.time = Math.max(1, S.time - 5);
+    if (S.hint) msg(`La cadena más larga que veo tiene ${S.hint.length} fichas`);
+    paint(); hud();
+  };
+  $("b2").onclick = () => {
+    if (!S || busy || S.over) return;
+    if (mode === "levels") return levelHint();
+    breakCombo();
+    for (let i = S.board.length - 1; i > 0; i--){ const j = Math.floor(mixR() * (i + 1)); [S.board[i], S.board[j]] = [S.board[j], S.board[i]]; }
+    S.board.forEach(t => t.pop = true);
+    S.time = Math.max(1, S.time - 5); S.hint = null; ensureSolvable(); build(); hud();
+  };
+
+  // ---------- sheets and modes ----------
+  function toast(t, ms = 2000){ const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, ms); }
+  function hideSheets(){ ["mapsheet", "lvdone", "lvfail", "start", "over", "toast"].forEach(id => $(id).hidden = true); }
+  function copyText(txt, ta){
+    const fallback = () => { ta.value = txt; ta.hidden = false; ta.select(); toast("Copia el texto de arriba"); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Resultado copiado"), fallback); } catch { fallback(); }
+  }
+  function setMode(m){
+    mode = m;
+    ["levels", "free", "day"].forEach(x => $("t-" + x).setAttribute("aria-pressed", String(x === m)));
+    if (S) S.over = true; cancelAnimationFrame(timerRaf);
+    if (m === "levels") return showMap();
+    // preview board behind the start sheet
+    S = { pts: 0, time: 60, elapsed: 0, combo: 0, lastClear: -99, path: [], dead: [], over: true };
+    setBoard(N, N, Array(N * N).fill(true), Array.from({ length: N * N }, () => randTile(Math.random)));
+    setChrome(); build(); hud(); comboUI(); msg("Une fichas vecinas que sumen exactamente 1");
+    $("s-eyebrow").textContent = m === "day" ? `Reto n.º ${dayNumber()} · el mismo tablero para todos` : "Contrarreloj";
+    $("s-title").textContent = m === "day" ? "Reto del día" : "Contrarreloj";
+    startStats(); hideSheets(); $("start").hidden = false;
+  }
+  $("t-levels").onclick = () => setMode("levels");
+  $("t-free").onclick = () => setMode("free");
+  $("t-day").onclick = () => setMode("day");
+  $("go").onclick = newTimedGame; $("o-again").onclick = newTimedGame;
+  $("o-share").onclick = () => copyText(timedShareText(), $("o-copy"));
+  $("d-next").onclick = () => startLevel(S.level + 1);
+  $("f-retry").onclick = () => {
+    if (!S.failOver) return Ads.interstitial(() => startLevel(S.level));
+    if (!Ads.enabled){ applyGameOver(); return startLevel(levelData().u); }
+    Ads.rewarded(
+      () => { const lv = levelData(); lv.l = 1; store.set("ojo.lv", lv); startLevel(S.level); toast("Vida recuperada", 1800); },
+      why => toast(why === "unavailable" ? "Ahora no hay anuncios disponibles. Prueba en un momento o vuelve al principio del capítulo." : "Sin recompensa: el anuncio no se vio entero.", 3000)
+    );
+  };
+  $("f-alt").onclick = () => { applyGameOver(); startLevel(levelData().u); };
+  $("f-map").onclick = showMap;
+  $("aula-badge").hidden = EDITION !== "aula";
+  if (window.OJO_PRIVACY){ $("m-privacy").href = window.OJO_PRIVACY; $("m-legal").hidden = false; }
+  $("d-again").onclick = () => startLevel(S.level);
+  $("d-map").onclick = showMap;
+  $("d-share").onclick = () => copyText(`El Ojo de Horus · Nivel ${S.level} (${levelName(S.level)})\n${"★".repeat(S.stars)}${"☆".repeat(3 - S.stars)} · ${S.chains} cadenas` + (window.OJO_URL ? `\n${window.OJO_URL}` : ""), $("d-copy"));
+
+  addEventListener("resize", fitGrid);
+  setMode("levels");
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+</script>
+</body>
+</html>
