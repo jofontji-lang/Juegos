@@ -1,0 +1,61 @@
+# Rehace icons/og.png y los favicons cada vez que cambia la portada.
+#
+# Existe porque la imagen que sale al compartir el enlace se quedaba atrás
+# cada vez que se añadía un juego: había que acordarse de ejecutar el script
+# a mano, con cairosvg y las tipografías instaladas. Ahora lo hace GitHub.
+name: Imagenes de la portada
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Dependencias
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libcairo2 fontconfig
+          pip install --quiet cairosvg pillow fonttools brotli
+
+      - name: Tipografias
+        run: |
+          mkdir -p ~/.fonts
+          curl -sfSL -o /tmp/Fraunces.ttf 'https://raw.githubusercontent.com/google/fonts/main/ofl/fraunces/Fraunces%5BSOFT,WONK,opsz,wght%5D.ttf'
+          curl -sfSL -o /tmp/Figtree.ttf 'https://raw.githubusercontent.com/google/fonts/main/ofl/figtree/Figtree%5Bwght%5D.ttf'
+          python - <<'EOF'
+          from fontTools.varLib import instancer
+          from fontTools.ttLib import TTFont
+          import os
+          destino = os.path.expanduser('~/.fonts')
+          instancer.instantiateVariableFont(
+              TTFont('/tmp/Fraunces.ttf'),
+              {'wght': 600, 'SOFT': 0, 'WONK': 1, 'opsz': 48}
+          ).save(destino + '/Fraunces.ttf')
+          instancer.instantiateVariableFont(
+              TTFont('/tmp/Figtree.ttf'), {'wght': 400}
+          ).save(destino + '/Figtree.ttf')
+          EOF
+          fc-cache -f
+
+      - name: Generar
+        run: python generar-imagenes.py
+
+      - name: Comitear si han cambiado
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@users.noreply.github.com'
+          git add icons/og.png icons/og.svg icons/icono-512.png icons/icono-32.png
+          git diff --cached --quiet || git commit -m 'Rehacer las imagenes de la portada'
+          git push
