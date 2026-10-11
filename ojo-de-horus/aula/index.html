@@ -23,7 +23,7 @@
 <meta property="og:locale" content="es_ES">
 <meta name="twitter:card" content="summary_large_image">
 <style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<script>window.OJO_BUILD = true; window.OJO_EDITION = "aula"; window.OJO_VERSION = "1.0.0"; window.OJO_URL = "https://juegos.matematicasjosepfont.es/ojo-de-horus/aula/"; window.OJO_PRIVACY = "https://juegos.matematicasjosepfont.es/ojo-de-horus/privacidad/";</script>
+<script>window.OJO_BUILD = true; window.OJO_EDITION = "aula"; window.OJO_VERSION = "1.0.1"; window.OJO_URL = "https://juegos.matematicasjosepfont.es/ojo-de-horus/aula/"; window.OJO_PRIVACY = "https://juegos.matematicasjosepfont.es/ojo-de-horus/privacidad/";</script>
 
 </head>
 <body>
@@ -153,6 +153,7 @@ button:focus-visible{outline:3px solid var(--gold-hi);outline-offset:2px}
 .chain .mini .den{border-top:2px solid currentColor;padding-top:2px;margin-top:2px}
 .chain .op{font:800 1rem var(--body);color:var(--gold)}
 .primary{border:0;background:linear-gradient(var(--gold-hi),var(--gold));color:var(--night);border-radius:14px;padding:14px;font:800 1rem var(--body);cursor:pointer;box-shadow:0 3px 0 var(--gold-lo)}
+.primary:disabled{opacity:.6;cursor:progress}
 .ghost{border:1px solid rgba(212,162,58,.5);background:rgba(255,255,255,.05);color:var(--text);border-radius:14px;padding:13px 8px;font:700 .92rem var(--body);cursor:pointer}
 .row{display:flex;gap:10px}.row>*{flex:1}
 textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px solid rgba(212,162,58,.4);border-radius:10px;background:var(--night);color:var(--text);padding:8px}
@@ -551,28 +552,39 @@ textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px 
   const Ads = {
     // on the real site, ads run only when the AdSense script is configured; never a fake ad in production
     enabled: EDITION !== "aula" && (!IS_BUILD || typeof window.adBreak === "function"),
-    real: () => typeof window.adBreak === "function",
+    // the ad script may be blocked (ad blockers, network): then the game simply goes on without ads
+    real: () => typeof window.adBreak === "function" && !window.OJO_ADS_BLOCKED,
     // between screens, after a failed level
     interstitial(done){
       if (!this.enabled) return done();
-      if (this.real()){
-        let fired = false; const fin = () => { if (!fired){ fired = true; done(); } };
-        window.adBreak({ type: "next", name: "nivel-fallido", adBreakDone: fin });
-        setTimeout(fin, 25000); // safety net: never leave the player stuck if the ad service does not answer
+      if (IS_BUILD){
+        if (!this.real()) return done();
+        let fired = false, t = 0;
+        const fin = () => { if (!fired){ fired = true; clearTimeout(t); done(); } };
+        window.adBreak({ type: "next", name: "nivel-fallido", beforeAd: () => clearTimeout(t), adBreakDone: fin });
+        t = setTimeout(fin, 6000); // nothing at all happened: carry on without an ad
         return;
       }
       simAd("next", done);
     },
-    // opt-in: the player chose to watch an ad to get a life back
-    rewarded(onReward, onFail){
-      if (!this.enabled) return onFail("off");
-      if (this.real()){
-        let settled = false;
-        const ok = () => { if (!settled){ settled = true; onReward(); } }, no = why => { if (!settled){ settled = true; onFail(why); } };
-        window.adBreak({ type: "reward", name: "vida-extra", beforeReward: showAdFn => showAdFn(), adViewed: ok, adDismissed: () => no("dismissed"), adBreakDone: () => no("unavailable") });
+    // Rewarded ad, Google's pattern: ask for one first; only if one is ready (beforeReward)
+    // do we offer it to the player, who then chooses to watch it.
+    // h = { ready(show), viewed(), dismissed(), none() }
+    rewardOffer(h){
+      if (!this.enabled) return h.none();
+      if (IS_BUILD){
+        if (!this.real()) return h.none();
+        let state = "waiting";
+        const none = () => { if (state === "waiting"){ state = "none"; h.none(); } };
+        window.adBreak({ type: "reward", name: "vida-extra",
+          beforeReward: show => { if (state !== "waiting") return; state = "ready"; h.ready(show); },
+          adViewed: () => h.viewed(),
+          adDismissed: () => h.dismissed(),
+          adBreakDone: none });
+        setTimeout(none, 8000);
         return;
       }
-      simAd("reward", onReward, onFail);
+      h.ready(() => simAd("reward", () => h.viewed(), () => h.dismissed()));
     }
   };
   function simAd(kind, onDone, onFail){
@@ -825,15 +837,29 @@ textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px 
     $("f-lives").innerHTML = Array.from({ length: LIVES }, (_, i) => `<svg class="${i < before - 1 ? "on" : i === before - 1 ? "lost" : "off"}" viewBox="0 0 64 40" aria-hidden="true"><use href="#eye"/></svg>`).join("");
     const left = before - 1;
     const chName = chapter(Math.floor((back - 1) / 6)).name;
+    const noAdText = `Vuelves al nivel ${back}, principio de ${chName}, con 3 vidas nuevas.`;
     $("f-text").textContent = over
-      ? (Ads.enabled
-          ? `Mira un anuncio para recuperar una vida y seguir en este nivel, o vuelve al nivel ${back}, principio de ${chName}, con 3 vidas.`
-          : `Vuelves al nivel ${back}, principio de ${chName}, con 3 vidas nuevas.`)
+      ? (Ads.enabled ? `Mira un anuncio para recuperar una vida y seguir en este nivel, o vuelve al nivel ${back}, principio de ${chName}, con 3 vidas.` : noAdText)
       : (reason === "time" ? "El tablero no se vació a tiempo. " : "Quedaron fichas que ya no podían sumar 1. ") + `Te ${left === 1 ? "queda 1 vida" : `quedan ${left} vidas`}.`;
-    $("f-retry").textContent = over ? (Ads.enabled ? "Ver anuncio: +1 vida" : `Volver al nivel ${back}`) : "Reintentar";
+    const retry = $("f-retry");
+    retry.hidden = false; retry.disabled = false;
+    retry.textContent = over ? (Ads.enabled ? "Buscando anuncio…" : `Volver al nivel ${back}`) : "Reintentar";
     $("f-alt").textContent = `Volver al nivel ${back}`;
     $("f-alt").hidden = !(over && Ads.enabled);
     $("lvfail").hidden = false;
+    S.showReward = null;
+    if (over && Ads.enabled) offerLife(noAdText);
+  }
+  // Out of lives: offer the rewarded ad only once Google says one is ready.
+  function offerLife(noAdText){
+    const retry = $("f-retry"), token = S;
+    retry.disabled = true; retry.textContent = "Buscando anuncio…";
+    Ads.rewardOffer({
+      ready: show => { if (S !== token) return; S.showReward = show; retry.disabled = false; retry.textContent = "Ver anuncio: +1 vida"; },
+      viewed: () => { const lv = levelData(); lv.l = 1; store.set("ojo.lv", lv); startLevel(token.level); toast("Vida recuperada", 1800); },
+      dismissed: () => { if (S !== token) return; toast("Sin recompensa: el anuncio no se vio entero.", 2600); offerLife(noAdText); },
+      none: () => { if (S !== token) return; retry.hidden = true; $("f-text").textContent = "Ahora no hay anuncios disponibles. " + noAdText; }
+    });
   }
   function levelDone(){
     S.over = true; cancelAnimationFrame(timerRaf); hud();
@@ -1042,10 +1068,7 @@ textarea{width:100%;box-sizing:border-box;font:500 .8rem var(--body);border:1px 
   $("f-retry").onclick = () => {
     if (!S.failOver) return Ads.interstitial(() => startLevel(S.level));
     if (!Ads.enabled){ applyGameOver(); return startLevel(levelData().u); }
-    Ads.rewarded(
-      () => { const lv = levelData(); lv.l = 1; store.set("ojo.lv", lv); startLevel(S.level); toast("Vida recuperada", 1800); },
-      why => toast(why === "unavailable" ? "Ahora no hay anuncios disponibles. Prueba en un momento o vuelve al principio del capítulo." : "Sin recompensa: el anuncio no se vio entero.", 3000)
-    );
+    if (S.showReward){ const show = S.showReward; S.showReward = null; $("f-retry").disabled = true; show(); }
   };
   $("f-alt").onclick = () => { applyGameOver(); startLevel(levelData().u); };
   $("f-map").onclick = showMap;

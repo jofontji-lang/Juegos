@@ -1,5 +1,5 @@
 // Service worker: keeps the game playable offline. Bump CACHE when you publish changes.
-const CACHE = "ojo-aula-1.0.0";
+const CACHE = "ojo-aula-1.0.1";
 const ASSETS = ["./", "index.html", "manifest.webmanifest", "og.png", "fonts/marcellus-latin-400-normal.woff2", "fonts/outfit-latin-500-normal.woff2", "fonts/outfit-latin-700-normal.woff2", "fonts/outfit-latin-800-normal.woff2", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png"];
 
 self.addEventListener("install", e => {
