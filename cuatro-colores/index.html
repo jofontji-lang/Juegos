@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cuatro Colores · el juego de los cuatro colores</title>
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/cuatro-colores/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#1C2830">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Pinta mapas reales con solo cuatro colores. Reto diario, carrera por el mundo y la historia del teorema de los cuatro colores.">
+<meta property="og:title" content="Cuatro Colores · Four Colors">
+<meta property="og:description" content="Any map can be painted with four inks. Daily challenge on real maps.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/cuatro-colores/">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/cuatro-colores/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <section id="vCover" class="cover" hidden>
+    <div class="c-top"><span data-i18n="atlas">Atlas para colorear</span><span class="langs" data-langs></span></div>
+    <h1 class="c-title"><span data-i18n="game">Cuatro Colores</span><span class="ink" aria-hidden="true"><i></i><i></i><i></i><i></i></span></h1>
+    <p class="c-lede" data-i18n="lede"></p>
+    <figure class="plate">
+      <div class="plate-in"><svg id="plate"></svg><span class="loading" id="plateLoading" data-i18n="loading">Cargando mapas…</span><span class="tick" style="right:8px;bottom:6px" data-i18n="inks4">4 tintas</span></div>
+      <figcaption><em data-i18n="plateCap">Países del mundo</em><span id="plateCount"></span></figcaption>
+    </figure>
+    <div class="modes">
+      <button class="mode daily" id="mDaily"><span class="strip" aria-hidden="true"><i style="background:var(--c0)"></i><i style="background:var(--c1)"></i><i style="background:var(--c2)"></i><i style="background:var(--c3)"></i></span>
+        <span class="body"><span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="k" id="cdKick"></span><b id="cdTitle">…</b><span class="d" id="cdSub"></span></span><span class="cta" id="cdCta"></span></span></button>
+      <div class="mode town"><span class="k" data-i18n="regionKick"></span><b data-i18n="regionTitle"></b><span class="d" data-i18n="regionDesc"></span>
+        <div class="town"><div class="searchbox"><input id="cTown" autocomplete="off" data-i18n-ph="regionPh" aria-autocomplete="list"><div class="sugg" id="cSugg" hidden></div></div><button class="btn pri" id="cTownGo" data-i18n="play"></button></div></div>
+      <button class="mode" id="mCareer"><span class="k" data-i18n="careerKick"></span><b id="ccTitle"></b><span class="d" id="ccStars"></span></button>
+      <button class="mode" id="mTheory"><span class="k" data-i18n="theoryKick"></span><b>1852 → 1976</b><span class="d" data-i18n="theoryDesc"></span></button>
+    </div>
+    <p class="c-src"><a href="/" data-i18n="moreGames" style="color:inherit">Más juegos de matemáticas</a> · <a href="/privacidad/" data-i18n="privacy" style="color:inherit">Privacidad</a> · <span data-i18n="sources"></span></p>
+  </section>
+
+  <header id="hdr" hidden>
+    <h1 class="home" id="hHome"><span data-i18n="game">Cuatro Colores</span><small data-i18n="tagline"></small></h1>
+    <div class="hdr-row">
+      <nav aria-label="Modo">
+        <button id="tHome" data-i18n="navHome"></button>
+        <button id="tDaily" data-i18n="navDaily"></button>
+        <button id="tCareer" data-i18n="navCareer"></button>
+        <button id="tTheory" data-i18n="navTheory"></button>
+      </nav>
+      <span class="langs" data-langs></span>
+    </div>
+  </header>
+
+  <section id="vPlay" class="wrap" style="gap:10px" hidden>
+    <div class="meta"><span class="t" id="mTitle"></span><span class="s" id="mSub"></span></div>
+    <div class="hud">
+      <div><span data-i18n="hTime"></span><b id="hTime">0:00</b></div>
+      <div class="go" id="hRegBox"><span data-i18n="hRegions"></span><b id="hReg">0/0</b></div>
+      <div><span data-i18n="hClash"></span><b id="hErr">0</b></div>
+      <div><span data-i18n="hPar"></span><b id="hPar">0:00</b></div>
+    </div>
+    <div class="board" id="board">
+      <svg id="map"><g id="gCtx"></g><g id="gReg"></g><g id="gClash"></g><g id="gMk"></g></svg>
+      <div class="zoom"><button id="zIn" data-i18n-aria="zoomIn">+</button><button id="zOut" data-i18n-aria="zoomOut">−</button><button id="zFit" data-i18n-aria="zoomFit">⤢</button></div>
+      <div class="toast off" id="toast"></div>
+      <div class="win" id="win" hidden></div>
+    </div>
+    <div class="info" id="info"></div>
+    <div class="palette" id="palette"></div>
+    <div class="tools">
+      <button class="btn find" id="bFind"></button>
+      <button class="btn" id="bUndo" data-i18n="undo"></button>
+      <button class="btn" id="bHint" data-i18n="hint"></button>
+      <button class="btn" id="bReset" data-i18n="reset"></button>
+    </div>
+    <p class="rules" data-i18n-html="rules"></p>
+  </section>
+
+  <section id="vCareer" class="wrap" hidden></section>
+
+  <section id="vTheory" class="wrap" hidden>
+    <div class="essay" id="essay"></div>
+  </section>
+</div>
+<script src="js/d3-array.min.js"></script>
+<script src="js/d3-geo.min.js"></script>
+<script src="js/topojson-client.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
+</body>
+</html>
