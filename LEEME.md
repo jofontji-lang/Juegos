@@ -10,9 +10,10 @@ robots.txt
 fuentes/            fraunces.woff2 · figtree.woff2 · OFL-*.txt (servidas desde tu dominio)
 icons/              icono-32.png · icono-512.png (favicon) · og.png (al compartir)
 generar-imagenes.py genera el favicon y la imagen de compartir (NO se sube)
+                    Lee las obras del propio index.html: no hay que editarlo
 
 La portada es una página y nada más: no lleva manifest ni service worker, no se
-instala y no compite con tus apps. Las cuatro apps siguen siendo independientes,
+instala y no compite con tus apps. Cada app sigue siendo independiente,
 cada una con su carpeta, su manifest, su service worker y su ficha de Play.
 ```
 
@@ -131,7 +132,7 @@ página son 21 kB y no llama a nadie de fuera, carga igual de rápido sin él.
 La contrapartida es que un cambio se ve al momento: editas, subes y ya está.
 No hay versiones que subir ni móviles que se queden con lo viejo.
 
-## Lista de comprobación para el juego número cinco
+## Lista de comprobación para cada juego nuevo
 
 1. Carpeta propia con nombre estable en la raíz. La URL no se cambia nunca.
 2. Su `manifest.webmanifest`, su `sw.js` y sus iconos **dentro de esa carpeta**,
@@ -142,7 +143,28 @@ No hay versiones que subir ni móviles que se queden con lo viejo.
    nunca sustituir el archivo. Y recordar que Play añade una segunda huella al
    firmar.
 5. Un color propio y su tarjeta en la portada, con el bloque de abajo.
-6. Añadir la URL a `sitemap.xml`.
+6. Añadir la URL a `sitemap.xml` y una entrada al `ItemList` del JSON-LD, al
+   final del `index.html`.
+7. Actualizar los textos que cuentan juegos: el `<title>`, las dos
+   descripciones, el `og:description`, la frase de la cabecera y la del pie.
+   Se encuentran buscando el número escrito con letra («Seis»).
+8. **Las imágenes se rehacen solas.** `.github/workflows/imagenes.yml` ejecuta
+   el script en cada push a `main` y comitea `icons/` si ha cambiado. Si
+   prefieres hacerlo en tu máquina, necesitarás cairosvg y las tipografías
+   Fraunces y Figtree instaladas en el sistema, no solo los `.woff2` de
+   `/fuentes/`: `python3 generar-imagenes.py`.
+
+### Cuántas columnas
+
+`.pared` lleva `grid-template-columns:repeat(3, 1fr)`. Cuando el número de
+juegos no es múltiplo de las columnas, la última fila queda corta: con 7 sale
+3+3+1, y esa última obra va centrada a mano. Si llegas a 8, lo natural es
+pasar a `repeat(4, 1fr)` y volver a tener filas llenas. El riel se repite solo
+en cada fila.
+
+La imagen de compartir no hay que tocarla: `generar-imagenes.py` calcula la
+rejilla solo —una fila hasta tres obras, dos hasta ocho, tres a partir de ahí—,
+centra la fila corta y encoge las miniaturas según quepan.
 
 ### Plantilla de tarjeta
 
@@ -171,7 +193,7 @@ Se pega dentro de `<main class="pared limite">`, se elige un color en
 </article>
 ```
 
-Y el ancho de su obra, junto a los otros cuatro, para que la pared no quede
+Y el ancho de su obra, distinto al de las demás, para que la pared no quede
 uniforme:
 
 ```css
