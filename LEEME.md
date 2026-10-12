@@ -32,24 +32,46 @@ cada una con su carpeta, su manifest, su service worker y su ficha de Play.
 
 ## Las miniaturas
 
-No son capturas: son dibujos hechos a mano en SVG, dentro del propio HTML.
-Pesan unos pocos kilobytes, se ven nítidos a cualquier tamaño, cambian de color
-solos en modo oscuro y no hay que rehacerlos cuando toques un juego.
+No son capturas: son dibujos en SVG, dentro del propio HTML. Pesan pocos
+kilobytes, se ven nítidos a cualquier tamaño, cambian de color solos en modo
+oscuro y no hay que rehacerlos cuando toques un juego.
 
-Son matemáticamente correctos, no decorativos:
+Y no son decorativas. Cada una enseña matemáticas de verdad, y las cuatro
+últimas están generadas y comprobadas por programa, no dibujadas a ojo:
 
 - **Ruta mínima**: un grafo de 7 vértices y 10 aristas; el camino resaltado
-  (3+4+3+2 = 12) es de verdad el mínimo entre los dos vértices marcados, y
-  pasa por aristas que están dibujadas.
-- **Mondrian**: un cuadrado 11×11 partido en 11×2, 5×5, 6×4, 5×4 y 6×5 —
-  cinco rectángulos de medidas distintas dos a dos.
+  (3+4+3+2 = 12) es de verdad el mínimo entre los dos vértices marcados.
+- **Mondrian**: el cuadrado 11×11 partido en **ocho** rectángulos de medidas
+  todas distintas dos a dos. La mayor mide 18 y la menor 12, así que el
+  defecto es 6. Lo encontró una búsqueda con las áreas acotadas por arriba y
+  por abajo, que es lo que hace viable el problema.
 - **Mimizu**: los 16 números forman un camino hamiltoniano real; cada paso es
-  entre consecutivos (24-25, 15-16, 20-21) o con factor común.
+  entre consecutivos o con factor común.
 - **Productos cruzados**: la cuadrícula se completa con 9, 3 y 6, y entonces
   las filas dan 72, 105 y 48 y las columnas 84, 45 y 96.
-- **Equaldle**: una partida real. Los dos primeros intentos (9×8−7=65 y
-  13+26=39) son igualdades correctas y sus colores son los que da el juego
-  frente a la solución 12+35=47, que es el tercer intento.
+- **El Ojo de Horus**: el wedjat con sus seis partes etiquetadas. Por
+  tradición cada parte era una fracción del heqat con que se medía el grano:
+  ceja 1/8, pupila 1/4, mitad exterior 1/2, interior 1/16, espiral 1/32 y
+  lágrima 1/64. Suman 63/64 — falta justo 1/64 para la unidad, el hueco que
+  la leyenda dice que completó Thot, y es lo mismo que pide el juego.
+  (La atribución de fracciones al ojo es la versión tradicional; hay
+  egiptólogos que la discuten. Como gancho de aula es inmejorable.)
+- **Fibo**: un rectángulo 13×8 partido en cuadrados de lado 1, 1, 2, 3, 5 y 8,
+  recorrido por la espiral áurea.
+- **Jaulas**: cuadrado latino de 4×4 generado por programa; cada fila y cada
+  columna llevan 1, 2, 3 y 4 sin repetir, y las siete jaulas cumplen su
+  cuenta. El sello lleva 檻 (*ori*, «jaula»), con el contorno sacado de la
+  Shippori Mincho que el propio juego ya sirve en `/jaulas/fonts/` y
+  convertido a trazado, para no depender de que el lector tenga una
+  tipografía japonesa instalada.
+- **Cuatro Colores**: la isla sale de un diagrama de Voronoi, así que las
+  fronteras encajan exactas y la vecindad entre provincias es la real. Se
+  comprueban dos cosas: que con tres colores **no** se puede, o sea que los
+  cuatro hacen falta de verdad, y que con cuatro sí, sin que ninguna frontera
+  repita color. Las fronteras se ondulan con una curva que depende solo de sus
+  dos extremos ordenados; si dependiera del sentido del trazo, las dos
+  provincias vecinas ondularían hacia lados distintos y quedaría una holgura
+  entre ellas.
 
 Si prefieres capturas reales, cada `<figure>` es independiente: se sustituye el
 `<svg>` por un `<img>` en WebP con `width` y `height` declarados.
