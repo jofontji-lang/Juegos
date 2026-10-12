@@ -6,11 +6,11 @@
 </g>
 <text x="72" y="368" font-family="Figtree" font-size="26" fill="#8CA7DA">Josep Font, profesor de matemáticas</text>
 <g font-family="Figtree" font-size="25" fill="#B3C6EC">
-  <text x="72" y="436">Ocho puzles para jugar en el navegador</text>
+  <text x="72" y="436">Nueve puzles para jugar en el navegador</text>
   <text x="72" y="470">o en el móvil. Gratuitos y sin anuncios.</text>
 </g>
-<path d="M540.0 92.0 H1148.0" stroke="#3B5490" stroke-width="1"/><path d="M540.0 346.0 H1148.0" stroke="#3B5490" stroke-width="1"/>
-<path d="M622.0 92.0 V112.0" stroke="#3B5490" stroke-width="1"/><rect x="554.0" y="112.0" width="136.0" height="187.9" fill="#FFFFFF"/><svg x="563.0" y="121.0" width="118.0" height="169.9" viewBox="0 0 200 288">
+<path d="M540.0 92.0 H1148.0" stroke="#3B5490" stroke-width="1"/><path d="M540.0 261.3 H1148.0" stroke="#3B5490" stroke-width="1"/><path d="M540.0 430.7 H1148.0" stroke="#3B5490" stroke-width="1"/>
+<path d="M646.7 92.0 V99.0" stroke="#3B5490" stroke-width="1"/><rect x="599.0" y="99.0" width="95.3" height="129.3" fill="#FFFFFF"/><svg x="608.0" y="108.0" width="77.3" height="111.3" viewBox="0 0 200 288">
           <!-- 7 vértices, 10 aristas. El camino resaltado A-C-D-F-G pesa
                3+4+3+2 = 12 y es el mínimo entre los dos vértices marcados. -->
           <g fill="none" stroke="#6B655D" stroke-width="1.1">
@@ -36,7 +36,7 @@
           <g fill="#008A7B" stroke="#FFFFFF" stroke-width="2">
             <circle cx="36" cy="44" r="8"/><circle cx="96" cy="262" r="8"/>
           </g>
-        </svg><path d="M770.0 92.0 V138.0" stroke="#3B5490" stroke-width="1"/><rect x="702.0" y="138.0" width="136.0" height="136.0" fill="#FFFFFF"/><svg x="711.0" y="147.0" width="118.0" height="118.0" viewBox="0 0 242 242">
+        </svg><path d="M844.0 92.0 V99.0" stroke="#3B5490" stroke-width="1"/><rect x="779.3" y="99.0" width="129.3" height="129.3" fill="#FFFFFF"/><svg x="788.3" y="108.0" width="111.3" height="111.3" viewBox="0 0 242 242">
           <rect x="1" y="1" width="240" height="240" fill="#FFFFFF"/>
           <!-- 11×11 → 11×2 | 5×5 | 6×4 | 5×4 | 6×5 -->
           <g>
@@ -49,7 +49,7 @@
             <path d="M1 153.6 H110"/><path d="M110 131.8 H241"/>
             <rect x="1.6" y="1.6" width="238.8" height="238.8"/>
           </g>
-        </svg><path d="M918.0 92.0 V136.0" stroke="#3B5490" stroke-width="1"/><rect x="850.0" y="136.0" width="136.0" height="140.0" fill="#FFFFFF"/><svg x="859.0" y="145.0" width="118.0" height="122.0" viewBox="0 0 236 244">
+        </svg><path d="M1041.3 92.0 V99.0" stroke="#3B5490" stroke-width="1"/><rect x="978.5" y="99.0" width="125.7" height="129.3" fill="#FFFFFF"/><svg x="987.5" y="108.0" width="107.7" height="111.3" viewBox="0 0 236 244">
           <g fill="none" stroke="#D5CFC3" stroke-width="1" opacity=".55">
             <path d="M18 18 H218 M18 70 H218 M18 122 H218 M18 174 H218 M18 226 H218"/>
             <path d="M18 18 V226 M68 18 V226 M118 18 V226 M168 18 V226 M218 18 V226"/>
@@ -64,7 +64,7 @@
             <text x="43" y="148">4</text><text x="93" y="148">2</text><text x="143" y="148">16</text><text x="193" y="148">20</text>
             <text x="43" y="200">8</text><text x="93" y="200">14</text><text x="143" y="200">7</text><text x="193" y="200">21</text>
           </g>
-        </svg><path d="M1066.0 92.0 V130.4" stroke="#3B5490" stroke-width="1"/><rect x="998.0" y="130.4" width="136.0" height="151.3" fill="#FFFFFF"/><svg x="1007.0" y="139.4" width="118.0" height="133.3" viewBox="0 0 216 244">
+        </svg><path d="M646.7 261.3 V268.3" stroke="#3B5490" stroke-width="1"/><rect x="588.4" y="268.3" width="116.6" height="129.3" fill="#FFFFFF"/><svg x="597.4" y="277.3" width="98.6" height="111.3" viewBox="0 0 216 244">
           <g stroke="#6B655D" stroke-width="1.2" fill="none">
             <rect x="14" y="14" width="150" height="150"/>
             <path d="M64 14 V164 M114 14 V164 M14 64 H164 M14 114 H164"/>
@@ -81,7 +81,7 @@
             <text x="190" y="40">72</text><text x="190" y="90">105</text><text x="190" y="140">48</text>
             <text x="39" y="190">84</text><text x="89" y="190">45</text><text x="139" y="190">96</text>
           </g>
-        </svg><path d="M622.0 346.0 V382.3" stroke="#3B5490" stroke-width="1"/><rect x="554.0" y="382.3" width="136.0" height="155.3" fill="#FFFFFF"/><svg x="563.0" y="391.3" width="118.0" height="137.3" viewBox="0 0 220 256">
+        </svg><path d="M844.0 261.3 V268.3" stroke="#3B5490" stroke-width="1"/><rect x="787.2" y="268.3" width="113.7" height="129.3" fill="#FFFFFF"/><svg x="796.2" y="277.3" width="95.7" height="111.3" viewBox="0 0 220 256">
           <!-- Fila 1: 1/2 1/4 1/6 · fila 2: 1/3 1/6 1/4 · fila 3: 1/12 1/3 1/2.
                El recorrido 1/2 → 1/3 → 1/6 suma exactamente 1. -->
           <g fill="none" stroke="#D5CFC3" stroke-width="1.2">
@@ -105,7 +105,7 @@
             <path d="M34 44.5 H50 M102 44.5 H118 M170 44.5 H186 M34 112.5 H50 M102 112.5 H118 M170 112.5 H186 M31 180.5 H53 M102 180.5 H118 M170 180.5 H186"/>
           </g>
           <text x="110" y="240" font-family="Fraunces, serif" font-size="17" font-weight="500" fill="#24408E" text-anchor="middle">1/2 + 1/3 + 1/6 = 1</text>
-        </svg><path d="M770.0 346.0 V413.2" stroke="#3B5490" stroke-width="1"/><rect x="702.0" y="413.2" width="136.0" height="93.7" fill="#FFFFFF"/><svg x="711.0" y="422.2" width="118.0" height="75.7" viewBox="0 0 237 152">
+        </svg><path d="M1041.3 261.3 V276.5" stroke="#3B5490" stroke-width="1"/><rect x="958.3" y="276.5" width="166.0" height="112.9" fill="#FFFFFF"/><svg x="967.3" y="285.5" width="148.0" height="94.9" viewBox="0 0 237 152">
           <!-- Cuadrados de lado 1, 1, 2, 3, 5 y 8 (17 px por unidad) que llenan un 13×8;
                la espiral son cuartos de circunferencia de esos mismos radios. -->
           <g stroke="#6B655D" stroke-width="1.2">
@@ -122,13 +122,13 @@
           </g>
           <path d="M59 42 A17 17 0 0 0 76 59 A17 17 0 0 0 93 42 A34 34 0 0 0 59 8 A51 51 0 0 0 8 59 A85 85 0 0 0 93 144 A136 136 0 0 0 229 8"
                 fill="none" stroke="#7A4EB0" stroke-width="4" stroke-linecap="round"/>
-        </svg><path d="M918.0 346.0 V392.0" stroke="#3B5490" stroke-width="1"/><rect x="850.0" y="392.0" width="136.0" height="136.0" fill="#FFFFFF"/><svg x="859.0" y="401.0" width="118.0" height="118.0" viewBox="0 0 232 232">
+        </svg><path d="M646.7 430.7 V437.7" stroke="#3B5490" stroke-width="1"/><rect x="582.0" y="437.7" width="129.3" height="129.3" fill="#FFFFFF"/><svg x="591.0" y="446.7" width="111.3" height="111.3" viewBox="0 0 232 232">
           <g fill="#F2D7DB"><rect x="168" y="12" width="52" height="52"/><rect x="168" y="64" width="52" height="52"/><rect x="168" y="116" width="52" height="52"/></g>
           <path d="M116 12V64M168 64H220M64 64V116M116 64V116M168 116H220M64 116V168M12 168H64M116 168V220M168 168V220" stroke="#D5CFC3" stroke-width="1" fill="none"/>
           <path d="M64 12V64M12 64H64M64 64H116M168 12V64M116 64H168M12 116H64M64 116H116M168 64V116M116 116H168M116 116V168M64 168H116M168 116V168M116 168H168M168 168H220M64 168V220" stroke="#22201F" stroke-width="3" stroke-linecap="square" fill="none"/>
           <rect x="12" y="12" width="208" height="208" fill="none" stroke="#22201F" stroke-width="3"/>
           <g font-family="Fraunces, serif"><text x="17" y="25" font-size="12" font-weight="600" fill="#22201F">4</text><text x="38" y="41" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">4</text><text x="69" y="25" font-size="12" font-weight="600" fill="#22201F">4+</text><text x="90" y="41" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">3</text><text x="173" y="25" font-size="12" font-weight="600" fill="#8E2436">6×</text><text x="17" y="77" font-size="12" font-weight="600" fill="#22201F">8×</text><text x="38" y="93" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">2</text><text x="90" y="93" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">1</text><text x="142" y="93" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">4</text><text x="194" y="93" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">3</text><text x="17" y="129" font-size="12" font-weight="600" fill="#22201F">8+</text><text x="121" y="129" font-size="12" font-weight="600" fill="#22201F">2</text><text x="142" y="145" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">2</text><text x="194" y="145" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">1</text><text x="69" y="181" font-size="12" font-weight="600" fill="#22201F">9+</text><text x="90" y="197" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">2</text><text x="142" y="197" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">3</text><text x="194" y="197" font-size="22" text-anchor="middle" dominant-baseline="central" fill="#22201F">4</text></g>
-        </svg><path d="M1066.0 346.0 V392.0" stroke="#3B5490" stroke-width="1"/><rect x="998.0" y="392.0" width="136.0" height="136.0" fill="#FFFFFF"/><svg x="1007.0" y="401.0" width="118.0" height="118.0" viewBox="0 0 232 232">
+        </svg><path d="M844.0 430.7 V437.7" stroke="#3B5490" stroke-width="1"/><rect x="779.3" y="437.7" width="129.3" height="129.3" fill="#FFFFFF"/><svg x="788.3" y="446.7" width="111.3" height="111.3" viewBox="0 0 232 232">
           <path d="M131.2 74.2L169.0 12.0L220.0 12.0L220.0 132.5L165.3 116.0Z" fill="#E9A016"/>
           <path d="M165.3 116.0L220.0 132.5L220.0 220.0L132.5 220.0L131.2 157.8Z" fill="#3A62C6"/>
           <path d="M131.2 157.8L132.5 220.0L12.0 220.0L12.0 169.0L76.1 141.9Z" fill="#E9A016"/>
@@ -136,5 +136,9 @@
           <path d="M76.1 90.1L12.0 12.0L169.0 12.0L131.2 74.2Z" fill="#9C5A2B"/>
           <path d="M131.2 74.2L165.3 116.0L131.2 157.8L76.1 141.9L76.1 90.1Z" fill="#DC4430"/>
           <g fill="none" stroke="#22201F" stroke-width="3" stroke-linejoin="round"><path d="M131.2 74.2L169.0 12.0L220.0 12.0L220.0 132.5L165.3 116.0Z"/><path d="M165.3 116.0L220.0 132.5L220.0 220.0L132.5 220.0L131.2 157.8Z"/><path d="M131.2 157.8L132.5 220.0L12.0 220.0L12.0 169.0L76.1 141.9Z"/><path d="M76.1 141.9L12.0 169.0L12.0 12.0L76.1 90.1Z"/><path d="M76.1 90.1L12.0 12.0L169.0 12.0L131.2 74.2Z"/><path d="M131.2 74.2L165.3 116.0L131.2 157.8L76.1 141.9L76.1 90.1Z"/><rect x="12" y="12" width="208" height="208"/></g>
+        </svg><path d="M1041.3 430.7 V437.7" stroke="#3B5490" stroke-width="1"/><rect x="960.1" y="437.7" width="162.5" height="129.3" fill="#FFFFFF"/><svg x="969.1" y="446.7" width="144.5" height="111.3" viewBox="0 0 244 188">
+          <g><rect x="12" y="12" width="24" height="24" rx="4" fill="#6B655D"/><rect x="40" y="12" width="24" height="24" rx="4" fill="#6B655D"/><rect x="68" y="12" width="24" height="24" rx="4" fill="#6B655D"/><rect x="96" y="12" width="24" height="24" rx="4" fill="#6B655D"/><rect x="124" y="12" width="24" height="24" rx="4" fill="#E9A016"/><rect x="152" y="12" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="180" y="12" width="24" height="24" rx="4" fill="#6B655D"/><rect x="208" y="12" width="24" height="24" rx="4" fill="#E9A016"/><rect x="12" y="40" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="40" y="40" width="24" height="24" rx="4" fill="#E9A016"/><rect x="68" y="40" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="96" y="40" width="24" height="24" rx="4" fill="#E9A016"/><rect x="124" y="40" width="24" height="24" rx="4" fill="#6B655D"/><rect x="152" y="40" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="180" y="40" width="24" height="24" rx="4" fill="#6B655D"/><rect x="208" y="40" width="24" height="24" rx="4" fill="#6B655D"/><rect x="12" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="40" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="68" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="96" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="124" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="152" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="180" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/><rect x="208" y="68" width="24" height="24" rx="4" fill="#4A8C1C"/></g>
+          <g fill="none" stroke="#D5CFC3" stroke-width="1.5"><rect x="12.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="40.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="68.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="96.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="124.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="152.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="180.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="208.75" y="96.75" width="22.5" height="22.5" rx="4"/><rect x="12.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="40.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="68.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="96.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="124.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="152.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="180.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="208.75" y="124.75" width="22.5" height="22.5" rx="4"/><rect x="12.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="40.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="68.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="96.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="124.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="152.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="180.75" y="152.75" width="22.5" height="22.5" rx="4"/><rect x="208.75" y="152.75" width="22.5" height="22.5" rx="4"/></g>
+          <g font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central"><text x="24.0" y="24.5">9</text><text x="52.0" y="24.5">×</text><text x="80.0" y="24.5">8</text><text x="108.0" y="24.5">−</text><text x="136.0" y="24.5">7</text><text x="164.0" y="24.5">=</text><text x="192.0" y="24.5">6</text><text x="220.0" y="24.5">5</text><text x="24.0" y="52.5">1</text><text x="52.0" y="52.5">3</text><text x="80.0" y="52.5">+</text><text x="108.0" y="52.5">2</text><text x="136.0" y="52.5">6</text><text x="164.0" y="52.5">=</text><text x="192.0" y="52.5">3</text><text x="220.0" y="52.5">9</text><text x="24.0" y="80.5">1</text><text x="52.0" y="80.5">2</text><text x="80.0" y="80.5">+</text><text x="108.0" y="80.5">3</text><text x="136.0" y="80.5">5</text><text x="164.0" y="80.5">=</text><text x="192.0" y="80.5">4</text><text x="220.0" y="80.5">7</text></g>
         </svg>
 </svg>
