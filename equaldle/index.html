@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Equaldle · el Wordle de las igualdades</title>
+<meta name="description" content="Adivina la igualdad escondida en 6 intentos: 8 casillas con cifras, + − × ÷ y un «=». Reto diario igual para todos, práctica sin límite, modo difícil y estadísticas.">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/equaldle/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#15223A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/equaldle/">
+<meta property="og:title" content="Equaldle · el Wordle de las igualdades">
+<meta property="og:description" content="Una igualdad al día, la misma para todos. 8 casillas, 6 intentos. ¿La sacas en menos que yo?">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/equaldle/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
+<link rel="preload" href="fonts/martian-mono-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fuentes alojadas en el propio sitio (sin Google Fonts) para poder jugar sin conexión. */
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/bricolage-grotesque-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/bricolage-grotesque-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/bricolage-grotesque-latin-800-normal.woff2") format("woff2")}
+@font-face{font-family:"Martian Mono";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/martian-mono-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Martian Mono";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/martian-mono-latin-700-normal.woff2") format("woff2")}
+
+/* Layout: cuaderno cuadriculado (claro) / pizarra (oscuro). Cabecera con el nombre en 8 casillas, cuadrícula 6×8 en el centro, teclado de cifras y operaciones abajo */
+:root{
+  --paper:#F5F7FB; --grid:rgba(52,92,170,.085); --surface:#FFFFFF; --ink:#15223A; --muted:#5E6A82;
+  --line:#CAD2E0; --key:#E2E7F0; --keyedge:#C3CBDA; --on:#FFFFFF;
+  --hit:#16966D; --near:#DC981A; --miss:#77829A;
+  --display:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"Martian Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#18221E; --grid:rgba(225,238,230,.05); --surface:#212D28; --ink:#EAF0EB; --muted:#98A89F;
+  --line:#34433C; --key:#2C3933; --keyedge:#1B2420; --on:#FFFFFF;
+  --hit:#25AE7F; --near:#E6AA31; --miss:#4B5953; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#18221E; --grid:rgba(225,238,230,.05); --surface:#212D28; --ink:#EAF0EB; --muted:#98A89F;
+  --line:#34433C; --key:#2C3933; --keyedge:#1B2420; --on:#FFFFFF;
+  --hit:#25AE7F; --near:#E6AA31; --miss:#4B5953; color-scheme:dark }
+
+html,body{height:100%}
+body{background-color:var(--paper);color:var(--ink);font-family:var(--display);overflow:hidden;-webkit-tap-highlight-color:transparent;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.app{height:100%;max-width:500px;margin:0 auto;padding-inline:16px;padding-block:12px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px}
+
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{margin:0;display:flex;gap:3px}
+h1 i{font:800 .82rem/1 var(--display);font-style:normal;width:25px;height:25px;display:grid;place-items:center;border-radius:6px;color:var(--on);background:var(--hit)}
+h1 i.n{background:var(--near)} h1 i.m{background:var(--miss)}
+.icons{display:flex;gap:6px}
+.icon{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.icon svg{width:19px;height:19px}
+
+.bar{display:flex;flex-direction:column;align-items:center;gap:8px}
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;color:var(--muted);font:700 .8rem/1 var(--display);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.msg{margin:0;text-align:center;font:500 .88rem/1.3 var(--display);color:var(--muted);min-height:1.3em}
+.msg.bad{color:var(--near);font-weight:700} .msg.good{color:var(--hit);font-weight:700}
+.badge{font:700 .66rem/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--near);border:1px solid currentColor;border-radius:999px;padding:3px 7px;margin-left:6px;vertical-align:2px}
+
+.board{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.grid{display:grid;gap:6px}
+.row{display:grid;gap:6px}
+.row.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.cell{display:grid;place-items:center;border:2px solid var(--line);border-radius:8px;background:var(--surface);font:700 var(--cf,1.4rem)/1 var(--mono);aspect-ratio:1;box-sizing:border-box;max-width:100%}
+.cell.filled{border-color:var(--muted);animation:pop .12s ease-out}
+.row.current .cell{cursor:pointer}
+.cell.cursor{border-color:var(--hit);box-shadow:0 0 0 3px color-mix(in srgb,var(--hit) 28%,transparent)}
+.cell.cursor:empty::after{content:"";width:2px;height:42%;background:var(--hit);border-radius:2px;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+h1.won i{animation:tilewin .5s ease both}
+h1.won i:nth-child(2){animation-delay:.06s} h1.won i:nth-child(3){animation-delay:.12s} h1.won i:nth-child(4){animation-delay:.18s}
+h1.won i:nth-child(5){animation-delay:.24s} h1.won i:nth-child(6){animation-delay:.3s} h1.won i:nth-child(7){animation-delay:.36s} h1.won i:nth-child(8){animation-delay:.42s}
+@keyframes tilewin{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}51%{background:var(--hit)}100%{transform:none;background:var(--hit)}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:15}
+@keyframes pop{50%{transform:scale(1.08)}}
+.cell.hit,.cell.near,.cell.miss{color:var(--on);border-color:transparent}
+.cell.hit{background:var(--hit)} .cell.near{background:var(--near)} .cell.miss{background:var(--miss)}
+.cell.rv{animation:flip .46s ease-out both}
+@keyframes flip{0%{transform:rotateX(90deg)}100%{transform:none}}
+.row.win .cell{animation:jump .5s ease both}
+@keyframes jump{30%{transform:translateY(-12px)}55%{transform:translateY(2px)}75%{transform:translateY(-3px)}100%{transform:none}}
+
+.keys{display:flex;flex-direction:column;gap:7px;padding-bottom:2px}
+.krow{display:grid;gap:6px}
+.k{border:0;border-radius:9px;background:var(--key);color:var(--ink);font:700 1.05rem var(--mono);padding:14px 0 13px;cursor:pointer;min-width:0;box-shadow:0 2px 0 var(--keyedge);transition:background-color .2s}
+.k:active{transform:translateY(2px);box-shadow:none}
+.k.wide{font:700 .9rem var(--display)}
+.k.hit{background:var(--hit);color:var(--on)} .k.near{background:var(--near);color:var(--on)} .k.miss{background:var(--miss);color:var(--on)}
+.k.enter{background:var(--ink);color:var(--paper)}
+button:focus-visible{outline:3px solid var(--hit);outline-offset:2px}
+
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--paper) 72%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding-inline:16px;padding-block:16px calc(16px + env(safe-area-inset-bottom,0px));z-index:10}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;width:100%;max-width:440px;max-height:100%;overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 60px rgba(10,20,40,.22);position:relative}
+.panel h2{font:800 1.55rem/1.1 var(--display);margin:0;text-wrap:balance;padding-right:36px}
+.panel p{margin:0;line-height:1.5;color:var(--muted)}
+.panel p strong{color:var(--ink)}
+.close{position:absolute;top:14px;right:14px;width:34px;height:34px}
+.ex{display:flex;gap:4px;justify-content:center}
+.ex span{width:31px;height:31px;display:grid;place-items:center;border-radius:6px;font:700 .9rem var(--mono);color:var(--on);background:var(--miss)}
+.ex .h{background:var(--hit)} .ex .n{background:var(--near)}
+.legend{display:grid;gap:6px;margin:0;padding:0;list-style:none;color:var(--muted);line-height:1.4}
+.legend li{display:flex;gap:10px;align-items:center}
+.legend b{width:14px;height:14px;border-radius:4px;flex:none;background:var(--miss)}
+.legend .h{background:var(--hit)} .legend .n{background:var(--near)}
+.sol{font:700 1.5rem var(--mono);text-align:center;letter-spacing:.06em;padding:10px;border:2px dashed var(--line);border-radius:12px}
+.label{font:700 .7rem/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.nums div{display:flex;flex-direction:column;gap:4px}
+.nums strong{font:800 1.7rem/1 var(--display);font-variant-numeric:tabular-nums}
+.nums span{font:500 .72rem/1.2 var(--display);color:var(--muted)}
+.dist{display:grid;gap:5px}
+.dist div{display:grid;grid-template-columns:14px 1fr;gap:8px;align-items:center;font:700 .8rem var(--mono)}
+.dist b{display:block;min-width:24px;padding:4px 7px;box-sizing:border-box;border-radius:5px;background:var(--miss);color:var(--on);text-align:right;font:700 .75rem var(--mono);font-variant-numeric:tabular-nums}
+.dist b.me{background:var(--hit)}
+.primary{border:0;background:var(--ink);color:var(--paper);border-radius:14px;padding:14px;font:800 1rem var(--display);cursor:pointer}
+.ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:13px;font:700 .95rem var(--display);cursor:pointer}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-block:6px}
+.opt div{min-width:0}
+.opt strong{display:block;font:700 1rem var(--display);color:var(--ink)}
+.opt small{display:block;color:var(--muted);line-height:1.4;margin-top:2px}
+.sw{flex:none;width:50px;height:30px;border-radius:999px;border:0;background:var(--line);position:relative;cursor:pointer;transition:background-color .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw[aria-checked="true"]{background:var(--hit)} .sw[aria-checked="true"]::after{transform:translateX(20px)}
+.sw:disabled{opacity:.45;cursor:not-allowed}
+.links{margin:0;text-align:center;font:500 .85rem var(--display);color:var(--muted)}
+.links a{color:var(--muted);text-underline-offset:3px}
+textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);padding:8px}
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);font:700 .86rem var(--display);padding:10px 16px;border-radius:999px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion: reduce){.row.shake,.row.win .cell,.cell.rv,.cell.filled,h1.won i{animation:none}h1.won i{background:var(--hit)}.k,.sw,.sw::after{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1 id="logo" aria-label="Equaldle"><i>E</i><i>Q</i><i class="m">U</i><i>A</i><i class="n">L</i><i>D</i><i>L</i><i>E</i></h1>
+    <div class="icons">
+      <button class="icon" id="b-help" aria-label="Cómo se juega"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.4a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.4-2.7 4.1"/><circle cx="12" cy="17.6" r=".6" fill="currentColor"/></svg></button>
+      <button class="icon" id="b-stats" aria-label="Estadísticas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20v-6M12 20V5M19 20v-10"/></svg></button>
+      <button class="icon" id="b-set" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
+    </div>
+  </header>
+  <div class="bar">
+    <div class="tabs" role="group" aria-label="Modo">
+      <button id="t-day" aria-pressed="true">Reto del día</button>
+      <button id="t-free" aria-pressed="false">Práctica</button>
+    </div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+  </div>
+  <div class="board" id="boardWrap"><div class="grid" id="grid"></div></div>
+  <div class="keys" id="keys"></div>
+</div>
+
+<div class="sheet" id="rules" hidden>
+  <div class="panel" role="dialog" aria-labelledby="r-h">
+    <button class="icon close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="r-h">Adivina la igualdad escondida</h2>
+    <p>Tienes 6 intentos. Cada uno debe ser una <strong>igualdad correcta de 8 casillas</strong>, con cifras, + − × ÷ y un solo «=». A la derecha del «=» va solo un número. Se respeta la jerarquía: 3+4×2 vale 11.</p>
+    <div class="ex" aria-label="Ejemplo de intento coloreado"><span class="h">1</span><span>2</span><span class="n">+</span><span>3</span><span class="h">5</span><span class="h">=</span><span class="n">4</span><span>7</span></div>
+    <ul class="legend">
+      <li><b class="h"></b>Verde: está en su sitio.</li>
+      <li><b class="n"></b>Amarillo: está, pero en otra casilla.</li>
+      <li><b></b>Gris: no está, o ya no quedan más.</li>
+    </ul>
+    <p>Toca cualquier casilla de la fila para cambiarla sin borrar el resto (también con las flechas ← →).</p>
+    <p>Hay un reto nuevo cada día a medianoche (hora de Madrid), el mismo para todos. En Práctica puedes jugar sin límite.</p>
+    <button class="primary" data-close>Jugar</button>
+    <p class="links"><a href="/">Más juegos de matemáticas</a> · <a href="privacidad.html">Privacidad</a></p>
+  </div>
+</div>
+
+<div class="sheet" id="end" hidden>
+  <div class="panel" role="dialog" aria-labelledby="e-title">
+    <button class="icon close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="e-title">Estadísticas</h2>
+    <div class="sol" id="e-sol" hidden></div>
+    <p class="label" id="e-lab">Reto del día</p>
+    <div class="nums" id="e-nums"></div>
+    <p class="label">Intentos necesarios</p>
+    <div class="dist" id="e-dist"></div>
+    <p id="e-text"></p>
+    <textarea id="e-copy" rows="5" hidden aria-label="Texto para compartir"></textarea>
+    <div class="row2" id="e-btns"><button class="ghost" id="e-share">Compartir</button><button class="primary" id="e-next">Otra de práctica</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="settings" hidden>
+  <div class="panel" role="dialog" aria-labelledby="s-h">
+    <button class="icon close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="s-h">Ajustes</h2>
+    <div class="opt"><div><strong>Modo difícil</strong><small id="s-hard-note">Las pistas conseguidas son obligatorias: los verdes se quedan en su sitio y los amarillos hay que usarlos.</small></div><button class="sw" id="s-hard" role="switch" aria-checked="false" aria-label="Modo difícil"></button></div>
+    <div class="opt"><div><strong>Aceptar el orden cambiado</strong><small>Si la solución es 12+35=47, también ganas con 35+12=47 (propiedad conmutativa).</small></div><button class="sw" id="s-comm" role="switch" aria-checked="true" aria-label="Aceptar el orden cambiado"></button></div>
+    <p class="links"><a href="/">Más juegos de matemáticas</a> · <a href="privacidad.html">Privacidad</a></p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<canvas id="fx" hidden></canvas>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const LEN = 8, ROWS = 6, OPS = "+-×÷", TZ = "Europe/Madrid", LAUNCH = "2026-10-12";
+  const show = ch => ch === "-" ? "−" : ch;
+
+  // ---------- lógica de las igualdades ----------
+  function tokenize(s){ const t = s.match(/\d+|[+\-×÷]/g); return t && t.join("") === s ? t : null; }
+  function evalLeft(s){
+    const tokens = tokenize(s); if (!tokens || tokens.length % 2 === 0) return null;
+    for (let i = 0; i < tokens.length; i++){
+      const isNum = /^\d+$/.test(tokens[i]);
+      if ((i % 2 === 0) !== isNum) return null;
+      if (isNum && tokens[i].length > 1 && tokens[i][0] === "0") return null;
+    }
+    const nums = [+tokens[0]], ops = [];
+    for (let i = 1; i < tokens.length; i += 2){
+      const op = tokens[i], b = +tokens[i + 1];
+      if (op === "×") nums.push(nums.pop() * b);
+      else if (op === "÷"){ const a = nums.pop(); if (b === 0 || a % b !== 0) return null; nums.push(a / b); }
+      else { ops.push(op); nums.push(b); }
+    }
+    let v = nums[0]; ops.forEach((op, i) => v = op === "+" ? v + nums[i + 1] : v - nums[i + 1]);
+    return v;
+  }
+  function valid(s){
+    if (s.length !== LEN) return "Faltan casillas por rellenar";
+    const parts = s.split("="); if (parts.length !== 2) return "Tiene que haber un solo «=»";
+    const [L, R] = parts;
+    if (!/^\d+$/.test(R) || (R.length > 1 && R[0] === "0")) return "A la derecha del «=» va solo un número";
+    if (!/[+\-×÷]/.test(L)) return "Usa al menos una operación";
+    const v = evalLeft(L); if (v === null) return "La expresión no es válida o la división no es exacta";
+    if (v !== +R) return `Eso no es igual: ${L.replace(/-/g, "−")} = ${v}`;
+    return "";
+  }
+  // Forma canónica para reconocer igualdades que solo cambian el orden (a+b, a×b)
+  function canon(s){
+    const [L, R] = s.split("="), t = tokenize(L), terms = [];
+    let cur = { sign: "+", f: [t[0]], div: false };
+    for (let i = 1; i < t.length; i += 2){
+      const op = t[i], n = t[i + 1];
+      if (op === "+" || op === "-"){ terms.push(cur); cur = { sign: op, f: [n], div: false }; }
+      else { if (op === "÷") cur.div = true; cur.f.push(op, n); }
+    }
+    terms.push(cur);
+    const str = x => x.div ? x.f.join("") : x.f.filter(v => v !== "×").sort((a, b) => a - b).join("×");
+    const pos = terms.filter(x => x.sign === "+").map(str).sort(), neg = terms.filter(x => x.sign === "-").map(str).sort();
+    return pos.join("+") + neg.map(x => "-" + x).join("") + "=" + R;
+  }
+  function generate(r){
+    for (let t = 0; t < 20000; t++){
+      const nOps = r() < .5 ? 1 : 2, nums = [], ops = [];
+      for (let i = 0; i <= nOps; i++){ nums.push(1 + Math.floor(r() * (r() < .5 ? 9 : 99))); if (i < nOps) ops.push(OPS[Math.floor(r() * 4)]); }
+      let L = String(nums[0]); ops.forEach((o, i) => L += o + nums[i + 1]);
+      if (/[×÷]1(?!\d)/.test(L) || /(^|[+\-×÷])1×/.test(L)) continue;   // nada de ×1, ÷1, 1×
+      const v = evalLeft(L); if (v === null || v < 0) continue;
+      const s = `${L}=${v}`;
+      if (s.length !== LEN || valid(s)) continue;
+      if (new Set(s).size < 5) continue;                                 // fuera las tipo 11+11=22
+      if (nOps === 1 && (v === nums[0] || v === nums[1])) continue;
+      return s;
+    }
+    return "12+35=47";
+  }
+  function score(guess, sol){
+    const res = Array(LEN).fill("miss"), left = {};
+    for (let i = 0; i < LEN; i++){ if (guess[i] === sol[i]) res[i] = "hit"; else left[sol[i]] = (left[sol[i]] || 0) + 1; }
+    for (let i = 0; i < LEN; i++){ if (res[i] === "hit") continue; if (left[guess[i]]){ res[i] = "near"; left[guess[i]]--; } }
+    return res;
+  }
+  function hardErr(g){
+    for (const prev of S.rows){
+      const res = score(prev, S.sol), need = {};
+      for (let i = 0; i < LEN; i++) if (res[i] === "hit" && g[i] !== prev[i]) return `Modo difícil: la casilla ${i + 1} tiene que ser «${show(prev[i])}»`;
+      for (let i = 0; i < LEN; i++) if (res[i] !== "miss") need[prev[i]] = (need[prev[i]] || 0) + 1;
+      for (const ch in need) if (g.split(ch).length - 1 < need[ch]) return `Modo difícil: tienes que usar «${show(ch)}»`;
+    }
+    return "";
+  }
+
+  // ---------- fechas: el reto cambia a medianoche de Madrid ----------
+  function todayKey(){
+    try { return new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+    catch { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+  }
+  const utc = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+  const dayNumber = () => Math.round((utc(todayKey()) - utc(LAUNCH)) / 864e5) + 1;
+
+  // ---------- estado ----------
+  let mode = "day", S;
+  const opts = Object.assign({ hard: false, comm: true }, store.get("eq.settings", {}));
+  const blankStats = () => ({ played: 0, won: 0, streak: 0, best: 0, lastN: null, dist: [0, 0, 0, 0, 0, 0] });
+
+  function load(){
+    const day = mode === "day";
+    const sol = generate(rng(day ? Number(todayKey().replace(/-/g, "")) * 7 : Math.floor(Math.random() * 1e9)));
+    S = { sol, rows: [], cur: Array(LEN).fill(""), pos: 0, over: false, keys: {}, busy: false, hard: opts.hard };
+    $("logo").classList.remove("won");
+    if (day){
+      const saved = store.get("eq.day." + todayKey(), null);
+      if (saved && saved.sol === sol){ S.rows = saved.rows; S.over = saved.over; S.hard = !!saved.hard; S.rows.forEach(g => markKeys(g, score(g, sol))); }
+    }
+    $("t-day").setAttribute("aria-pressed", String(day)); $("t-free").setAttribute("aria-pressed", String(!day));
+    closeSheets(); build(); render(); intro();
+    if (S.over) setTimeout(() => showEnd(true), 350);
+  }
+  function intro(){
+    const m = $("msg");
+    m.className = "msg";
+    m.innerHTML = (mode === "day" ? `Equaldle n.º ${dayNumber()}` : "Práctica: igualdades sin límite") + (S.hard ? '<span class="badge">Difícil</span>' : "");
+  }
+  function save(){ if (mode === "day") store.set("eq.day." + todayKey(), { sol: S.sol, rows: S.rows, over: S.over, hard: S.hard }); }
+
+  function build(){
+    const wrap = $("boardWrap").getBoundingClientRect();
+    const cs = Math.max(26, Math.floor(Math.min((wrap.width - 7 * 6) / LEN, (wrap.height - 5 * 6) / ROWS, 62)));
+    const g = $("grid"); g.innerHTML = ""; g.style.setProperty("--cf", (cs / 34).toFixed(2) + "rem");
+    for (let r = 0; r < ROWS; r++){
+      const row = document.createElement("div"); row.className = "row"; row.id = "r" + r;
+      row.style.gridTemplateColumns = `repeat(${LEN}, ${cs}px)`;
+      for (let c = 0; c < LEN; c++){ const d = document.createElement("div"); d.className = "cell"; row.append(d); }
+      g.append(row);
+    }
+    const kb = $("keys"); kb.innerHTML = "";
+    [["1","2","3","4","5","6","7","8","9","0"], ["+","-","×","÷","=","⌫","Enviar"]].forEach((keys, i) => {
+      const row = document.createElement("div"); row.className = "krow";
+      row.style.gridTemplateColumns = i === 0 ? "repeat(10,1fr)" : "repeat(5,1fr) 1.25fr 2.1fr";
+      keys.forEach(k => {
+        const b = document.createElement("button");
+        b.className = "k" + (k === "Enviar" ? " wide enter" : k === "⌫" ? " wide" : "");
+        b.dataset.k = k; b.textContent = show(k);
+        b.setAttribute("aria-label", k === "⌫" ? "Borrar" : k === "-" ? "menos" : k);
+        row.append(b);
+      });
+      kb.append(row);
+    });
+  }
+  function render(revealRow = -1){
+    for (let r = 0; r < ROWS; r++){
+      const rowEl = $("r" + r), cells = rowEl.children, guess = S.rows[r], res = guess ? score(guess, S.sol) : null;
+      const isCur = r === S.rows.length && !S.over;
+      rowEl.classList.toggle("current", isCur);
+      for (let c = 0; c < LEN; c++){
+        const ch = guess ? guess[c] : isCur ? S.cur[c] : "";
+        const cls = "cell" + (res ? " " + res[c] + (r === revealRow ? " rv" : "") : (ch ? " filled" : "") + (isCur && c === S.pos && !S.busy ? " cursor" : ""));
+        if (cells[c].className !== cls) cells[c].className = cls;
+        if (cells[c].textContent !== show(ch)) cells[c].textContent = show(ch);
+        cells[c].style.animationDelay = r === revealRow ? `${c * 95}ms` : "";
+      }
+    }
+  }
+  function renderKeys(){
+    document.querySelectorAll(".k").forEach(b => { const st = S.keys[b.dataset.k]; b.classList.remove("hit", "near", "miss"); if (st) b.classList.add(st); });
+  }
+  function markKeys(g, res){ const rank = { miss: 0, near: 1, hit: 2 }; g.split("").forEach((ch, i) => { const cur = S.keys[ch]; if (!cur || rank[res[i]] > rank[cur]) S.keys[ch] = res[i]; }); }
+  function msg(t, cls){ const m = $("msg"); m.textContent = t; m.className = "msg" + (cls ? " " + cls : ""); }
+
+  function press(k){
+    if (S.over || S.busy) return;
+    if (k === "Enviar"){ submit(); return; }
+    if (k === "←"){ S.pos = Math.max(0, S.pos - 1); }
+    else if (k === "→"){ S.pos = Math.min(LEN - 1, S.pos + 1); }
+    else if (k === "⌫"){
+      if (S.cur[S.pos]) S.cur[S.pos] = "";
+      else if (S.pos > 0){ S.pos--; S.cur[S.pos] = ""; }
+    } else {
+      S.cur[S.pos] = k;
+      const next = S.cur.findIndex((v, i) => i > S.pos && !v);   // salta a la siguiente casilla vacía
+      S.pos = next >= 0 ? next : Math.min(LEN - 1, S.pos + 1);
+    }
+    render();
+  }
+  function pick(c){ if (S.over || S.busy) return; S.pos = c; render(); }
+  function shake(){ const row = $("r" + S.rows.length); row.classList.remove("shake"); void row.offsetWidth; row.classList.add("shake"); }
+  function submit(){
+    if (S.cur.some(v => !v)){ msg("Faltan casillas por rellenar", "bad"); S.pos = S.cur.findIndex(v => !v); render(); shake(); return; }
+    let g = S.cur.join("");
+    const err = valid(g) || (S.hard ? hardErr(g) : "");
+    if (err){ msg(err, "bad"); shake(); return; }
+    let viaComm = false;
+    if (g !== S.sol && opts.comm && canon(g) === canon(S.sol)){ g = S.sol; viaComm = true; }
+    S.rows.push(g); S.cur = Array(LEN).fill(""); S.pos = 0; S.busy = true;
+    const idx = S.rows.length - 1, res = score(g, S.sol), won = g === S.sol;
+    markKeys(g, res);
+    try { navigator.vibrate && navigator.vibrate(8); } catch {}
+    if (won || S.rows.length === ROWS){ S.over = true; if (mode === "day") stats(won); else statsFree(won); }
+    save(); render(idx);
+    const revealMs = LEN * 95 + 460;
+    setTimeout(() => {
+      S.busy = false; renderKeys(); render();
+      if (won){
+        if (viaComm) toast("Vale: es la misma igualdad con otro orden");
+        msg(["¡Genio!", "¡Brillante!", "¡Muy bien!", "¡Bien!", "¡Por poco!", "¡Uf, justo!"][idx], "good");
+        const row = $("r" + idx); [...row.children].forEach((c, i) => c.style.animationDelay = `${i * 70}ms`); row.classList.add("win");
+        $("logo").classList.add("won");
+        celebrate(row);
+        setTimeout(() => showEnd(true), 2300);
+      } else if (S.over){ msg("Se acabaron los intentos", "bad"); setTimeout(() => showEnd(true), 700); }
+      else msg(`Intento ${S.rows.length + 1} de ${ROWS}`);
+    }, revealMs);
+  }
+
+  // ---------- celebración: lluvia de cifras y operaciones desde la fila ganadora ----------
+  function celebrate(row){
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const cv = $("fx"), ctx = cv.getContext("2d"), dpr = Math.min(2, devicePixelRatio || 1);
+    const W = innerWidth, H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.hidden = false; ctx.scale(dpr, dpr);
+    const css = getComputedStyle(document.documentElement), col = n => css.getPropertyValue(n).trim();
+    const colors = [col("--hit"), col("--hit"), col("--near"), col("--ink")];
+    const font = col("--mono"), glyphs = "0123456789+−×÷=", box = row.getBoundingClientRect();
+    const P = [];
+    for (let i = 0; i < 110; i++){
+      const a = -Math.PI / 2 + (Math.random() - .5) * 2.1, sp = 6 + Math.random() * 9;
+      P.push({
+        x: box.left + Math.random() * box.width, y: box.top + box.height / 2,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2, rot: Math.random() * 6, vr: (Math.random() - .5) * .3,
+        s: 13 + Math.random() * 15, c: colors[i % colors.length],
+        g: Math.random() < .55 ? glyphs[Math.floor(Math.random() * glyphs.length)] : null
+      });
+    }
+    const start = performance.now(), DUR = 2600;
+    (function frame(now){
+      const t = now - start; ctx.clearRect(0, 0, W, H);
+      for (const p of P){
+        p.vy += .28; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        ctx.save(); ctx.globalAlpha = Math.max(0, 1 - Math.max(0, t - DUR * .6) / (DUR * .4));
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c;
+        if (p.g){ ctx.font = `700 ${p.s}px ${font}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(p.g, 0, 0); }
+        else { const s = p.s * .55; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-s / 2, -s / 2, s, s, 2) : ctx.rect(-s / 2, -s / 2, s, s); ctx.fill(); }
+        ctx.restore();
+      }
+      if (t < DUR) requestAnimationFrame(frame); else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+    })(start);
+  }
+
+  // ---------- estadísticas ----------
+  function stats(won){
+    const st = Object.assign(blankStats(), store.get("eq.stats.day", {})), n = dayNumber();
+    if (st.lastN === n) return;
+    st.played++;
+    if (won){ st.won++; st.streak = st.lastN === n - 1 ? st.streak + 1 : 1; st.best = Math.max(st.best, st.streak); st.dist[S.rows.length - 1]++; }
+    else st.streak = 0;
+    st.lastN = n; store.set("eq.stats.day", st);
+  }
+  function statsFree(won){
+    const st = Object.assign(blankStats(), store.get("eq.stats.free", {}));
+    st.played++;
+    if (won){ st.won++; st.streak++; st.best = Math.max(st.best, st.streak); st.dist[S.rows.length - 1]++; } else st.streak = 0;
+    store.set("eq.stats.free", st);
+  }
+  function emojiGrid(){ return S.rows.map(g => score(g, S.sol).map(r => r === "hit" ? "🟩" : r === "near" ? "🟨" : "⬛").join("")).join("\n"); }
+  function showEnd(finished){
+    const day = mode === "day", st = Object.assign(blankStats(), store.get(day ? "eq.stats.day" : "eq.stats.free", {}));
+    const won = S.over && S.rows.at(-1) === S.sol;
+    if (finished && S.over){
+      $("e-title").textContent = won ? ["¡Genio!", "¡Brillante!", "¡Muy bien!", "¡Bien!", "¡Por poco!", "¡Uf, justo!"][S.rows.length - 1] : "Esta vez no";
+      $("e-sol").textContent = S.sol.replace(/-/g, "−"); $("e-sol").hidden = false;
+    } else { $("e-title").textContent = "Estadísticas"; $("e-sol").hidden = true; }
+    $("e-lab").textContent = day ? "Reto del día" : "Práctica";
+    const pct = st.played ? Math.round(100 * st.won / st.played) : 0;
+    $("e-nums").innerHTML = [[st.played, "Jugadas"], [pct, "% aciertos"], [st.streak, "Racha"], [st.best, "Mejor racha"]]
+      .map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join("");
+    const max = Math.max(1, ...st.dist), mine = won ? S.rows.length - 1 : -1;
+    $("e-dist").innerHTML = st.dist.map((v, i) =>
+      `<div><span>${i + 1}</span><b class="${i === mine ? "me" : ""}" style="width:${Math.max(8, 100 * v / max)}%">${v}</b></div>`).join("");
+    $("e-text").textContent = day ? (S.over ? "Mañana a medianoche, otra igualdad." : "Termina el reto de hoy para sumarlo.") : "En práctica puedes encadenar todas las que quieras.";
+    $("e-share").hidden = !S.over;
+    $("e-next").textContent = day ? "Ir a práctica" : "Otra de práctica";
+    $("e-copy").hidden = true; openSheet("end");
+  }
+  function shareText(){
+    const won = S.rows.at(-1) === S.sol;
+    return `Equaldle ${mode === "day" ? "n.º " + dayNumber() : "práctica"} ${won ? S.rows.length : "X"}/6${S.hard ? "*" : ""}\n${emojiGrid()}\njuegos.matematicasjosepfont.es/equaldle/`;
+  }
+  function toast(t){ const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2200); }
+
+  // ---------- hojas y ajustes ----------
+  const sheets = ["rules", "end", "settings"];
+  function openSheet(id){ closeSheets(); $(id).hidden = false; const f = $(id).querySelector(".primary, .close"); f && f.focus({ preventScroll: true }); }
+  function closeSheets(){ sheets.forEach(id => $(id).hidden = true); }
+  const anyOpen = () => sheets.some(id => !$(id).hidden);
+  function syncSettings(){
+    const locked = mode === "day" && S && S.rows.length > 0 && !S.over;
+    $("s-hard").setAttribute("aria-checked", String(locked ? S.hard : opts.hard));
+    $("s-hard").disabled = locked;
+    $("s-hard-note").textContent = locked ? "Solo se puede cambiar antes del primer intento del reto." : "Las pistas conseguidas son obligatorias: los verdes se quedan en su sitio y los amarillos hay que usarlos.";
+    $("s-comm").setAttribute("aria-checked", String(opts.comm));
+  }
+
+  $("keys").addEventListener("click", e => { const b = e.target.closest(".k"); if (b) press(b.dataset.k); });
+  $("grid").addEventListener("click", e => {
+    const cell = e.target.closest(".cell"); if (!cell) return;
+    const row = cell.parentElement; if (row.id !== "r" + S.rows.length) return;
+    pick([...row.children].indexOf(cell));
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape"){ closeSheets(); return; }
+    if (anyOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+    const map = { "*": "×", "x": "×", "X": "×", "/": "÷", ":": "÷", "Backspace": "⌫", "Delete": "⌫", "Enter": "Enviar", "ArrowLeft": "←", "ArrowRight": "→" };
+    const k = map[e.key] || e.key;
+    if (/^[0-9+\-=]$/.test(k) || ["×", "÷", "⌫", "Enviar", "←", "→"].includes(k)){ e.preventDefault(); press(k); }
+  });
+  document.querySelectorAll(".sheet").forEach(sh => sh.addEventListener("click", e => {
+    if (e.target === sh || e.target.closest("[data-close]")){ sh.hidden = true; if (sh.id === "rules") store.set("eq.seen", 1); }
+  }));
+  $("b-help").onclick = () => openSheet("rules");
+  $("b-stats").onclick = () => showEnd(S.over);
+  $("b-set").onclick = () => { syncSettings(); openSheet("settings"); };
+  $("s-hard").onclick = () => {
+    opts.hard = !opts.hard; store.set("eq.settings", opts);
+    if (S.rows.length === 0 || S.over){ if (!S.over) S.hard = opts.hard; }
+    syncSettings(); intro();
+  };
+  $("s-comm").onclick = () => { opts.comm = !opts.comm; store.set("eq.settings", opts); syncSettings(); };
+  $("t-day").onclick = () => { if (mode !== "day" || S.over){ mode = "day"; load(); } };
+  $("t-free").onclick = () => { if (mode !== "free" || S.over){ mode = "free"; load(); } };
+  $("e-next").onclick = () => { mode = "free"; load(); };
+  $("e-share").onclick = () => {
+    const txt = shareText(), ta = $("e-copy"), fallback = () => { ta.value = txt; ta.hidden = false; ta.select(); toast("Selecciona y copia el texto"); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Resultado copiado"), fallback); } catch { fallback(); }
+  };
+  addEventListener("resize", () => { if (S){ build(); render(); renderKeys(); } });
+
+  load(); renderKeys();
+  if (!store.get("eq.seen", 0)) openSheet("rules");
+})();
+</script>
+<script>if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body>
+</html>

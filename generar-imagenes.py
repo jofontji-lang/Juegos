@@ -119,8 +119,10 @@ for fila in range(filas):
                   f'stroke="{HILO_BANDA}" stroke-width="1"/>')
     for i, j in enumerate(tanda):
         cx = x0 + celda * (i + 0.5)
-        alto = ancho_obra * j["h"] / j["w"]
-        marco_w = ancho_obra + 2 * MARGEN
+        # que quepa también a lo alto: con tres filas, las obras altas se pisaban
+        ancho = min(ancho_obra, (alto_fila - 40 - 2 * MARGEN) * j["w"] / j["h"])
+        alto = ancho * j["h"] / j["w"]
+        marco_w = ancho + 2 * MARGEN
         marco_h = alto + 2 * MARGEN
         # la obra se cuelga por su centro dentro de la fila, como en la portada
         y = y_riel + (alto_fila - 26 - marco_h) / 2
@@ -128,7 +130,7 @@ for fila in range(filas):
         piezas.append(
             f'<path d="M{cx:.1f} {y_riel:.1f} V{y:.1f}" stroke="{HILO_BANDA}" stroke-width="1"/>'
             f'<rect x="{x:.1f}" y="{y:.1f}" width="{marco_w:.1f}" height="{marco_h:.1f}" fill="{PAPEL}"/>'
-            f'<svg x="{x + MARGEN:.1f}" y="{y + MARGEN:.1f}" width="{ancho_obra:.1f}" height="{alto:.1f}"'
+            f'<svg x="{x + MARGEN:.1f}" y="{y + MARGEN:.1f}" width="{ancho:.1f}" height="{alto:.1f}"'
             f' viewBox="0 0 {j["w"]:g} {j["h"]:g}">'
             + re.sub(r"^<svg\b[^>]*>", "", j["svg"]).rsplit("</svg>", 1)[0]
             + "</svg>"

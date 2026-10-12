@@ -47,6 +47,9 @@ Son matemáticamente correctos, no decorativos:
   entre consecutivos (24-25, 15-16, 20-21) o con factor común.
 - **Productos cruzados**: la cuadrícula se completa con 9, 3 y 6, y entonces
   las filas dan 72, 105 y 48 y las columnas 84, 45 y 96.
+- **Equaldle**: una partida real. Los dos primeros intentos (9×8−7=65 y
+  13+26=39) son igualdades correctas y sus colores son los que da el juego
+  frente a la solución 12+35=47, que es el tercer intento.
 
 Si prefieres capturas reales, cada `<figure>` es independiente: se sustituye el
 `<svg>` por un `<img>` en WebP con `width` y `height` declarados.
@@ -156,11 +159,10 @@ No hay versiones que subir ni móviles que se queden con lo viejo.
 
 ### Cuántas columnas
 
-`.pared` lleva `grid-template-columns:repeat(3, 1fr)`. Cuando el número de
-juegos no es múltiplo de las columnas, la última fila queda corta: con 7 sale
-3+3+1, y esa última obra va centrada a mano. Si llegas a 8, lo natural es
-pasar a `repeat(4, 1fr)` y volver a tener filas llenas. El riel se repite solo
-en cada fila.
+`.pared` lleva `grid-template-columns:repeat(3, 1fr)`: con nueve juegos son
+tres filas llenas. A dos columnas (tabletas y móviles) la última obra queda sola
+y va centrada sola, con la regla `.obra:last-child:nth-child(odd)`. Si llegas a
+12, lo natural es pasar a `repeat(4, 1fr)`. El riel se repite solo en cada fila.
 
 La imagen de compartir no hay que tocarla: `generar-imagenes.py` calcula la
 rejilla solo —una fila hasta tres obras, dos hasta ocho, tres a partir de ahí—,
