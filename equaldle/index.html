@@ -63,6 +63,8 @@ h1 i.n{background:var(--near)} h1 i.m{background:var(--miss)}
 .icon svg{width:19px;height:19px}
 
 .bar{display:flex;flex-direction:column;align-items:center;gap:8px}
+.bar-top{display:flex;align-items:center;gap:8px}
+.icon.calc-btn svg{width:18px;height:18px}
 .tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
 .tabs button{border:0;background:none;color:var(--muted);font:700 .8rem/1 var(--display);padding:8px 14px;border-radius:999px;cursor:pointer}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
@@ -141,6 +143,25 @@ button:focus-visible{outline:3px solid var(--hit);outline-offset:2px}
 .links a{color:var(--muted);text-underline-offset:3px}
 textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);padding:8px}
 .toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);font:700 .86rem var(--display);padding:10px 16px;border-radius:999px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+/* calculadora: se abre abajo y deja el tablero a la vista */
+.sheet.calc-sheet{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.panel.calc{gap:10px;padding:16px 16px 14px;max-width:420px;box-shadow:0 -10px 40px rgba(10,20,40,.18),0 24px 60px rgba(10,20,40,.22)}
+.panel.calc h2{font-size:1.1rem}
+.calc .close{top:10px;right:10px}
+.calc-screen{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0}
+.calc-hist{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font:500 .74rem/1.3 var(--mono);color:var(--muted);min-height:1.3em;max-width:100%}
+.calc-hist button{all:unset;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calc-hist button:hover,.calc-hist button:focus-visible{color:var(--ink);text-decoration:underline}
+.calc-expr{font:700 1.15rem/1.3 var(--mono);color:var(--ink);min-height:1.3em;max-width:100%;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.calc-expr:empty::before{content:"0";color:var(--muted)}
+.calc-res{font:800 1.6rem/1.15 var(--display);font-variant-numeric:tabular-nums;color:var(--hit);min-height:1.15em;max-width:100%;overflow-wrap:anywhere;text-align:right}
+.calc-res.err{color:var(--near);font-size:.95rem;font-weight:700}
+.calc-res.pre{color:var(--muted)}
+.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.calc-keys .k{padding:11px 0 10px}
+.calc-keys .k.op{background:color-mix(in srgb,var(--hit) 16%,var(--key))}
+.calc-keys .k.eq{background:var(--hit);color:var(--on)}
+.calc-keys .k.clr{color:var(--near)}
 @media (prefers-reduced-motion: reduce){.row.shake,.row.win .cell,.cell.rv,.cell.filled,h1.won i{animation:none}h1.won i{background:var(--hit)}.k,.sw,.sw::after{transition:none}}
 </style>
 </head>
@@ -156,9 +177,12 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
     </div>
   </header>
   <div class="bar">
-    <div class="tabs" role="group" aria-label="Modo">
-      <button id="t-day" aria-pressed="true">Reto del día</button>
-      <button id="t-free" aria-pressed="false">Práctica</button>
+    <div class="bar-top">
+      <div class="tabs" role="group" aria-label="Modo">
+        <button id="t-day" aria-pressed="true">Reto del día</button>
+        <button id="t-free" aria-pressed="false">Práctica</button>
+      </div>
+      <button class="icon calc-btn" id="b-calc" aria-label="Calculadora" title="Calculadora"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01" stroke-width="2.6"/></svg></button>
     </div>
     <p class="msg" id="msg" aria-live="polite"></p>
   </div>
@@ -178,6 +202,7 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
       <li><b></b>Gris: no está, o ya no quedan más.</li>
     </ul>
     <p>Toca cualquier casilla de la fila para cambiarla sin borrar el resto (también con las flechas ← →).</p>
+    <p>Con el botón de la calculadora puedes tantear cuentas sin salir de la partida.</p>
     <p>Hay un reto nuevo cada día a medianoche (hora de Madrid), el mismo para todos. En Práctica puedes jugar sin límite.</p>
     <button class="primary" data-close>Jugar</button>
     <p class="links"><a href="/">Más juegos de matemáticas</a> · <a href="privacidad.html">Privacidad</a></p>
@@ -206,6 +231,18 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
     <div class="opt"><div><strong>Modo difícil</strong><small id="s-hard-note">Las pistas conseguidas son obligatorias: los verdes se quedan en su sitio y los amarillos hay que usarlos.</small></div><button class="sw" id="s-hard" role="switch" aria-checked="false" aria-label="Modo difícil"></button></div>
     <div class="opt"><div><strong>Aceptar el orden cambiado</strong><small>Si la solución es 12+35=47, también ganas con 35+12=47 (propiedad conmutativa).</small></div><button class="sw" id="s-comm" role="switch" aria-checked="true" aria-label="Aceptar el orden cambiado"></button></div>
     <p class="links"><a href="/">Más juegos de matemáticas</a> · <a href="privacidad.html">Privacidad</a></p>
+  </div>
+</div>
+<div class="sheet calc-sheet" id="calc" hidden>
+  <div class="panel calc" role="dialog" aria-labelledby="c-h">
+    <button class="icon close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="c-h">Calculadora</h2>
+    <div class="calc-screen">
+      <div class="calc-hist" id="c-hist"></div>
+      <div class="calc-expr" id="c-expr"></div>
+      <div class="calc-res" id="c-res" aria-live="polite"></div>
+    </div>
+    <div class="calc-keys" id="c-keys"></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -492,8 +529,122 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
   }
   function toast(t){ const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2200); }
 
+  // ---------- calculadora: + − × ÷, paréntesis y decimales, con la jerarquía de siempre ----------
+  const C = { expr: "", hist: [], done: false };
+  const OPC = "+-×÷";
+  function calcEval(src){
+    let i = 0;
+    const peek = () => src[i];
+    function num(){
+      const m = src.slice(i).match(/^\d+(,\d*)?/); if (!m) throw 0;
+      i += m[0].length; return parseFloat(m[0].replace(",", "."));
+    }
+    function factor(){
+      if (peek() === "-"){ i++; return -factor(); }
+      if (peek() === "("){ i++; const v = expr(); if (peek() !== ")") throw 0; i++; return v; }
+      return num();
+    }
+    function term(){
+      let v = factor();
+      while (peek() === "×" || peek() === "÷"){
+        const op = src[i++], b = factor();
+        if (op === "÷" && b === 0) throw "div0";
+        v = op === "×" ? v * b : v / b;
+      }
+      return v;
+    }
+    function expr(){
+      let v = term();
+      while (peek() === "+" || peek() === "-"){ const op = src[i++], b = term(); v = op === "+" ? v + b : v - b; }
+      return v;
+    }
+    const v = expr(); if (i !== src.length) throw 0; return v;
+  }
+  const fmt = v => {
+    if (!isFinite(v)) return "Demasiado grande";
+    const r = Number(v.toPrecision(12));
+    return (Math.abs(r) >= 1e15 || (r !== 0 && Math.abs(r) < 1e-9)) ? r.toExponential(6).replace(".", ",") : r.toLocaleString("es-ES", { maximumFractionDigits: 10, useGrouping: false }).replace("-", "−");
+  };
+  const showExpr = s => s.replace(/-/g, "−").replace(/\*/g, "×");
+  function depth(s){ let d = 0; for (const ch of s){ if (ch === "(") d++; else if (ch === ")") d--; } return d; }
+  function preview(s){
+    // completa lo que falte (operador al final, paréntesis abiertos) solo para enseñar el resultado provisional
+    let t = s.replace(/[+\-×÷(]+$/, ""); if (!t) return null;
+    t += ")".repeat(Math.max(0, depth(t)));
+    try { return calcEval(t); } catch (e) { return e === "div0" ? "div0" : null; }
+  }
+  function calcRender(final){
+    $("c-expr").textContent = showExpr(C.expr);
+    $("c-expr").scrollLeft = 1e6;
+    const res = $("c-res"); res.className = "calc-res";
+    if (!C.expr){ res.textContent = ""; }
+    else {
+      const v = preview(C.expr);
+      if (v === "div0"){ res.textContent = "No se puede dividir entre 0"; res.classList.add("err"); }
+      else if (v === null){ res.textContent = ""; }
+      else { res.textContent = "= " + fmt(v); if (!final) res.classList.add("pre"); }
+    }
+    $("c-hist").innerHTML = "";
+    C.hist.forEach(h => {
+      const b = document.createElement("button"); b.type = "button";
+      b.textContent = `${showExpr(h.e)} = ${fmt(h.v)}`; b.title = "Volver a usar este resultado";
+      b.onclick = () => { C.expr = String(Number(h.v.toPrecision(12))).replace(".", ",").replace(/^-/, "-"); C.done = true; calcRender(true); };
+      $("c-hist").append(b);
+    });
+  }
+  function calcPress(k){
+    let s = C.expr; const last = s.slice(-1);
+    if (k === "C"){ C.expr = ""; C.done = false; calcRender(); return; }
+    if (k === "⌫"){ C.expr = s.slice(0, -1); C.done = false; calcRender(); return; }
+    if (k === "="){
+      if (!s) return;
+      const t = s.replace(/[+\-×÷(]+$/, "") + ")".repeat(Math.max(0, depth(s.replace(/[+\-×÷(]+$/, ""))));
+      try {
+        const v = calcEval(t);
+        if (!isFinite(v)) throw 0;
+        C.hist.unshift({ e: t, v }); C.hist = C.hist.slice(0, 3);
+        C.expr = String(Number(v.toPrecision(12))).replace(".", ",");
+        if (/e/.test(C.expr)) C.expr = "";
+        C.done = true; calcRender(true);
+      } catch (e){ const r = $("c-res"); r.className = "calc-res err"; r.textContent = e === "div0" ? "No se puede dividir entre 0" : "Revisa la cuenta: falta algo"; }
+      return;
+    }
+    if (C.done && (/\d|,|\(/.test(k))) s = "";       // tras «=», una cifra empieza otra cuenta; un operador sigue con el resultado
+    C.done = false;
+    if (/\d/.test(k)){ if (last === ")") s += "×"; s += k; }
+    else if (k === ","){
+      const cur = s.match(/[\d,]*$/)[0];
+      if (cur.includes(",")) return;
+      if (!cur) s += (last === ")" ? "×" : "") + "0";
+      s += ",";
+    }
+    else if (k === "("){ if (/[\d,)]/.test(last)) s += "×"; s += "("; }
+    else if (k === ")"){ if (depth(s) <= 0 || !/[\d)]/.test(last)) return; s += ")"; }
+    else if (OPC.includes(k)){
+      if (!s || last === "("){ if (k === "-") s += "-"; else return; }
+      else if (last === ","){ s = s.slice(0, -1) + k; }
+      else if (OPC.includes(last)){
+        if (k === "-" && (last === "×" || last === "÷")) s += "-";
+        else { s = s.replace(/[+\-×÷]+$/, ""); if (!s) return; s += k; }
+      } else s += k;
+    }
+    C.expr = s.slice(0, 40); calcRender();
+  }
+  function buildCalc(){
+    const keys = [["C", "clr"], ["(", "op"], [")", "op"], ["÷", "op"], ["7"], ["8"], ["9"], ["×", "op"], ["4"], ["5"], ["6"], ["-", "op"], ["1"], ["2"], ["3"], ["+", "op"], ["0"], [","], ["⌫"], ["=", "eq"]];
+    const box = $("c-keys");
+    keys.forEach(([k, cls]) => {
+      const b = document.createElement("button"); b.type = "button";
+      b.className = "k" + (cls ? " " + cls : ""); b.dataset.c = k; b.textContent = show(k);
+      b.setAttribute("aria-label", { "C": "Borrar todo", "⌫": "Borrar", "-": "menos", ",": "coma decimal", "=": "igual" }[k] || k);
+      box.append(b);
+    });
+    box.addEventListener("click", e => { const b = e.target.closest(".k"); if (b) calcPress(b.dataset.c); });
+  }
+  buildCalc();
+
   // ---------- hojas y ajustes ----------
-  const sheets = ["rules", "end", "settings"];
+  const sheets = ["rules", "end", "settings", "calc"];
   function openSheet(id){ closeSheets(); $(id).hidden = false; const f = $(id).querySelector(".primary, .close"); f && f.focus({ preventScroll: true }); }
   function closeSheets(){ sheets.forEach(id => $(id).hidden = true); }
   const anyOpen = () => sheets.some(id => !$(id).hidden);
@@ -513,7 +664,14 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
   });
   document.addEventListener("keydown", e => {
     if (e.key === "Escape"){ closeSheets(); return; }
-    if (anyOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!$("calc").hidden){
+      const cm = { "*": "×", "x": "×", "X": "×", "/": "÷", ":": "÷", ".": ",", "Enter": "=", "Backspace": "⌫", "Delete": "C", "c": "C", "C": "C" };
+      const k = cm[e.key] || e.key;
+      if (/^[0-9+\-×÷(),=]$/.test(k) || k === "⌫" || k === "C"){ e.preventDefault(); calcPress(k); }
+      return;
+    }
+    if (anyOpen()) return;
     const map = { "*": "×", "x": "×", "X": "×", "/": "÷", ":": "÷", "Backspace": "⌫", "Delete": "⌫", "Enter": "Enviar", "ArrowLeft": "←", "ArrowRight": "→" };
     const k = map[e.key] || e.key;
     if (/^[0-9+\-=]$/.test(k) || ["×", "÷", "⌫", "Enviar", "←", "→"].includes(k)){ e.preventDefault(); press(k); }
@@ -522,6 +680,7 @@ textarea{width:100%;box-sizing:border-box;font:600 .8rem var(--mono);border:1px 
     if (e.target === sh || e.target.closest("[data-close]")){ sh.hidden = true; if (sh.id === "rules") store.set("eq.seen", 1); }
   }));
   $("b-help").onclick = () => openSheet("rules");
+  $("b-calc").onclick = () => { calcRender(); openSheet("calc"); };
   $("b-stats").onclick = () => showEnd(S.over);
   $("b-set").onclick = () => { syncSettings(); openSheet("settings"); };
   $("s-hard").onclick = () => {
