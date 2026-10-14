@@ -709,6 +709,11 @@ footer a{text-underline-offset:3px}
      bloque «De display», adaptable, y pon su número en data-ad-slot.
      Mientras ahí no haya un número, el bloque no se ve y no se carga
      nada de Google. El de ahora es el bloque «Portada juegos».
+
+     El bloque se esconde solo si no acaba saliendo un anuncio: cuando
+     Google dice que no tiene nada que poner, cuando el visitante lleva
+     un bloqueador, o cuando el sitio todavía no está aprobado. Así no
+     queda la palabra «Publicidad» flotando sobre un hueco vacío.
      ═══════════════════════════════════════════════════════════════════ -->
 <aside class="publi limite" aria-label="Publicidad" hidden>
   <p class="publi-etiqueta">Publicidad</p>
@@ -723,9 +728,31 @@ footer a{text-underline-offset:3px}
   s.async = true;
   s.crossOrigin = "anonymous";
   s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" + ins.getAttribute("data-ad-client");
-  s.onerror = function () { box.hidden = true; };
+  s.onerror = esconder;
   document.head.appendChild(s);
   (window.adsbygoogle = window.adsbygoogle || []).push({});
+
+  function esconder() { box.hidden = true; }
+
+  // Google marca el hueco con data-ad-status: «filled» si ha puesto un
+  // anuncio, «unfilled» si no tenía ninguno que encajara. Lo segundo es
+  // motivo para quitar el bloque entero.
+  if (window.MutationObserver) {
+    new MutationObserver(function () {
+      if (ins.getAttribute("data-ad-status") === "unfilled") esconder();
+    }).observe(ins, { attributes: true, attributeFilter: ["data-ad-status"] });
+  }
+
+  // Y si pasados unos segundos ni siquiera ha llegado a cargar el script
+  // de Google —bloqueador de por medio, casi siempre— también se quita.
+  // Si el script sí cargó pero aún no ha dicho nada, no se toca nada: el
+  // hueco está abajo del todo y Google puede tardar en llegar a él.
+  setTimeout(function () {
+    var estado = ins.getAttribute("data-ad-status");
+    if (estado === "unfilled") return esconder();
+    if (estado === "filled") return;
+    if (!window.adsbygoogle || !window.adsbygoogle.loaded) esconder();
+  }, 4000);
 })();
 </script>
 
