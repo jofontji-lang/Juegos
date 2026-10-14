@@ -147,6 +147,35 @@ tienen que quedarse ahí.
 Para rehacer la imagen de compartir hace falta tener las dos instaladas en el
 sistema, porque `generar-imagenes.py` las compone por nombre.
 
+## El contador de visitas
+
+En el pie de la portada. Lo lleva un Apps Script propio, no un servicio de
+terceros: el código está en `contador/contador.gs` y sus instrucciones de
+puesta en marcha, dentro del propio archivo.
+
+Hace dos cosas con una sola llamada. Devuelve el número de visita, que es lo
+que se enseña, y apunta la visita en una hoja de cálculo —fecha, página y
+dominio de procedencia—, que es la analítica. Con eso te haces una tabla
+dinámica y sabes las visitas por día, por juego y desde dónde llega la gente,
+sin montar Google Analytics.
+
+No pone cookies, no guarda IP y no crea ningún identificador, así que no
+necesita banner de consentimiento. Eso sí: está contado en
+`/privacidad/`, y si algún día le añades algo que identifique a alguien,
+hay que volver a pasar por ahí.
+
+Mientras el `index.html` ponga `PEGA_AQUI_LA_URL` no se llama a nada y el pie
+se ve igual que siempre. Si el servidor no contesta, el contador se queda
+oculto: nunca deja un hueco ni un cero raro.
+
+Cuenta cada carga de página, no cada persona: quien recargue suma otra visita.
+Es a propósito, porque distinguir personas obligaría a guardar algo en el
+dispositivo y entonces sí haría falta consentimiento.
+
+Para contar también un juego, basta con pegar el mismo bloque `<script>` en su
+`index.html`; manda su propia ruta, así que en la hoja aparecerá separado. El
+número visible, en cambio, tiene sentido solo en la portada.
+
 ## Sin service worker, a propósito
 
 La portada no cachea nada. Un service worker en la raíz vería pasar también las
