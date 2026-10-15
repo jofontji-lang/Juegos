@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Goldbach Factory · fabrica números pares</title>
+<meta name="description" content="Juego sobre la conjetura de Goldbach: monta parejas de primos que sumen cada número par. Modo carrera con niveles infinitos, reto del día, tres vidas y taller libre con el cometa de Goldbach.">
+<link rel="canonical" href="https://juegos.matematicasjosepfont.es/goldbach/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#17202A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:url" content="https://juegos.matematicasjosepfont.es/goldbach/">
+<meta property="og:title" content="Goldbach Factory · fabrica números pares">
+<meta property="og:description" content="Todo par mayor que 2 es suma de dos primos. ¿Cuántas parejas sacas antes de que se pare la cadena?">
+<meta property="og:image" content="https://juegos.matematicasjosepfont.es/goldbach/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
+<link rel="preload" href="fonts/big-shoulders-stencil-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Big Shoulders Stencil Display";font-style:normal;font-weight:900;font-display:swap;src:url("fonts/big-shoulders-stencil-display-latin-900-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/barlow-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/barlow-latin-600-normal.woff2") format("woff2")}
+@font-face{font-family:"Barlow";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/barlow-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2")}
+/* Layout: una nave industrial — placa de pedidos arriba, ensambladora en el centro, cinta de producción abajo */
+:root{
+  --bg:#E4E8EB; --surface:#F6F7F8; --surface-2:#D9DFE4; --ink:#17202A; --muted:#566370; --line:#BFC8D0;
+  --amber:#E39A0A; --amber-ink:#1B1400; --steel:#2C5A86; --steel-soft:#D3DFEA;
+  --ok:#2A7A4B; --ok-soft:#D5EADC; --bad:#B5302A; --bad-soft:#F4D8D5; --heart:#D23B33;
+  --f-display:"Big Shoulders Stencil Display","Impact","Arial Narrow",sans-serif;
+  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13171B; --surface:#1C2228; --surface-2:#252D34; --ink:#E6EBEF; --muted:#93A0AC; --line:#37414B;
+  --amber:#F2AE2E; --amber-ink:#1B1400; --steel:#86AED6; --steel-soft:#22374B;
+  --ok:#62BE86; --ok-soft:#1C3526; --bad:#EA6D61; --bad-soft:#3E211F; --heart:#F0645A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#13171B; --surface:#1C2228; --surface-2:#252D34; --ink:#E6EBEF; --muted:#93A0AC; --line:#37414B;
+  --amber:#F2AE2E; --amber-ink:#1B1400; --steel:#86AED6; --steel-soft:#22374B;
+  --ok:#62BE86; --ok-soft:#1C3526; --bad:#EA6D61; --bad-soft:#3E211F; --heart:#F0645A; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+.app{max-width:880px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:18px 14px;border-bottom:2px solid var(--ink)}
+.brand{display:flex;flex-direction:column;line-height:1}
+.brand b{font-family:var(--f-display);font-weight:900;font-size:2.1rem;letter-spacing:.02em;text-transform:uppercase}
+.brand span{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:4px}
+.nav{display:flex;gap:6px}
+.nav button{background:transparent;border:1.5px solid var(--line);border-radius:var(--r);padding:7px 12px;font-weight:600;font-size:.9rem}
+.nav button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hazard{height:8px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,var(--ink) 10px 20px);margin-bottom:20px}
+
+.lede{max-width:62ch;color:var(--muted);margin:0 0 20px}
+.lede strong{color:var(--ink)}
+.sec-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700;margin:0 0 10px}
+
+/* Modos */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:22px}
+.mode{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.mode.daily{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mode .eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.16em;font-weight:700;opacity:.7}
+.mode h2{font-family:var(--f-display);font-weight:900;font-size:2.3rem;line-height:.95;text-transform:uppercase;letter-spacing:.02em}
+.mode p{margin:0;font-size:.94rem;opacity:.85;max-width:46ch}
+.mode .facts{display:flex;gap:16px;flex-wrap:wrap}
+.mode .facts div{display:flex;flex-direction:column}
+.mode .facts small{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;opacity:.7}
+.mode .facts b{font-family:var(--f-mono);font-size:1.15rem;font-variant-numeric:tabular-nums}
+.mode .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.rules-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin:0;padding:0;list-style:none;font-size:.9rem;color:var(--muted)}
+.rules-list b{color:var(--ink)}
+
+/* Juego */
+.play-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.back{background:transparent;border:1.5px solid var(--line);border-radius:var(--r);padding:6px 10px;font-weight:600;font-size:.88rem}
+.play-title{flex:1;min-width:0}
+.play-title small{display:block;font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.play-title b{font-size:1.1rem}
+.meters{display:flex;gap:8px;flex-wrap:wrap}
+.meter{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:4px 10px;text-align:right;min-width:70px}
+.meter small{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.meter b{font-family:var(--f-mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.meter.warn{border-color:var(--bad)} .meter.warn b{color:var(--bad)}
+.hearts{font-size:1.05rem;letter-spacing:1px;line-height:1.5}
+.hearts .on{color:var(--heart)} .hearts .off{color:var(--line)}
+.hearts.hit{animation:shake .35s}
+.timebar{height:5px;background:var(--surface-2);border-radius:3px;margin:-6px 0 12px;overflow:hidden}
+.timebar i{display:block;height:100%;background:var(--steel);width:100%;transition:width .25s linear}
+.timebar.warn i{background:var(--bad)}
+
+.orders{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+.order{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:10px 14px 12px 18px;position:relative;overflow:hidden;min-width:0}
+.order::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:repeating-linear-gradient(-45deg,var(--amber) 0 6px,transparent 6px 12px)}
+.order small{font-size:.68rem;text-transform:uppercase;letter-spacing:.16em;opacity:.7}
+.order .big{font-family:var(--f-display);font-weight:900;font-size:3.4rem;line-height:.95;letter-spacing:.02em}
+.order .prog{font-family:var(--f-mono);font-size:.8rem;opacity:.85}
+.pips{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.pip{width:14px;height:6px;border-radius:2px;background:color-mix(in srgb,var(--bg) 25%,transparent)}
+.pip.on{background:var(--amber)}
+.order.done{background:var(--ok);color:var(--surface)}
+.order.done .pip.on{background:var(--surface)}
+
+.rule{display:flex;gap:10px;align-items:center;border:1.5px dashed var(--bad);color:var(--bad);background:var(--bad-soft);border-radius:var(--r);padding:8px 12px;font-weight:600;font-size:.92rem;margin-bottom:10px}
+.rule::before{content:"⛔";font-size:1rem}
+
+.assembler{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:10px}
+.slot{font-family:var(--f-mono);font-weight:600;font-size:1.3rem;min-width:56px;height:44px;display:grid;place-items:center;border:2px dashed var(--line);border-radius:var(--r);font-variant-numeric:tabular-nums}
+.slot.fill{border-style:solid;border-color:var(--amber);background:color-mix(in srgb,var(--amber) 18%,transparent)}
+.op{font-family:var(--f-mono);font-size:1.2rem;color:var(--muted)}
+.msg{flex:1 1 200px;min-width:0;font-size:.92rem;color:var(--muted);padding-left:4px}
+.msg.ok{color:var(--ok);font-weight:600}
+.msg.bad{color:var(--bad);font-weight:600}
+
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;margin-bottom:10px}
+.tile{font-family:var(--f-mono);font-weight:600;font-size:1.02rem;height:46px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface);font-variant-numeric:tabular-nums;position:relative;transition:transform .08s}
+.tile:hover{border-color:var(--steel)}
+.tile:active{transform:scale(.95)}
+.tile.sel{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
+.tile.used::after{content:"";position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.tile.err{animation:shake .35s;background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.tile.hint{animation:pulse 1s ease-in-out 3;border-color:var(--steel);box-shadow:0 0 0 3px var(--steel-soft)}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+@keyframes pulse{50%{box-shadow:0 0 0 6px var(--steel-soft)}}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.btn{border-radius:var(--r);padding:9px 14px;font-weight:600;font-size:.92rem;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.btn.ghost{background:transparent;border-color:color-mix(in srgb,currentColor 35%,transparent);color:inherit}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.help{font-size:.82rem;color:var(--muted);align-self:center}
+
+.belt{border-top:2px solid var(--ink);padding-top:12px}
+.belt-group{margin-bottom:10px}
+.belt-group h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:6px}
+.crates{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;padding:6px;border-radius:var(--r);
+  background:repeating-linear-gradient(90deg,var(--surface-2) 0 18px,color-mix(in srgb,var(--surface-2) 70%,var(--line)) 18px 20px)}
+.crate{font-family:var(--f-mono);font-weight:600;font-size:.9rem;background:var(--surface);border:1.5px solid var(--ok);color:var(--ink);border-radius:4px;padding:3px 9px;animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+.empty{font-size:.85rem;color:var(--muted);padding:4px 6px}
+
+/* Taller libre */
+.free-form{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
+.free-form label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.free-form input{font-family:var(--f-mono);font-size:1.3rem;width:160px;max-width:100%;padding:7px 10px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.free-out{display:grid;gap:12px;margin-bottom:18px}
+.free-sum{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.free-sum .big{font-family:var(--f-display);font-weight:900;font-size:3.2rem;line-height:1}
+.free-sum p{margin:0;color:var(--muted);max-width:52ch}
+.free-sum p b{color:var(--ink)}
+.chips{max-height:260px;overflow:auto}
+.comet-wrap{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:12px}
+.comet-wrap p{margin:0 0 8px;font-size:.88rem;color:var(--muted);max-width:65ch}
+canvas{display:block;width:100%;height:220px}
+
+/* Tarjetas emergentes */
+.overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 60%,transparent);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));z-index:10}
+.card{background:var(--surface);color:var(--ink);border-radius:10px;max-width:410px;width:100%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.card .hz{height:10px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,var(--ink) 10px 20px)}
+.card.fail .hz{background:repeating-linear-gradient(-45deg,var(--bad) 0 10px,var(--ink) 10px 20px)}
+.card-body{padding:18px 20px 20px;display:grid;gap:12px}
+.card h2{font-family:var(--f-display);font-weight:900;font-size:2.2rem;line-height:1;text-transform:uppercase}
+.card p{margin:0;color:var(--muted);font-size:.94rem}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+.stats div{background:var(--surface-2);border-radius:var(--r);padding:6px 10px}
+.stats dt{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.stats dd{margin:0;font-family:var(--f-mono);font-weight:600;font-size:1.1rem}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap}
+.card-actions .btn{flex:1 1 140px}
+.ad-box{aspect-ratio:16/9;max-width:100%;border-radius:var(--r);border:1.5px dashed var(--line);display:grid;place-items:center;text-align:center;
+  background:repeating-linear-gradient(45deg,var(--surface-2) 0 12px,var(--surface) 12px 24px);color:var(--muted);font-size:.9rem;padding:10px}
+.pie{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.pie a{color:inherit}
+.ad-box b{display:block;font-family:var(--f-display);font-size:3rem;color:var(--ink);line-height:1}
+
+@media (max-width:480px){
+  .order .big{font-size:2.7rem}
+  .brand b{font-size:1.7rem}
+  .board{grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:5px}
+  .tile{height:42px;font-size:.95rem}
+  .meter{min-width:60px;padding:3px 8px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><b>Goldbach Factory</b><span>Fabrica números pares</span></div>
+    <nav class="nav" aria-label="Secciones">
+      <button id="nav-menu" aria-current="true">Jugar</button>
+      <button id="nav-free" aria-current="false">Taller libre</button>
+    </nav>
+  </header>
+  <div class="hazard" aria-hidden="true"></div>
+
+  <!-- MENÚ -->
+  <section id="scr-menu">
+    <p class="lede"><strong>Conjetura de Goldbach:</strong> todo número par mayor que 2 es suma de dos números primos. Christian Goldbach la planteó en 1742 en una carta a Euler. Se ha comprobado por ordenador hasta 4·10<sup>18</sup>, pero nadie la ha demostrado. Cada pedido de la fábrica es un número par y tú montas las parejas de primos que lo producen.</p>
+    <div class="modes">
+      <article class="mode">
+        <span class="eyebrow">Modo carrera</span>
+        <h2>Niveles infinitos</h2>
+        <p>Cada nivel es más exigente: números mayores, varios pedidos a la vez, menos tiempo y piezas prohibidas. Recuperas una vida en cada punto de control (cada 5 niveles).</p>
+        <div class="facts">
+          <div><small>Récord</small><b id="c-best">—</b></div>
+          <div><small>Mejor puntuación</small><b id="c-score">—</b></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="c-continue">Empezar</button>
+          <button class="btn" id="c-new" hidden>Desde el nivel 1</button>
+        </div>
+      </article>
+      <article class="mode daily">
+        <span class="eyebrow" id="d-date">Reto del día</span>
+        <h2>Reto del día</h2>
+        <p>Cinco pedidos iguales para todos hoy, de menos a más difíciles. Mañana cambian.</p>
+        <div class="facts">
+          <div><small>Hoy</small><b id="d-today">—</b></div>
+          <div><small>Racha</small><b id="d-streak">0 días</b></div>
+        </div>
+        <div class="row"><button class="btn primary" id="d-play">Jugar el reto</button></div>
+      </article>
+    </div>
+    <p class="sec-label">Reglas de la fábrica</p>
+    <ul class="rules-list">
+      <li><b>3 vidas.</b> Cada pieza que no es prima, prohibida o que no suma un pedido cuesta una.</li>
+      <li><b>Tiempo limitado.</b> Si el reloj llega a cero, se para la cadena.</li>
+      <li><b>Segunda oportunidad.</b> Una vez por partida, un anuncio te da +30 s y una vida.</li>
+      <li><b>Puntos.</b> +100 por combinación, +3 por segundo sobrante, −50 por pista.</li>
+    </ul>
+  </section>
+
+  <!-- JUEGO -->
+  <section id="scr-play" hidden>
+    <div class="play-head">
+      <button class="back" id="btn-back">← Salir</button>
+      <div class="play-title"><small id="p-mode">Carrera</small><b id="p-name">Nivel 1</b></div>
+      <div class="meters">
+        <div class="meter"><small>Vidas</small><div class="hearts" id="p-hearts"></div></div>
+        <div class="meter" id="m-time"><small>Tiempo</small><b id="p-time">—</b></div>
+        <div class="meter"><small>Puntos</small><b id="p-score">0</b></div>
+      </div>
+    </div>
+    <div class="timebar" id="timebar"><i id="timefill"></i></div>
+    <div class="orders" id="orders"></div>
+    <div class="rule" id="rule" hidden></div>
+    <div class="assembler">
+      <div class="slot" id="slot-a">·</div><span class="op">+</span>
+      <div class="slot" id="slot-b">·</div><span class="op">=</span>
+      <div class="slot" id="slot-s">·</div>
+      <div class="msg" id="msg" aria-live="polite"></div>
+    </div>
+    <div class="board" id="board" role="group" aria-label="Piezas numeradas"></div>
+    <div class="actions">
+      <button class="btn" id="btn-drop">Soltar pieza</button>
+      <button class="btn" id="btn-hint">Pista (−50)</button>
+      <span class="help">Toca dos piezas para unirlas. Toca la misma dos veces para usarla doble (5 + 5).</span>
+    </div>
+    <div class="belt" id="belt"></div>
+  </section>
+
+  <!-- TALLER LIBRE -->
+  <section id="scr-free" hidden>
+    <p class="lede">Escribe cualquier número par y la fábrica sacará todas sus parejas de primos. Al número de parejas se le llama <strong>g(n)</strong>.</p>
+    <form class="free-form" id="free-form">
+      <label for="free-n">Número par<input id="free-n" type="number" inputmode="numeric" min="4" max="100000" step="2" value="100"></label>
+      <button class="btn primary" type="submit">Fabricar</button>
+      <button class="btn" type="button" id="free-rand">Al azar</button>
+    </form>
+    <div class="free-out" id="free-out"></div>
+    <div class="comet-wrap">
+      <p class="sec-label">El cometa de Goldbach</p>
+      <p>Cada punto es un par n hasta 2000 y su altura es g(n). La nube nunca toca el cero y crece con n: por eso se cree que la conjetura es cierta. Las bandas aparecen porque los múltiplos de 3, 5 y 7 tienen más parejas.</p>
+      <canvas id="comet" aria-label="Gráfico de g(n) para pares hasta 2000"></canvas>
+    </div>
+  </section>
+  <footer class="pie">
+    <a href="/">← Todos los juegos</a>
+    <a href="privacidad.html">Privacidad</a>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" id="card" role="dialog" aria-modal="true" aria-labelledby="r-title">
+    <div class="hz"></div>
+    <div class="card-body" id="card-body"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- Primos ---------- */
+const MAX=100000;
+const sieve=new Uint8Array(MAX+1).fill(1); sieve[0]=sieve[1]=0;
+for(let i=2;i*i<=MAX;i++) if(sieve[i]) for(let j=i*i;j<=MAX;j+=i) sieve[j]=0;
+const isPrime=n=>n>=2&&n<=MAX&&sieve[n]===1;
+const RULES={
+  noEnd3:{label:"Prohibidos los primos que terminan en 3",test:p=>p%10!==3,why:"termina en 3 y está prohibido"},
+  noEnd7:{label:"Prohibidos los primos que terminan en 7",test:p=>p%10!==7,why:"termina en 7 y está prohibido"},
+  gt20:{label:"Solo primos mayores que 20",test:p=>p>20,why:"es menor que 20 y aquí no sirve"},
+  twoDigit:{label:"Solo primos de dos cifras",test:p=>p>=10&&p<=99,why:"no tiene dos cifras"},
+  noTwins:{label:"Prohibidos los primos gemelos (con p − 2 o p + 2 primo)",test:p=>!(isPrime(p-2)||isPrime(p+2)),why:"tiene un primo gemelo y está prohibido"},
+  noSmall:{label:"Prohibidos 2, 3, 5 y 7",test:p=>p>7,why:"es un primo de una cifra y está prohibido"}
+};
+function partitions(n,rule){
+  const out=[],r=rule?RULES[rule]:null;
+  for(let p=2;p<=n/2;p++){const q=n-p; if(isPrime(p)&&isPrime(q)&&(!r||(r.test(p)&&r.test(q)))) out.push([p,q]);}
+  return out;
+}
+function why(n){
+  if(n===1) return "1 no es primo: solo tiene un divisor";
+  for(let d=2;d*d<=n;d++) if(n%d===0) return `${n} no es primo: ${n} = ${d} × ${n/d}`;
+  return "";
+}
+
+/* ---------- Aleatorio con semilla ---------- */
+function rngFrom(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function hashStr(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+const ri=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+
+/* ---------- Generador de niveles ---------- */
+const NAMES=["Turno de mañana","Pedido urgente","Línea de montaje","Control de calidad","Horas extra","Inventario","Cadena rápida","Exportación","Cliente exigente","Turno de noche","Maquinaria pesada","Lote especial"];
+function genLevel(k,r){
+  const nT=k<5?1:k<12?(r()<.5?2:1):(r()<.45?3:2);
+  const maxT=Math.min(12+6*k,150), minT=Math.max(8,Math.floor(maxT*.45));
+  let rule=null;
+  if(k>=6&&r()<.4){const keys=Object.keys(RULES); rule=keys[ri(r,0,keys.length-1)];}
+  const cap=Math.min(8,2+Math.floor(k/3));
+  for(let attempt=0;attempt<2;attempt++){
+    const targets=[],req={};let ok=true;
+    for(let i=0;i<nT;i++){
+      let t=0,tries=0;
+      do{t=2*ri(r,Math.ceil(minT/2),Math.floor(maxT/2));tries++;}
+      while((targets.includes(t)||partitions(t,rule).length===0)&&tries<40);
+      if(tries>=40){ok=false;break;}
+      targets.push(t);req[t]=Math.min(cap,partitions(t,rule).length);
+    }
+    if(ok){
+      targets.sort((a,b)=>a-b);
+      const sumReq=targets.reduce((a,t)=>a+req[t],0);
+      const time=Math.max(20,Math.round((12+9*sumReq+4*nT)*Math.max(.6,1-.015*k)));
+      return {k,name:NAMES[(k-1)%NAMES.length],targets,req,rule,time};
+    }
+    rule=null;
+  }
+}
+
+/* ---------- Progreso ---------- */
+const KEY="gbf-progress-v2";
+let prog={best:0,bestScore:0,daily:{},streak:{last:null,count:0}};
+try{const s=localStorage.getItem(KEY);if(s) prog=Object.assign(prog,JSON.parse(s));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(prog));}catch(e){}}
+function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+const today=()=>ymd(new Date());
+function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return ymd(d);}
+
+const $=id=>document.getElementById(id);
+
+/* ---------- Navegación ---------- */
+function show(scr){
+  ["menu","play","free"].forEach(s=>$("scr-"+s).hidden=s!==scr);
+  $("nav-menu").setAttribute("aria-current",scr!=="free");
+  $("nav-free").setAttribute("aria-current",scr==="free");
+  if(scr!=="play"){stopTimer();}
+  if(scr==="menu") renderMenu();
+  if(scr==="free"){runFree();}
+  window.scrollTo(0,0);
+}
+$("nav-menu").onclick=()=>{ if(R&&!R.over&&!$("scr-play").hidden){confirmExit();return;} show("menu"); };
+$("nav-free").onclick=()=>{ if(R&&!R.over&&!$("scr-play").hidden){confirmExit("free");return;} show("free"); };
+$("btn-back").onclick=()=>confirmExit();
+
+function checkpointFor(best){return Math.max(1,Math.floor((best-1)/5)*5+1);}
+function renderMenu(){
+  $("c-best").textContent=prog.best?`Nivel ${prog.best}`:"—";
+  $("c-score").textContent=prog.bestScore?prog.bestScore.toLocaleString("es-ES"):"—";
+  const cp=checkpointFor(prog.best);
+  $("c-continue").textContent=prog.best>=6?`Continuar desde el nivel ${cp}`:"Empezar carrera";
+  $("c-new").hidden=prog.best<6;
+  const d=prog.daily[today()];
+  const f=new Intl.DateTimeFormat("es-ES",{weekday:"long",day:"numeric",month:"long"}).format(new Date());
+  $("d-date").textContent="Reto del día · "+f;
+  $("d-today").textContent=d?`${d.score.toLocaleString("es-ES")} pts${d.done?" ✓":""}`:"Sin jugar";
+  const st=(prog.streak.last===today()||prog.streak.last===yesterday())?prog.streak.count:0;
+  $("d-streak").textContent=st===1?"1 día":`${st} días`;
+  $("d-play").textContent=d?"Mejorar mi puntuación":"Jugar el reto";
+}
+$("c-continue").onclick=()=>startRun("career",checkpointFor(prog.best));
+$("c-new").onclick=()=>startRun("career",1);
+$("d-play").onclick=()=>startRun("daily",1);
+
+/* ---------- Partida ---------- */
+let R=null,G=null,tick=null;
+const DAILY_K=[3,6,9,12,15];
+function startRun(mode,from){
+  R={mode,lives:3,score:0,adUsed:false,over:false,levelNo:from,date:today(),errors:0,pairs:0,cleared:0};
+  if(mode==="daily") R.rng=rngFrom(hashStr("goldbach-"+R.date));
+  startLevel();
+  show("play");
+}
+function levelFor(){
+  if(R.mode==="career") return genLevel(R.levelNo,rngFrom(hashStr("career-"+R.levelNo)));
+  return genLevel(DAILY_K[R.levelNo-1],R.rng);
+}
+function startLevel(){
+  stopTimer();
+  const L=levelFor();
+  const sol={};L.targets.forEach(t=>sol[t]=partitions(t,L.rule));
+  const max=Math.max(...L.targets);
+  const tiles=[1,2];for(let k=3;k<max;k+=2) tiles.push(k);
+  G={L,sol,found:{},sel:null,tiles,remain:L.time*1000,deadline:0,done:false};
+  L.targets.forEach(t=>G.found[t]=[]);
+  $("p-mode").textContent=R.mode==="career"?"Modo carrera":`Reto del día · ${R.levelNo} de ${DAILY_K.length}`;
+  $("p-name").textContent=R.mode==="career"?`Nivel ${R.levelNo} · ${L.name}`:L.name;
+  const ru=$("rule");ru.hidden=!L.rule;if(L.rule) ru.textContent=RULES[L.rule].label;
+  renderBoard();renderOrders();renderBelt();renderSlots();renderHearts();
+  setMsg(R.levelNo===1&&R.mode==="career"?"Empieza por un primo pequeño: toca el 3.":"Elige la primera pieza.");
+  resumeTimer();
+}
+function stopTimer(){if(tick){clearInterval(tick);tick=null;}}
+function pauseTimer(){if(!G) return; if(tick){G.remain=Math.max(0,G.deadline-Date.now());} stopTimer();}
+function resumeTimer(){
+  stopTimer();G.deadline=Date.now()+G.remain;
+  tick=setInterval(onTick,200);onTick();
+}
+function onTick(){
+  const left=Math.max(0,G.deadline-Date.now());
+  G.remain=left;
+  const s=Math.ceil(left/1000);
+  $("p-time").textContent=s+" s";
+  $("timefill").style.width=(100*left/(G.L.time*1000)).toFixed(1)+"%";
+  const warn=s<=10;
+  $("m-time").classList.toggle("warn",warn);$("timebar").classList.toggle("warn",warn);
+  $("p-score").textContent=R.score.toLocaleString("es-ES");
+  if(left<=0&&!G.done){stopTimer();gameOver("time");}
+}
+document.addEventListener("visibilitychange",()=>{
+  if(!G||G.done||$("scr-play").hidden||!$("overlay").hidden) return;
+  if(document.hidden) pauseTimer(); else resumeTimer();
+});
+
+function renderHearts(hit){
+  const h=$("p-hearts");
+  h.innerHTML=Array.from({length:3},(_,i)=>`<span class="${i<R.lives?"on":"off"}">♥</span>`).join("");
+  h.setAttribute("aria-label",`${R.lives} vidas`);
+  if(hit){h.classList.remove("hit");void h.offsetWidth;h.classList.add("hit");}
+}
+function renderBoard(){
+  const b=$("board");b.innerHTML="";
+  const used=new Set();Object.values(G.found).forEach(a=>a.forEach(([p,q])=>{used.add(p);used.add(q);}));
+  G.tiles.forEach(n=>{
+    const t=document.createElement("button");t.className="tile";t.id="t"+n;t.textContent=n;
+    if(n===G.sel) t.classList.add("sel");
+    if(used.has(n)) t.classList.add("used");
+    t.onclick=()=>pick(n);b.appendChild(t);
+  });
+}
+function renderOrders(){
+  const o=$("orders");o.innerHTML="";
+  G.L.targets.forEach(t=>{
+    const need=G.L.req[t],got=G.found[t].length,tot=G.sol[t].length;
+    const d=document.createElement("div");d.className="order"+(got>=need?" done":"");
+    d.innerHTML=`<small>Pedido</small><div class="big">${t}</div>
+      <div class="prog">${Math.min(got,need)} / ${need}${tot>need?` (hay ${tot})`:""}</div>
+      <div class="pips">${Array.from({length:need},(_,k)=>`<span class="pip${k<got?" on":""}"></span>`).join("")}</div>`;
+    o.appendChild(d);
+  });
+}
+function renderBelt(){
+  const b=$("belt");b.innerHTML="";
+  G.L.targets.forEach(t=>{
+    const f=G.found[t];
+    const g=document.createElement("div");g.className="belt-group";
+    g.innerHTML=`<h3>Producción · ${t}</h3><div class="crates">${f.length?f.map(([p,q])=>`<span class="crate">${p} + ${q}</span>`).join(""):`<span class="empty">Aún no has fabricado nada para ${t}.</span>`}</div>`;
+    b.appendChild(g);
+  });
+}
+function renderSlots(p,q){
+  const A=p??G.sel,B=q??null;
+  $("slot-a").textContent=A??"·";$("slot-a").classList.toggle("fill",A!=null);
+  $("slot-b").textContent=B??"·";$("slot-b").classList.toggle("fill",B!=null);
+  $("slot-s").textContent=(A!=null&&B!=null)?A+B:"·";
+}
+function setMsg(t,k){const m=$("msg");m.textContent=t;m.className="msg"+(k?" "+k:"");}
+function flash(n){const t=$("t"+n);if(!t) return;t.classList.remove("err");void t.offsetWidth;t.classList.add("err");setTimeout(()=>t.classList.remove("err"),600);}
+function loseLife(n,text){
+  R.lives--;R.errors++;flash(n);renderHearts(true);
+  setMsg(text+(R.lives>0?` Te quedan ${R.lives} ${R.lives===1?"vida":"vidas"}.`:""),"bad");
+  if(R.lives<=0){G.sel=null;renderBoard();renderSlots();setTimeout(()=>gameOver("lives"),500);G.done=true;stopTimer();}
+}
+function checkPiece(n){
+  if(!isPrime(n)){loseLife(n,why(n)+".");return false;}
+  const r=G.L.rule&&RULES[G.L.rule];
+  if(r&&!r.test(n)){loseLife(n,`${n} es primo, pero ${r.why}.`);return false;}
+  return true;
+}
+function pick(n){
+  if(G.done) return;
+  if(G.sel===null){
+    if(!checkPiece(n)) return;
+    G.sel=n;renderBoard();renderSlots();setMsg(`${n} en la ensambladora. Elige la segunda pieza.`);return;
+  }
+  if(!checkPiece(n)) return;
+  const p=Math.min(G.sel,n),q=Math.max(G.sel,n),s=p+q;
+  renderSlots(p,q);G.sel=null;
+  if(!G.L.targets.includes(s)){renderBoard();loseLife(n,`${p} + ${q} = ${s}: no hay pedido de ${s}.`);return;}
+  if(G.found[s].some(x=>x[0]===p)){setMsg(`${p} + ${q} ya está fabricado para ${s}.`);renderBoard();return;}
+  if(G.found[s].length>=G.L.req[s]){setMsg(`El pedido ${s} ya está completo. Atiende los demás.`);renderBoard();return;}
+  G.found[s].push([p,q]);G.found[s].sort((a,b)=>a[0]-b[0]);
+  R.score+=100;R.pairs++;
+  setMsg(`¡Combinación válida! ${p} + ${q} = ${s} (+100)`,"ok");
+  renderBoard();renderOrders();renderBelt();onTick();
+  if(G.L.targets.every(t=>G.found[t].length>=G.L.req[t])){G.done=true;stopTimer();setTimeout(levelDone,450);}
+}
+$("btn-drop").onclick=()=>{if(!G||G.done) return;G.sel=null;renderBoard();renderSlots();setMsg("Ensambladora vacía. Elige la primera pieza.");};
+$("btn-hint").onclick=()=>{
+  if(!G||G.done) return;
+  let tgt=null;
+  for(const t of G.L.targets){
+    if(G.found[t].length>=G.L.req[t]) continue;
+    const miss=G.sol[t].filter(([p])=>!G.found[t].some(x=>x[0]===p));
+    if(G.sel!=null){const m=miss.find(x=>x[0]===G.sel||x[1]===G.sel);if(m){tgt=m[0]===G.sel?m[1]:m[0];break;}}
+    if(tgt==null&&miss.length) tgt=miss[ri(Math.random,0,miss.length-1)][0];
+  }
+  if(tgt==null) return;
+  R.score=Math.max(0,R.score-50);onTick();
+  const el=$("t"+tgt);el.classList.remove("hint");void el.offsetWidth;el.classList.add("hint");
+  setTimeout(()=>el.classList.remove("hint"),3200);
+  setMsg(`Pista: la pieza ${tgt} forma parte de una combinación que falta. (−50)`);
+};
+
+/* ---------- Tarjetas ---------- */
+function openCard(html,fail){
+  $("card").className="card"+(fail?" fail":"");
+  $("card-body").innerHTML=html;$("overlay").hidden=false;
+  const f=$("card-body").querySelector(".btn.primary")||$("card-body").querySelector(".btn");if(f) f.focus();
+}
+function closeCard(){$("overlay").hidden=true;}
+const stats=a=>`<dl class="stats">${a.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+
+function levelDone(){
+  const leftS=Math.ceil(G.remain/1000),bonus=leftS*3;R.score+=bonus;
+  const last=R.mode==="daily"&&R.levelNo>=DAILY_K.length;
+  R.cleared++;
+  if(R.mode==="career"){prog.best=Math.max(prog.best,R.levelNo);save();}
+  if(last){finishRun(true);return;}
+  let extra="";
+  const nextNo=R.levelNo+1;
+  if(R.mode==="career"&&R.levelNo%5===0){
+    extra=R.lives<3?`<p>Punto de control alcanzado: recuperas una vida. Si pierdes, podrás volver desde el nivel ${nextNo}.</p>`:`<p>Punto de control: si pierdes, podrás volver desde el nivel ${nextNo}.</p>`;
+    R.lives=Math.min(3,R.lives+1);
+  }
+  openCard(`<h2 id="r-title">${R.mode==="career"?`Nivel ${R.levelNo} superado`:`Pedido ${R.levelNo} servido`}</h2>${extra}
+    ${stats([["Tiempo sobrante",`${leftS} s`],["Bonificación",`+${bonus}`],["Vidas",`${R.lives} / 3`],["Puntos",R.score.toLocaleString("es-ES")]])}
+    <div class="card-actions"><button class="btn" id="k-exit">Salir</button><button class="btn primary" id="k-next">${R.mode==="career"?`Nivel ${nextNo}`:`Pedido ${nextNo}`} →</button></div>`);
+  $("k-next").onclick=()=>{closeCard();R.levelNo=nextNo;startLevel();};
+  $("k-exit").onclick=()=>{closeCard();finishRun(false,true);};
+}
+
+function gameOver(reason){
+  G.done=true;stopTimer();
+  const title=reason==="time"?"Tiempo agotado":"Sin vidas";
+  const desc=reason==="time"?"La cadena se ha parado antes de completar el pedido.":"Has gastado las tres vidas.";
+  const adBtn=R.adUsed?"":`<button class="btn primary" id="g-ad">Ver anuncio · +30 s y 1 vida</button>`;
+  openCard(`<h2 id="r-title">${title}</h2><p>${desc}${R.adUsed?" Ya has usado tu segunda oportunidad en esta partida.":" Puedes seguir en este mismo nivel viendo un anuncio."}</p>
+    ${stats([[R.mode==="career"?"Nivel":"Pedido",R.levelNo],["Puntos",R.score.toLocaleString("es-ES")]])}
+    <div class="card-actions"><button class="btn" id="g-end">Terminar</button>${adBtn}</div>`,true);
+  $("g-end").onclick=()=>{closeCard();finishRun(false);};
+  if(!R.adUsed) $("g-ad").onclick=showAd;
+}
+function showAd(){
+  R.adUsed=true;let s=5;
+  openCard(`<h2 id="r-title">Anuncio</h2>
+    <div class="ad-box" role="img" aria-label="Espacio publicitario"><div><b id="ad-s">${s}</b>Espacio publicitario<br>El anuncio real se mostrará aquí</div></div>
+    <div class="card-actions"><button class="btn primary" id="ad-go" disabled>Seguir jugando (${s})</button></div>`);
+  const iv=setInterval(()=>{s--;const e=$("ad-s"),b=$("ad-go");if(!e){clearInterval(iv);return;}
+    e.textContent=Math.max(s,0);
+    if(s<=0){clearInterval(iv);b.disabled=false;b.textContent="Seguir jugando: +30 s y 1 vida";b.focus();}
+    else b.textContent=`Seguir jugando (${s})`;},1000);
+  $("ad-go").onclick=()=>{
+    closeCard();R.lives=Math.max(R.lives,1);G.remain=Math.max(0,G.remain)+30000;G.done=false;
+    renderHearts();setMsg("Segunda oportunidad: +30 s y 1 vida.","ok");resumeTimer();
+  };
+}
+function finishRun(dailyComplete,quit){
+  R.over=true;stopTimer();
+  let html="";
+  if(R.mode==="career"){
+    const newRec=R.score>prog.bestScore;
+    prog.bestScore=Math.max(prog.bestScore,R.score);save();
+        html=`<h2 id="r-title">Fin del turno</h2><p>${newRec?"¡Nueva mejor puntuación!":`Tu récord es el nivel ${prog.best}.`} Volverás a empezar desde el nivel ${checkpointFor(prog.best)}.</p>
+      ${stats([["Niveles superados",R.cleared],["Combinaciones",R.pairs],["Errores",R.errors],["Puntos",R.score.toLocaleString("es-ES")]])}`;
+  } else {
+    const prev=prog.daily[R.date];
+    const done=!!dailyComplete;
+    prog.daily[R.date]={score:Math.max(prev?prev.score:0,R.score),done:(prev&&prev.done)||done};
+    if(done&&prog.streak.last!==R.date){
+      prog.streak.count=prog.streak.last===yesterday()?prog.streak.count+1:1;prog.streak.last=R.date;
+    }
+    save();
+    html=`<h2 id="r-title">${done?"Reto completado":"Reto sin terminar"}</h2>
+      <p>${done?`Racha: ${prog.streak.count} ${prog.streak.count===1?"día":"días"} seguidos. Vuelve mañana para un reto nuevo.`:"Puedes intentarlo otra vez; se guarda tu mejor puntuación de hoy."}</p>
+      ${stats([["Pedidos servidos",done?DAILY_K.length:R.levelNo-1],["Errores",R.errors],["Puntos",R.score.toLocaleString("es-ES")],["Mejor de hoy",prog.daily[R.date].score.toLocaleString("es-ES")]])}`;
+  }
+  openCard(html+`<div class="card-actions"><button class="btn" id="f-menu">Menú</button><button class="btn primary" id="f-again">Jugar otra vez</button></div>`,!dailyComplete&&R.mode==="daily");
+  const mode=R.mode;
+  $("f-menu").onclick=()=>{closeCard();show("menu");};
+  $("f-again").onclick=()=>{closeCard();startRun(mode,mode==="career"?checkpointFor(prog.best):1);};
+}
+function confirmExit(dest){
+  if(!R||R.over){show(dest||"menu");return;}
+  pauseTimer();
+  openCard(`<h2 id="r-title">¿Salir?</h2><p>La partida terminará y se guardará tu puntuación.</p>
+    <div class="card-actions"><button class="btn" id="x-stay">Seguir jugando</button><button class="btn primary" id="x-go">Salir</button></div>`);
+  $("x-stay").onclick=()=>{closeCard();if(!G.done) resumeTimer();};
+  $("x-go").onclick=()=>{closeCard();R.over=true;
+    if(R.mode==="daily"){const prev=prog.daily[R.date];prog.daily[R.date]={score:Math.max(prev?prev.score:0,R.score),done:!!(prev&&prev.done)};}
+    else prog.bestScore=Math.max(prog.bestScore,R.score);
+    save();show(dest||"menu");};
+}
+
+/* ---------- Taller libre ---------- */
+function runFree(){
+  const n=parseInt($("free-n").value,10),out=$("free-out");
+  if(!Number.isFinite(n)||n<4||n>MAX||n%2){out.innerHTML=`<p class="msg bad">Escribe un número par entre 4 y ${MAX.toLocaleString("es-ES")}.</p>`;return;}
+  const P=partitions(n,null),shown=P.slice(0,300),a=P[0],z=P[P.length-1];
+  out.innerHTML=`<div class="free-sum"><div class="big">g(${n.toLocaleString("es-ES")}) = ${P.length}</div>
+    <p>La pareja con el primo más pequeño es <b>${a[0]} + ${a[1]}</b>${P.length>1?` y la más equilibrada, <b>${z[0]} + ${z[1]}</b>`:""}.</p></div>
+    <div class="chips crates">${shown.map(([p,q])=>`<span class="crate">${p} + ${q}</span>`).join("")}${P.length>300?`<span class="empty">…y ${P.length-300} más</span>`:""}</div>`;
+  drawComet(n);
+}
+$("free-form").onsubmit=e=>{e.preventDefault();runFree();};
+$("free-rand").onclick=()=>{$("free-n").value=2*(2+Math.floor(Math.random()*4999));runFree();};
+let cometData=null,cometN=100;
+function drawComet(hl){
+  if(hl!=null) cometN=hl;
+  const c=$("comet");if($("scr-free").hidden) return;
+  if(!cometData){cometData=[];for(let n=4;n<=2000;n+=2){let g=0;for(let p=2;p<=n/2;p++) if(sieve[p]&&sieve[n-p]) g++;cometData.push([n,g]);}}
+  const css=getComputedStyle(document.documentElement),col=v=>css.getPropertyValue(v).trim();
+  const dpr=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;
+  c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+  const L=34,Rr=8,T=8,B=22,maxG=Math.max(...cometData.map(d=>d[1])),yMax=Math.ceil(maxG/10)*10;
+  const sx=n=>L+(n-4)/(2000-4)*(W-L-Rr),sy=g=>T+(1-g/yMax)*(H-T-B);
+  x.font="11px "+col("--f-mono");x.fillStyle=col("--muted");x.strokeStyle=col("--line");x.lineWidth=1;
+  for(let g=0;g<=yMax;g+=yMax/4){const y=sy(g);x.beginPath();x.moveTo(L,y);x.lineTo(W-Rr,y);x.stroke();x.textAlign="right";x.fillText(Math.round(g),L-6,y+4);}
+  x.textAlign="center";[4,500,1000,1500,2000].forEach(n=>x.fillText(n,Math.min(Math.max(sx(n),L+8),W-Rr-14),H-6));
+  x.fillStyle=col("--steel");cometData.forEach(([n,g])=>x.fillRect(sx(n)-1,sy(g)-1,2,2));
+  if(cometN<=2000){const d=cometData[(cometN-4)/2];if(d){x.fillStyle=col("--amber");x.strokeStyle=col("--ink");x.beginPath();x.arc(sx(d[0]),sy(d[1]),5,0,Math.PI*2);x.fill();x.stroke();}}
+}
+window.addEventListener("resize",()=>drawComet());
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>drawComet());}catch(e){}
+new MutationObserver(()=>drawComet()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+renderMenu();
+if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+})();
+</script>
+
+</body>
+</html>
