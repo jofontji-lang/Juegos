@@ -1632,5 +1632,37 @@ if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWo
 })();
 
 </script>
+
+<!-- ═══ CONTADOR DE VISITAS ════════════════════════════════════════════
+     Avisa al Apps Script de la colección de que se ha abierto esta página.
+     Manda solo la ruta y, si vienes de un enlace, el dominio de origen.
+     Ni cookies, ni IP, ni identificadores. No enseña nada: el número que
+     devuelve es el del sitio entero y aquí no pinta nada, así que se tira.
+     Si no hay red o el servidor no contesta, no pasa nada.
+     La dirección sale de contador/contador.gs, en la raíz del repositorio.
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  var URL_CONTADOR = "https://script.google.com/macros/s/AKfycbyGa6sUAkzqc1ZFEf_UGzDGhnfrgVdjuymI5QnB7HY7Iydh4VCX5af2siMcjPeBeeVE7w/exec";
+  if (!/^https:\/\/script\.google\.com\/.*\/exec$/.test(URL_CONTADOR)) return;
+  var nombre = "contador_" + Math.random().toString(36).slice(2);
+  var guion = document.createElement("script");
+  var reloj = setTimeout(rendirse, 8000);
+  function rendirse() {
+    clearTimeout(reloj);
+    try { delete window[nombre]; } catch (e) { window[nombre] = undefined; }
+    if (guion.parentNode) guion.parentNode.removeChild(guion);
+  }
+  window[nombre] = rendirse;
+  var origen = "";
+  try { if (document.referrer) origen = new URL(document.referrer).host; } catch (e) {}
+  if (origen === location.host) origen = "";
+  guion.src = URL_CONTADOR + "?callback=" + nombre
+    + "&pagina=" + encodeURIComponent(location.pathname)
+    + "&origen=" + encodeURIComponent(origen);
+  guion.onerror = rendirse;
+  document.body.appendChild(guion);
+})();
+</script>
 </body>
 </html>
