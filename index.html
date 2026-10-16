@@ -808,14 +808,17 @@ footer a{text-underline-offset:3px}
      cookies, no guarda IP y no identifica a nadie: por eso no necesita
      banner de consentimiento.
 
-     Para activarlo, pega en URL la dirección del despliegue (termina en
-     /exec). Las instrucciones completas están en contador/contador.gs.
-     Mientras ponga PEGA_AQUI_LA_URL no se llama a nada y el pie se ve
+     La dirección es la del despliegue del Apps Script (termina en /exec).
+     Las instrucciones completas están en contador/contador.gs. Si ahí no
+     hubiera una dirección válida, no se llamaría a nada y el pie se vería
      igual que siempre.
+
+     Ojo: cada vez que cambies el contador.gs hay que volver a implementar
+     en Apps Script, o la web seguirá hablando con la versión vieja.
      ═══════════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
-  var URL_CONTADOR = "PEGA_AQUI_LA_URL";
+  var URL_CONTADOR = "https://script.google.com/macros/s/AKfycbyGa6sUAkzqc1ZFEf_UGzDGhnfrgVdjuymI5QnB7HY7Iydh4VCX5af2siMcjPeBeeVE7w/exec";
 
   if (!/^https:\/\/script\.google\.com\/.*\/exec$/.test(URL_CONTADOR)) return;
   var caja = document.querySelector(".contador");
