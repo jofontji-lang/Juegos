@@ -1,6 +1,6 @@
 /* La ruta más pequeña — service worker
    Sube el número de versión al publicar cambios: fuerza la recarga de la caché. */
-const VERSION = 'ruta-minima-v39';
+const VERSION = 'ruta-minima-v40';
 const ASSETS = [
   './',
   './index.html',
