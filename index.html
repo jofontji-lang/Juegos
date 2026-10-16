@@ -380,15 +380,50 @@ footer p{margin:0; max-width:40ch}
 footer nav{display:flex; flex-wrap:wrap; gap:.6em 1.4em}
 footer a{text-underline-offset:3px}
 
-/* El contador de visitas. Va oculto hasta que responde el servidor: si no
-   contesta, o si todavía no se ha configurado la URL, el pie queda como
-   estaba y no se ve ningún hueco. */
-.contador{margin:0}
-.contador b{
+/* El contador de visitas: el sello de tinta que te ponen al entrar en la
+   sala, en el oro del Ojo de Horus. Va oculto hasta que responde el
+   servidor: si no contesta, o si todavía no se ha configurado la URL, el
+   pie queda como estaba y no se ve ningún hueco.
+   El tamaño de la cifra lo pone el guion en --sello-tam, porque no ocupa
+   lo mismo un 7 que un 120.394 y el sello no crece. */
+.sello{
+  --sello-tam:1.9rem;
+  margin:0 0 0 auto; align-self:center; flex:0 0 auto;
+  width:138px; height:138px;
+  border:2.5px solid var(--c-horus-oro);
+  box-shadow:inset 0 0 0 1px var(--c-horus-oro);
+  border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; text-align:center;
+  color:var(--c-horus-oro);
+  transform:rotate(-7deg);
+}
+/* display:flex gana al display:none que el navegador da a [hidden], así que
+   hay que decirlo a mano o el sello sale aunque el servidor no conteste. */
+.sello[hidden]{display:none}
+.sello .et{font-size:.58rem; letter-spacing:.19em; text-transform:uppercase}
+.sello b{
   font-family:var(--titular);
   font-weight:600;
+  font-size:var(--sello-tam);
+  line-height:1;
   font-variant-numeric:tabular-nums;
-  color:var(--tinta);
+  letter-spacing:-.01em;
+}
+.sello .raya{width:52px; height:1px; background:currentColor; opacity:.5}
+.sello .firma{font-size:.55rem; letter-spacing:.11em; text-transform:uppercase; opacity:.85}
+/* se estampa al llegar, una sola vez */
+@media (prefers-reduced-motion: no-preference){
+  .sello{animation:estampar .26s cubic-bezier(.2,.8,.3,1.2) both}
+}
+@keyframes estampar{
+  from{opacity:0; transform:rotate(-7deg) scale(1.22)}
+  to  {opacity:1; transform:rotate(-7deg) scale(1)}
+}
+/* lo que lee un lector de pantalla: una frase, no un adorno */
+.solo-voz{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip-path:inset(50%); white-space:nowrap;
 }
 
 /* Publicidad: un solo bloque, entre la sala y el pie. Oculto hasta que
@@ -435,6 +470,8 @@ footer a{text-underline-offset:3px}
   .tienda{font-size:.82rem; margin-top:.5em}
   .ulam{display:none}          /* en el móvil la cabecera ocupa todo el ancho */
   .obra:last-child:nth-child(odd){width:calc(50% - 8px)}
+  /* el pie se apila: el sello deja de ir a la derecha y se centra debajo */
+  .sello{margin:14px auto 0}
 }
 
 /* Teléfonos muy estrechos: dos columnas apretarían demasiado los dibujos. */
@@ -799,7 +836,13 @@ footer a{text-underline-offset:3px}
     <a href="/privacidad/">Privacidad</a>
     <a href="/publicidad/">Publicidad y cookies</a>
   </nav>
-  <p class="contador" hidden>Eres la visita número <b>—</b></p>
+  <p class="sello" hidden>
+    <span class="solo-voz"></span>
+    <span class="et" aria-hidden="true">Visitante</span>
+    <b aria-hidden="true">—</b>
+    <span class="raya" aria-hidden="true"></span>
+    <span class="firma" aria-hidden="true">Josep Font</span>
+  </p>
 </footer>
 
 <!-- ═══ CONTADOR DE VISITAS ════════════════════════════════════════════
@@ -821,9 +864,10 @@ footer a{text-underline-offset:3px}
   var URL_CONTADOR = "https://script.google.com/macros/s/AKfycbyGa6sUAkzqc1ZFEf_UGzDGhnfrgVdjuymI5QnB7HY7Iydh4VCX5af2siMcjPeBeeVE7w/exec";
 
   if (!/^https:\/\/script\.google\.com\/.*\/exec$/.test(URL_CONTADOR)) return;
-  var caja = document.querySelector(".contador");
+  var caja = document.querySelector(".sello");
   var hueco = caja && caja.querySelector("b");
-  if (!hueco) return;
+  var voz = caja && caja.querySelector(".solo-voz");
+  if (!hueco || !voz) return;
 
   var nombre = "contador_" + Math.random().toString(36).slice(2);
   var guion = document.createElement("script");
@@ -838,7 +882,12 @@ footer a{text-underline-offset:3px}
   window[nombre] = function (d) {
     rendirse();
     if (!d || typeof d.visitas !== "number") return;
-    hueco.textContent = d.visitas.toLocaleString("es-ES");
+    var texto = d.visitas.toLocaleString("es-ES");
+    hueco.textContent = texto;
+    // el sello no crece: la cifra se encoge para caber dentro del círculo
+    caja.style.setProperty("--sello-tam",
+      texto.length <= 4 ? "1.9rem" : texto.length <= 6 ? "1.55rem" : "1.25rem");
+    voz.textContent = "Eres la visita número " + texto + ".";
     caja.hidden = false;
   };
 
