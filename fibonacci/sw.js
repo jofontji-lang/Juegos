@@ -1,5 +1,5 @@
 // Fibo: funciona sin conexión. Al cambiar cualquier archivo, sube la versión de CACHE.
-const CACHE = 'fibonacci-v1';
+const CACHE = 'fibonacci-v2';
 const ASSETS = ['./', 'index.html', 'manifest.webmanifest',
   'fonts/gabarito-latin-600-normal.woff2', 'fonts/gabarito-latin-800-normal.woff2', 'fonts/gabarito-latin-900-normal.woff2',
   'fonts/atkinson-hyperlegible-latin-400-normal.woff2', 'fonts/atkinson-hyperlegible-latin-700-normal.woff2',
