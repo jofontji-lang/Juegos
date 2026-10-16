@@ -1,4 +1,4 @@
-const CACHE='mimizu-v2';
+const CACHE='mimizu-v3';
 const ASSETS=['./','index.html','manifest.webmanifest','privacidad.html',
  'fonts/bricolage-grotesque-latin-400-normal.woff2','fonts/bricolage-grotesque-latin-600-normal.woff2','fonts/bricolage-grotesque-latin-800-normal.woff2',
  'icons/icon-192.png','icons/icon-512.png','icons/apple-touch-icon.png'];
