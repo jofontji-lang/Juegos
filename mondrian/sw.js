@@ -7,7 +7,7 @@
 //   - Iconos y manifiesto: primero la copia, que no cambian.
 //   - Clasificación y contadores: nunca se guardan. Son datos vivos.
 
-const VERSION = 'mondrian-v2';
+const VERSION = 'mondrian-v3';
 const ESTATICOS = [
   './',
   './index.html',
